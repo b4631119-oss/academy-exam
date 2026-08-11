@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #0ea5e9;
+  --color-brand-hover: #0284c7;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 min-h-screen font-sans;
+  background-image: radial-gradient(circle at top, #f0f9ff 0%, #f8fafc 100%);
+  background-attachment: fixed;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
