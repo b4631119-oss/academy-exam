@@ -262,45 +262,64 @@ export async function getQuestions(examId: string) {
 }
 
 export async function saveAnswer(studentId: string, questionId: string, answerText: string) {
-  const supabase = await createClient()
-  
-  // First, check if an answer already exists
-  const { data: existing } = await supabase
-    .from("answers")
-    .select("id")
-    .eq("student_id", studentId)
-    .eq("question_id", questionId)
-    .maybeSingle()
-
-  if (existing) {
-    // Update existing answer
-    const { data, error } = await supabase
+  console.log("-> saveAnswer called for student:", studentId, "question:", questionId)
+  try {
+    const supabase = await createClient()
+    
+    // First, check if an answer already exists
+    const { data: existing, error: existError } = await supabase
       .from("answers")
-      .update({ 
-        answer: answerText,
-        is_correct: null // reset correct status if edited
-      })
-      .eq("id", existing.id)
-      .select()
-      .single()
+      .select("id")
+      .eq("student_id", studentId)
+      .eq("question_id", questionId)
+      .maybeSingle()
 
-    if (error) throw new Error(error.message)
-    return data
-  } else {
-    // Insert new answer
-    const { data, error } = await supabase
-      .from("answers")
-      .insert([{ 
-        student_id: studentId, 
-        question_id: questionId, 
-        answer: answerText,
-        is_correct: null
-      }])
-      .select()
-      .single()
+    if (existError) {
+      console.error("-> Error checking existing answer:", existError)
+      throw new Error(existError.message)
+    }
 
-    if (error) throw new Error(error.message)
-    return data
+    if (existing) {
+      // Update existing answer
+      console.log("-> Updating existing answer:", existing.id)
+      const { data, error } = await supabase
+        .from("answers")
+        .update({ 
+          answer: answerText,
+          is_correct: null // reset correct status if edited
+        })
+        .eq("id", existing.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error("-> Error updating answer:", error)
+        throw new Error(error.message)
+      }
+      return data
+    } else {
+      // Insert new answer
+      console.log("-> Inserting new answer")
+      const { data, error } = await supabase
+        .from("answers")
+        .insert([{ 
+          student_id: studentId, 
+          question_id: questionId, 
+          answer: answerText,
+          is_correct: null
+        }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error("-> Error inserting answer:", error)
+        throw new Error(error.message)
+      }
+      return data
+    }
+  } catch (err) {
+    console.error("-> Exception in saveAnswer:", err)
+    throw err // Throw it so the client knows it failed
   }
 }
 
