@@ -174,13 +174,17 @@ export async function approveAnswer(answerId: string, isCorrect: boolean) {
 
 export async function validateRoomCode(code: string) {
   const supabase = await createClient()
+  const formattedCode = code.trim().toUpperCase()
+  console.log("Backend validating room code:", formattedCode)
+
   const { data, error } = await supabase
     .from("rooms")
     .select("*")
-    .eq("code", code.toUpperCase())
+    .eq("code", formattedCode)
     .single()
 
   if (error || !data) {
+    console.error("Room not found or error:", error?.message || "No data")
     return null
   }
   return data

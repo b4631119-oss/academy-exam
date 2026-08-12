@@ -23,7 +23,10 @@ export default function StudentEnter() {
 
     try {
       // 1. Validate room
-      const room = await validateRoomCode(code)
+      const formattedCode = code.trim().toUpperCase()
+      console.log("Validating room code:", formattedCode)
+      
+      const room = await validateRoomCode(formattedCode)
       if (!room) {
         throw new Error("Invalid room code. Please check and try again.")
       }
