@@ -64,12 +64,28 @@ export default function TakeExam() {
     const currentQ = questions[currentIndex]
     const answerText = answers[currentQ.id] || ""
     
+    if (currentIndex === questions.length - 1) {
+      const updatedAnswers: Record<string, string> = { ...answers, [currentQ.id]: answerText }
+      let emptyCount = 0
+      for (const q of questions) {
+        const qId = String(q.id)
+        if (!updatedAnswers[qId] || updatedAnswers[qId].trim() === "") {
+          emptyCount++
+        }
+      }
+
+      if (emptyCount > 0) {
+        const confirm = window.confirm(`У вас осталось ${emptyCount} вопросов без ответа. Вы уверены, что хотите завершить экзамен?`)
+        if (!confirm) {
+          return
+        }
+      }
+    }
+
     setSaving(true)
     try {
       // Save current answer
-      if (answerText.trim() !== "") {
-        await saveAnswer(student.id, currentQ.id, answerText)
-      }
+      await saveAnswer(student.id, currentQ.id, answerText)
       
       if (currentIndex < questions.length - 1) {
         setCurrentIndex(currentIndex + 1)
@@ -94,7 +110,7 @@ export default function TakeExam() {
   }
 
   const currentQ = questions[currentIndex]
-  const progress = ((currentIndex) / questions.length) * 100
+  const progress = ((currentIndex + 1) / questions.length) * 100
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 fade-in">

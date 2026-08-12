@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
-import { validateRoomCode, createStudent } from "@/lib/actions"
+import { validateRoomCode, createStudent, checkStudentExists } from "@/lib/actions"
 
 export default function StudentEnter() {
   const [name, setName] = useState("")
@@ -28,8 +28,25 @@ export default function StudentEnter() {
         throw new Error("Invalid room code. Please check and try again.")
       }
 
+      let finalName = name.trim()
+      let isDuplicate = await checkStudentExists(finalName, room.id)
+      let counter = 2
+      while (isDuplicate) {
+        finalName = `${name.trim()} (${counter})`
+        isDuplicate = await checkStudentExists(finalName, room.id)
+        counter++
+      }
+
+      if (finalName !== name.trim()) {
+        const confirm = window.confirm(`Student name "${name.trim()}" is already taken in this room. Continue as "${finalName}"?`)
+        if (!confirm) {
+          setLoading(false)
+          return
+        }
+      }
+
       // 2. Create student & save cookie
-      await createStudent(name, room.id)
+      await createStudent(finalName, room.id)
       
       // 3. Redirect to room's exam list
       router.push(`/student/rooms/${room.id}`)

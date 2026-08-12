@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, FileText, Plus, Copy, Check } from "lucide-react"
+import { ArrowLeft, FileText, Plus, Copy, Check, Pencil, Trash } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { createClient } from "@/lib/supabase/client"
-import { getExams } from "@/lib/actions"
+import { getExams, deleteRoom, updateRoom, deleteExam, updateExam } from "@/lib/actions"
 
 export default function RoomDetails() {
   const params = useParams()
@@ -54,6 +54,52 @@ export default function RoomDetails() {
     loadData()
   }, [roomId, router, supabase])
 
+  const handleEditRoom = async () => {
+    const newName = window.prompt("New room name:", room?.name)
+    if (newName && newName !== room.name) {
+      try {
+        const updated = await updateRoom(roomId, newName)
+        setRoom(updated)
+      } catch (err: any) {
+        alert(err.message)
+      }
+    }
+  }
+
+  const handleDeleteRoom = async () => {
+    if (window.confirm("Are you sure you want to delete this room and all its exams?")) {
+      try {
+        await deleteRoom(roomId)
+        router.push("/teacher/dashboard")
+      } catch (err: any) {
+        alert(err.message)
+      }
+    }
+  }
+
+  const handleEditExam = async (examId: string, currentTitle: string) => {
+    const newTitle = window.prompt("New exam title:", currentTitle)
+    if (newTitle && newTitle !== currentTitle) {
+      try {
+        const updated = await updateExam(examId, newTitle)
+        setExams(exams.map(e => e.id === examId ? updated : e))
+      } catch (err: any) {
+        alert(err.message)
+      }
+    }
+  }
+
+  const handleDeleteExam = async (examId: string) => {
+    if (window.confirm("Are you sure you want to delete this exam?")) {
+      try {
+        await deleteExam(examId)
+        setExams(exams.filter(e => e.id !== examId))
+      } catch (err: any) {
+        alert(err.message)
+      }
+    }
+  }
+
   const copyCode = () => {
     if (!room) return
     navigator.clipboard.writeText(room.code)
@@ -81,17 +127,26 @@ export default function RoomDetails() {
 
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">{room.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900">{room.name}</h1>
+            <button onClick={handleEditRoom} className="p-2 text-slate-400 hover:text-sky-600 transition-colors" title="Edit room">
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button onClick={handleDeleteRoom} className="p-2 text-slate-400 hover:text-red-600 transition-colors" title="Delete room">
+              <Trash className="w-4 h-4" />
+            </button>
+          </div>
           <div className="mt-2 flex items-center space-x-3">
             <span className="text-sm text-slate-500">Room Access Code:</span>
             <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
               <span className="font-mono font-bold text-sky-600 tracking-wider text-lg">{room.code}</span>
               <button 
                 onClick={copyCode}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-md transition-colors"
+                className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors"
                 title="Copy code"
               >
                 {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                {copied ? "Copied" : "Копировать код"}
               </button>
             </div>
           </div>
@@ -133,10 +188,21 @@ export default function RoomDetails() {
                     </p>
                   </div>
                 </div>
-                <div className="flex space-x-3">
-                  <Link href={`/teacher/exams/${exam.id}/results`} className="w-full sm:w-auto">
+                <div className="flex space-x-3 mt-4 sm:mt-0">
+                  <button onClick={() => handleEditExam(exam.id, exam.title)} className="p-2 text-slate-400 hover:text-sky-600 transition-colors" title="Edit exam">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDeleteExam(exam.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors" title="Delete exam">
+                    <Trash className="w-4 h-4" />
+                  </button>
+                  <Link href={`/teacher/exams/${exam.id}/results`} className="w-full sm:w-auto ml-2">
                     <Button variant="outline" className="w-full">
                       View Results
+                    </Button>
+                  </Link>
+                  <Link href={`/teacher/exams/${exam.id}`} className="w-full sm:w-auto ml-2">
+                    <Button className="w-full">
+                      Manage Questions
                     </Button>
                   </Link>
                 </div>

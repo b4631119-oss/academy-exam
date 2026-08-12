@@ -2,6 +2,7 @@
 
 import { createClient } from "./supabase/server"
 import { cookies } from "next/headers"
+import { signStudentToken, verifyStudentToken } from "./jwt"
 
 // ========================
 // TEACHER ACTIONS
@@ -9,16 +10,6 @@ import { cookies } from "next/headers"
 
 export async function createRoom(teacherId: string, name: string, code: string) {
   const supabase = await createClient()
-  
-  // Ensure the teacher exists in the teachers table to prevent foreign key constraint error
-  const { data: { user } } = await supabase.auth.getUser()
-  const { error: teacherError } = await supabase
-    .from("teachers")
-    .upsert({ id: teacherId, email: user?.email }, { onConflict: 'id' })
-
-  if (teacherError) {
-    throw new Error(`Ошибка при создании профиля учителя: ${teacherError.message}`)
-  }
 
   const { data, error } = await supabase
     .from("rooms")
@@ -205,9 +196,10 @@ export async function createStudent(name: string, roomId: string) {
 
   if (error) throw new Error(error.message)
   
-  // Set student cookie
+  // Set student cookie using JWT
+  const token = await signStudentToken(data.id, roomId)
   const cookieStore = await cookies()
-  cookieStore.set("studentId", data.id, {
+  cookieStore.set("studentToken", token, {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
@@ -219,8 +211,13 @@ export async function createStudent(name: string, roomId: string) {
 
 export async function getStudent() {
   const cookieStore = await cookies()
-  const studentId = cookieStore.get("studentId")?.value
-  if (!studentId) return null
+  const token = cookieStore.get("studentToken")?.value
+  if (!token) return null
+
+  const payload = await verifyStudentToken(token)
+  if (!payload) return null
+  
+  const studentId = payload.studentId
 
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -261,7 +258,7 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
     const { data, error } = await supabase
       .from("answers")
       .update({ 
-        answer_text: answerText,
+        answer: answerText,
         is_correct: null // reset correct status if edited
       })
       .eq("id", existing.id)
@@ -277,7 +274,7 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
       .insert([{ 
         student_id: studentId, 
         question_id: questionId, 
-        answer_text: answerText,
+        answer: answerText,
         is_correct: null
       }])
       .select()
@@ -286,4 +283,130 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
     if (error) throw new Error(error.message)
     return data
   }
+}
+
+export async function checkStudentExists(name: string, roomId: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("students")
+    .select("id")
+    .eq("name", name)
+    .eq("room_id", roomId)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return !!data
+}
+
+// ========================
+// CRUD OPERATIONS
+// ========================
+
+async function getCurrentTeacherId() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Не авторизован")
+  return user.id
+}
+
+async function verifyRoomOwnership(roomId: string, teacherId: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("rooms")
+    .select("id")
+    .eq("id", roomId)
+    .eq("teacher_id", teacherId)
+    .maybeSingle()
+  if (error || !data) throw new Error("Нет доступа к комнате")
+}
+
+async function verifyExamOwnership(examId: string, teacherId: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("exams")
+    .select("id, rooms!inner(teacher_id)")
+    .eq("id", examId)
+    .eq("rooms.teacher_id", teacherId)
+    .maybeSingle()
+  if (error || !data) throw new Error("Нет доступа к экзамену")
+}
+
+async function verifyQuestionOwnership(questionId: string, teacherId: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id, exams!inner(rooms!inner(teacher_id))")
+    .eq("id", questionId)
+    .eq("exams.rooms.teacher_id", teacherId)
+    .maybeSingle()
+  if (error || !data) throw new Error("Нет доступа к вопросу")
+}
+
+export async function deleteRoom(roomId: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyRoomOwnership(roomId, teacherId)
+  const supabase = await createClient()
+  const { error } = await supabase.from("rooms").delete().eq("id", roomId)
+  if (error) throw new Error(error.message)
+  return true
+}
+
+export async function updateRoom(roomId: string, name: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyRoomOwnership(roomId, teacherId)
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("rooms")
+    .update({ name })
+    .eq("id", roomId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function deleteExam(examId: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyExamOwnership(examId, teacherId)
+  const supabase = await createClient()
+  const { error } = await supabase.from("exams").delete().eq("id", examId)
+  if (error) throw new Error(error.message)
+  return true
+}
+
+export async function updateExam(examId: string, title: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyExamOwnership(examId, teacherId)
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("exams")
+    .update({ title })
+    .eq("id", examId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function deleteQuestion(questionId: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyQuestionOwnership(questionId, teacherId)
+  const supabase = await createClient()
+  const { error } = await supabase.from("questions").delete().eq("id", questionId)
+  if (error) throw new Error(error.message)
+  return true
+}
+
+export async function updateQuestion(questionId: string, text: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyQuestionOwnership(questionId, teacherId)
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("questions")
+    .update({ text })
+    .eq("id", questionId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data
 }

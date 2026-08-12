@@ -30,19 +30,6 @@ export default function RegisterPage() {
       })
       if (error) throw error
       
-      // Auto-create teacher record if it doesn't exist
-      if (data.user) {
-        const { error: teacherError } = await supabase
-          .from('teachers')
-          .insert({ id: data.user.id, email: data.user.email })
-          
-        if (teacherError) {
-          console.log("Teacher creation failed during registration (non-fatal):", teacherError)
-        } else {
-          console.log("Teacher record successfully created on registration:", data.user.id)
-        }
-      }
-      
       router.push("/teacher/dashboard")
       router.refresh()
     } catch (err: any) {
