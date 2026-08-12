@@ -285,7 +285,7 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
       const { data, error } = await supabase
         .from("answers")
         .update({ 
-          answer: answerText,
+          answer_text: answerText,
           is_correct: null // reset correct status if edited
         })
         .eq("id", existing.id)
@@ -305,7 +305,7 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
         .insert([{ 
           student_id: studentId, 
           question_id: questionId, 
-          answer: answerText,
+          answer_text: answerText,
           is_correct: null
         }])
         .select()
