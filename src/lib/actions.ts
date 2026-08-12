@@ -173,21 +173,36 @@ export async function approveAnswer(answerId: string, isCorrect: boolean) {
 // ========================
 
 export async function validateRoomCode(code: string) {
-  const supabase = await createClient()
-  const formattedCode = code.trim().toUpperCase()
-  console.log("Backend validating room code:", formattedCode)
+  console.log("-> validateRoomCode called with:", code)
+  try {
+    const supabase = await createClient()
+    console.log("-> Supabase client created successfully")
+    
+    const formattedCode = code.trim().toUpperCase()
+    console.log("-> Backend validating formatted room code:", formattedCode)
 
-  const { data, error } = await supabase
-    .from("rooms")
-    .select("*")
-    .eq("code", formattedCode)
-    .single()
+    const { data, error } = await supabase
+      .from("rooms")
+      .select("*")
+      .eq("code", formattedCode)
+      .maybeSingle()
 
-  if (error || !data) {
-    console.error("Room not found or error:", error?.message || "No data")
+    if (error) {
+      console.error("-> Supabase query error:", error)
+      return null
+    }
+
+    if (!data) {
+      console.error("-> Room not found for code:", formattedCode)
+      return null
+    }
+    
+    console.log("-> Room found:", data)
+    return data
+  } catch (err) {
+    console.error("-> Exception in validateRoomCode:", err)
     return null
   }
-  return data
 }
 
 export async function createStudent(name: string, roomId: string) {

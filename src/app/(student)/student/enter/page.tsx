@@ -27,6 +27,8 @@ export default function StudentEnter() {
       console.log("Validating room code:", formattedCode)
       
       const room = await validateRoomCode(formattedCode)
+      console.log("Room validation result:", room)
+      
       if (!room) {
         throw new Error("Invalid room code. Please check and try again.")
       }
