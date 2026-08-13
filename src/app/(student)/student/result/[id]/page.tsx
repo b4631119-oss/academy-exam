@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { getStudent, getStudentAnswersForExam } from "@/lib/actions"
 import { cn } from "@/lib/utils"
+import { t } from "@/lib/translations"
 
 export default function StudentResult() {
   const params = useParams()
@@ -40,7 +41,7 @@ export default function StudentResult() {
   }, [examId, router])
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading your results...</div>
+    return <div className="text-center py-20 text-slate-500">{t.loadingResults}</div>
   }
 
   const correctCount = data.filter(d => d.answer?.is_correct === true).length
@@ -55,43 +56,43 @@ export default function StudentResult() {
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Exams
+        {t.backToExams}
       </Link>
 
       <div className="text-center space-y-4">
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Your Exam Results</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{t.yourExamResults}</h1>
         <p className="text-slate-500 text-lg">
-          Here's how you did, {student?.name}
+          {t.howYouDid.replace('{name}', student?.name || '')}
         </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-6 flex flex-col items-center justify-center text-center space-y-2">
           <span className="text-3xl font-bold text-slate-700">{totalCount}</span>
-          <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">Questions</span>
+          <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">{t.questionsTotal}</span>
         </Card>
         <Card className="p-6 flex flex-col items-center justify-center text-center space-y-2 border-green-100 bg-green-50/50">
           <span className="text-3xl font-bold text-green-600 flex items-center gap-2">
             {correctCount}
           </span>
-          <span className="text-sm font-medium text-green-600/80 uppercase tracking-wider">Correct</span>
+          <span className="text-sm font-medium text-green-600/80 uppercase tracking-wider">{t.correct}</span>
         </Card>
         <Card className="p-6 flex flex-col items-center justify-center text-center space-y-2 border-red-100 bg-red-50/50">
           <span className="text-3xl font-bold text-red-500 flex items-center gap-2">
             {wrongCount}
           </span>
-          <span className="text-sm font-medium text-red-500/80 uppercase tracking-wider">Incorrect</span>
+          <span className="text-sm font-medium text-red-500/80 uppercase tracking-wider">{t.incorrect}</span>
         </Card>
         <Card className="p-6 flex flex-col items-center justify-center text-center space-y-2 border-amber-100 bg-amber-50/50">
           <span className="text-3xl font-bold text-amber-500 flex items-center gap-2">
             {pendingCount}
           </span>
-          <span className="text-sm font-medium text-amber-500/80 uppercase tracking-wider">Pending</span>
+          <span className="text-sm font-medium text-amber-500/80 uppercase tracking-wider">{t.pending}</span>
         </Card>
       </div>
 
       <div className="space-y-6 mt-12">
-        <h2 className="text-xl font-bold text-slate-900 px-1">Detailed Breakdown</h2>
+        <h2 className="text-xl font-bold text-slate-900 px-1">{t.detailedBreakdown}</h2>
         {data.map((item, index) => {
           const ans = item.answer
           const isPending = ans && ans.is_correct === null
@@ -113,7 +114,7 @@ export default function StudentResult() {
                 <div className="flex-1 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">
-                      Question {index + 1}
+                      {t.questionIndex.replace('{index}', String(index + 1))}
                     </h3>
                     
                     {/* Status Badge */}
@@ -124,19 +125,19 @@ export default function StudentResult() {
                       isPending ? "bg-amber-100 text-amber-700" :
                       "bg-slate-100 text-slate-600"
                     )}>
-                      {isCorrect && <><CheckCircle2 className="w-3.5 h-3.5" /><span>Correct</span></>}
-                      {isWrong && <><XCircle className="w-3.5 h-3.5" /><span>Incorrect</span></>}
-                      {isPending && <><Clock className="w-3.5 h-3.5" /><span>In Review</span></>}
-                      {notAnswered && <span>Skipped</span>}
+                      {isCorrect && <><CheckCircle2 className="w-3.5 h-3.5" /><span>{t.correct}</span></>}
+                      {isWrong && <><XCircle className="w-3.5 h-3.5" /><span>{t.incorrect}</span></>}
+                      {isPending && <><Clock className="w-3.5 h-3.5" /><span>{t.inReview}</span></>}
+                      {notAnswered && <span>{t.skipped}</span>}
                     </div>
                   </div>
                   
                   <p className="text-lg text-slate-900 font-medium">{item.question.text}</p>
                   
                   <div className="mt-4">
-                    <h4 className="text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2">Your Answer</h4>
+                    <h4 className="text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2">{t.yourAnswer}</h4>
                     {notAnswered ? (
-                      <p className="text-slate-400 italic bg-slate-50 p-4 rounded-xl">You did not provide an answer.</p>
+                      <p className="text-slate-400 italic bg-slate-50 p-4 rounded-xl">{t.noAnswerProvided}</p>
                     ) : (
                       <p className="text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100 whitespace-pre-wrap">
                         {ans.answer_text}

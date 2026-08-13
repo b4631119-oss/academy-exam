@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { createClient } from "@/lib/supabase/client"
+import { t } from "@/lib/translations"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -41,16 +42,16 @@ export default function LoginPage() {
       <Card className="w-full max-w-md slide-up p-8">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-slate-900">
-            Teacher Login
+            {t.teacherLogin}
           </h1>
           <p className="text-slate-500 mt-2">
-            Welcome back! Enter your details.
+            {t.loginWelcome}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t.email}</Label>
             <Input
               id="email"
               type="email"
@@ -62,7 +63,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t.password}</Label>
             <Input
               id="password"
               type="password"
@@ -75,7 +76,7 @@ export default function LoginPage() {
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? t.signingIn : t.signIn}
           </Button>
         </form>
 
@@ -84,7 +85,7 @@ export default function LoginPage() {
             href="/register"
             className="text-sm text-sky-600 hover:underline"
           >
-            Don't have an account? Sign up
+            {t.noAccount}
           </Link>
         </div>
       </Card>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { validateRoomCode, createStudent, checkStudentExists } from "@/lib/actions"
+import { t } from "@/lib/translations"
 
 export default function StudentEnter() {
   const [name, setName] = useState("")
@@ -30,7 +31,7 @@ export default function StudentEnter() {
       console.log("Room validation result:", room)
       
       if (!room) {
-        throw new Error("Invalid room code. Please check and try again.")
+        throw new Error(t.invalidRoom)
       }
 
       let finalName = name.trim()
@@ -43,7 +44,7 @@ export default function StudentEnter() {
       }
 
       if (finalName !== name.trim()) {
-        const confirm = window.confirm(`Student name "${name.trim()}" is already taken in this room. Continue as "${finalName}"?`)
+        const confirm = window.confirm(t.nameTaken.replace('{name}', name.trim()).replace('{finalName}', finalName))
         if (!confirm) {
           setLoading(false)
           return
@@ -69,18 +70,18 @@ export default function StudentEnter() {
           <div className="inline-flex items-center justify-center p-3 bg-sky-100 rounded-2xl mb-4 text-sky-600">
             <Users className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Join a Room</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t.joinRoom}</h1>
           <p className="text-slate-500 mt-2">
-            Enter your details and the code provided by your teacher
+            {t.joinRoomDesc}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Your Full Name</Label>
+            <Label htmlFor="name">{t.fullName}</Label>
             <Input
               id="name"
-              placeholder="e.g. John Doe"
+              placeholder={t.namePlaceholder}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -88,10 +89,10 @@ export default function StudentEnter() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="code">Room Code</Label>
+            <Label htmlFor="code">{t.roomCode}</Label>
             <Input
               id="code"
-              placeholder="e.g. A7B3C9"
+              placeholder={t.roomCodePlaceholder}
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               className="uppercase tracking-widest font-mono"
@@ -103,9 +104,9 @@ export default function StudentEnter() {
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
           <Button type="submit" className="w-full gap-2 text-lg h-14 mt-4" disabled={loading || !name || code.length < 3}>
-            {loading ? "Joining..." : (
+            {loading ? t.joining : (
               <>
-                <span>Join Room</span>
+                <span>{t.joinBtn}</span>
                 <LogIn className="w-5 h-5" />
               </>
             )}

@@ -7,6 +7,7 @@ import { FileText, ChevronRight } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { getExams, getStudent } from "@/lib/actions"
+import { t } from "@/lib/translations"
 
 export default function StudentRoomExams() {
   const params = useParams()
@@ -45,17 +46,17 @@ export default function StudentRoomExams() {
   }, [roomId, router])
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading exams...</div>
+    return <div className="text-center py-20 text-slate-500">{t.loadingExams}</div>
   }
 
   return (
     <div className="space-y-6 fade-in max-w-4xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">
-          Hello, {student?.name}!
+          {t.helloStudent.replace('{name}', student?.name || '')}
         </h1>
         <p className="text-slate-500 mt-1">
-          Welcome to <span className="font-semibold text-slate-700">{student?.rooms?.name}</span>. Here are your available exams.
+          {t.welcomeToRoom.split('{room}')[0]}<span className="font-semibold text-slate-700">{student?.rooms?.name}</span>{t.welcomeToRoom.split('{room}')[1]}
         </p>
       </div>
 
@@ -64,9 +65,9 @@ export default function StudentRoomExams() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
             <FileText className="w-8 h-8 text-slate-400" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900">No exams available</h3>
+          <h3 className="text-xl font-semibold text-slate-900">{t.noExamsAvailable}</h3>
           <p className="text-slate-500 mt-2">
-            Your teacher hasn't created any exams for this room yet. Check back later!
+            {t.teacherNoExams}
           </p>
         </Card>
       ) : (
@@ -85,7 +86,7 @@ export default function StudentRoomExams() {
                   </div>
                 </div>
                 <div className="flex items-center text-sky-600 font-medium">
-                  Take Exam
+                  {t.takeExam}
                   <ChevronRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Card>

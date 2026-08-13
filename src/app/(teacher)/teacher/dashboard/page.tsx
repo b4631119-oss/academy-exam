@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { createClient } from "@/lib/supabase/client"
 import { getRooms } from "@/lib/actions"
+import { t } from "@/lib/translations"
 
 export default function TeacherDashboard() {
   const [rooms, setRooms] = useState<any[]>([])
@@ -37,20 +38,20 @@ export default function TeacherDashboard() {
   }, [router, supabase])
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading dashboard...</div>
+    return <div className="text-center py-20 text-slate-500">{t.loadingDashboard}</div>
   }
 
   return (
     <div className="space-y-6 fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Your Rooms</h1>
-          <p className="text-slate-500 mt-1">Manage classes and exams</p>
+          <h1 className="text-3xl font-bold text-slate-900">{t.yourRooms}</h1>
+          <p className="text-slate-500 mt-1">{t.manageClasses}</p>
         </div>
         <Link href="/teacher/rooms/create">
           <Button className="w-full sm:w-auto gap-2">
             <Plus className="w-4 h-4" />
-            Create Room
+            {t.createRoom}
           </Button>
         </Link>
       </div>
@@ -60,12 +61,12 @@ export default function TeacherDashboard() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
             <Users className="w-8 h-8 text-slate-400" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900">No rooms yet</h3>
+          <h3 className="text-xl font-semibold text-slate-900">{t.noRoomsYet}</h3>
           <p className="text-slate-500 mt-2 max-w-sm mx-auto">
-            Create your first room to start generating access codes for your students.
+            {t.createFirstRoom}
           </p>
           <Link href="/teacher/rooms/create" className="inline-block mt-6">
-            <Button variant="outline">Create a Room</Button>
+            <Button variant="outline">{t.createRoom}</Button>
           </Link>
         </Card>
       ) : (
@@ -78,14 +79,14 @@ export default function TeacherDashboard() {
                     {room.name}
                   </h3>
                   <div className="mt-4 flex items-center space-x-2">
-                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Room Code</span>
+                    <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{t.roomCodeLabel}</span>
                     <span className="px-2 py-1 bg-sky-100 text-sky-700 text-sm font-mono font-bold rounded">
                       {room.code}
                     </span>
                   </div>
                 </div>
                 <div className="mt-6 text-sm font-medium text-sky-600 group-hover:text-sky-700 flex items-center">
-                  View Details &rarr;
+                  {t.viewDetails} &rarr;
                 </div>
               </Card>
             </Link>

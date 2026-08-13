@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { createClient } from "@/lib/supabase/client"
+import { t } from "@/lib/translations"
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("")
@@ -44,16 +45,16 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md slide-up p-8">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-slate-900">
-            Create Account
+            {t.teacherRegister}
           </h1>
           <p className="text-slate-500 mt-2">
-            Start managing your classes and exams
+            {t.registerWelcome}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t.email}</Label>
             <Input
               id="email"
               type="email"
@@ -65,7 +66,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t.password}</Label>
             <Input
               id="password"
               type="password"
@@ -78,7 +79,7 @@ export default function RegisterPage() {
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creating..." : "Sign Up"}
+            {loading ? t.signingUp : t.signUp}
           </Button>
         </form>
 
@@ -87,7 +88,7 @@ export default function RegisterPage() {
             href="/login"
             className="text-sm text-sky-600 hover:underline"
           >
-            Already have an account? Sign in
+            {t.hasAccount}
           </Link>
         </div>
       </Card>
