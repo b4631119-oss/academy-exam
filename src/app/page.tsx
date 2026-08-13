@@ -4,8 +4,36 @@ import { GraduationCap, Users } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 
 export default function Home() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PROlab Academy Exam",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any",
+    "description": "Платформа для создания, проведения и автоматической оценки онлайн-экзаменов от PROlab Academy.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Schema.org JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* SEO-блок (виден только поисковым роботам) */}
+      <div className="sr-only">
+        <h1>Платформа онлайн-тестирования PROlab Academy Exam</h1>
+        <p>
+          Добро пожаловать в систему проведения экзаменов. Здесь студенты могут пройти тестирование по ИТ-направлениям, используя индивидуальный код доступа, а преподаватели — оценить результаты обучения.
+        </p>
+      </div>
+
       {/* Decorative background elements */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
       <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -16,7 +44,7 @@ export default function Home() {
           <div className="w-full max-w-2xl mx-auto relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/60 mb-6 group">
             <Image 
               src="/hero-image.png" 
-              alt="Academy Exam Banner" 
+              alt="Платформа онлайн-тестирования PROlab Academy Exam" 
               width={1400} 
               height={700} 
               className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-109"

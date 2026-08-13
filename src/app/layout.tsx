@@ -13,20 +13,76 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Academy Exam | Система проведения экзаменов",
-  description: "Надежная и защищенная платформа для проведения онлайн экзаменов и тестирования студентов.",
-  keywords: ["экзамены", "тестирование", "образование", "academy exam", "онлайн тесты"],
-  openGraph: {
-    title: "Academy Exam | Онлайн тестирование",
-    description: "Платформа для проведения защищенных онлайн экзаменов",
-    type: "website",
-    locale: "ru_RU",
-    siteName: "Academy Exam"
-  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy-exam.cc.cd"),
+  title: "PROlab Academy Exam — Система проведения и оценки экзаменов",
+  description: "Официальная платформа PROlab Academy для создания, проведения и автоматической оценки онлайн-экзаменов. Вход для студентов по коду доступа.",
+  keywords: [
+    // === PROLAB (брендовые) ===
+    "PROLAB Academy",
+    "PROLAB Academy Exam",
+    "PROLAB Agency",
+    "PROLAB Ош",
+    "PROLAB Кыргызстан",
+    "PROLAB IT Academy",
+    "PROLAB обучение",
+    "PROLAB курсы",
+    "PROLAB тестирование",
+    "PROLAB экзамены",
+    
+    // === Общие ===
+    "онлайн экзамены",
+    "проведение экзаменов онлайн",
+    "система тестирования",
+    "платформа для экзаменов",
+    "пройти тест онлайн",
+    "онлайн тестирование студентов",
+    "индивидуальный код доступа",
+    "вход в систему тестирования",
+    "создание экзаменов онлайн",
+    "автоматическая оценка знаний",
+    "проверка результатов тестирования",
+    "экзамены для преподавателей",
+    "Academy Exam",
+    "PROlab тестирование",
+    "тестирование в Оше",
+    "тестирование в Кыргызстане",
+    "онлайн экзамены для студентов",
+    "экзамены без списывания",
+    "защита от ИИ на экзаменах",
+    "система прокторинга",
+    "онлайн проверка знаний",
+    "дистанционное тестирование",
+    "академия программирования Ош",
+    "IT курсы Ош",
+  ],
   robots: {
     index: true,
     follow: true,
-  }
+  },
+  openGraph: {
+    title: "PROlab Academy Exam",
+    description: "Платформа для онлайн-тестирования студентов",
+    type: "website",
+    url: "/",
+    siteName: "PROlab Academy Exam",
+    images: [
+      {
+        url: "/hero-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Платформа PROlab Academy Exam",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PROlab Academy Exam — Оценка знаний",
+    description: "Платформа PROlab Academy для онлайн-тестирования студентов.",
+    images: ["/hero-image.png"],
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
