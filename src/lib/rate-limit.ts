@@ -1,5 +1,5 @@
 /**
- * Simple in-memory rate limiter for server-side protection.
+ * Granular Rate Limiting System for Anti-DDoS
  */
 
 interface RateLimitRecord {
@@ -7,25 +7,28 @@ interface RateLimitRecord {
   resetTime: number;
 }
 
-const tracker = new Map<string, RateLimitRecord>();
+const rateLimitStore = new Map<string, RateLimitRecord>();
+
+export const RATE_LIMIT_PRESETS = {
+  LOGIN: { limit: 5, windowMs: 60 * 1000 },           // 5 attempts per minute
+  REGISTER: { limit: 3, windowMs: 5 * 60 * 1000 },     // 3 attempts per 5 minutes
+  API_GENERAL: { limit: 100, windowMs: 60 * 1000 },   // 100 requests per minute
+  EXAM_SUBMIT: { limit: 10, windowMs: 60 * 1000 }     // 10 submissions per minute
+};
 
 /**
- * Enforces rate limiting on a specific action/key.
- * @param key Unique identifier (IP, user ID, or client key)
- * @param limit Maximum allowed requests in window
- * @param windowMs Time window in milliseconds (default: 1 minute)
- * @returns { allowed: boolean, remaining: number, resetTime: number }
+ * Enforces rate limiting by key and rule.
  */
-export function rateLimit(key: string, limit: number = 10, windowMs: number = 60000) {
+export function rateLimit(key: string, limit: number = 100, windowMs: number = 60000) {
   const now = Date.now();
-  const record = tracker.get(key);
+  const record = rateLimitStore.get(key);
 
   if (!record || now > record.resetTime) {
     const newRecord: RateLimitRecord = {
       count: 1,
       resetTime: now + windowMs
     };
-    tracker.set(key, newRecord);
+    rateLimitStore.set(key, newRecord);
     return { allowed: true, remaining: limit - 1, resetTime: newRecord.resetTime };
   }
 
