@@ -1,10 +1,47 @@
 /**
- * Bulletproof Enterprise Anti-Cheat System
- * Multi-layered protection against DevTools, Tab Swaps, DOM Tampering, Prototype Overrides, and Automation.
+ * Advanced Hardened Anti-Cheat System with Web Worker Pulse & Prototype Protection
  */
 
 export function initAntiCheat(onViolation?: (reason: string) => void) {
   if (typeof window === 'undefined') return () => {};
+
+  // =========================================================
+  // STEP 1: CAPTURE & IMMUTABLE FREEZE OF NATIVE REFERENCES
+  // =========================================================
+  const rawSetInterval = window.setInterval;
+  const rawSetTimeout = window.setTimeout;
+  const rawClearInterval = window.clearInterval;
+  const rawClearTimeout = window.clearTimeout;
+  const rawRequestAnimationFrame = window.requestAnimationFrame;
+  const rawCancelAnimationFrame = window.cancelAnimationFrame;
+
+  const rawPerfNow = performance.now.bind(performance);
+  const rawDateNow = Date.now.bind(Date);
+  const rawFuncConstructor = Function.prototype.constructor;
+
+  const rawConsoleLog = console.log.bind(console);
+  const rawConsoleWarn = console.warn.bind(console);
+  const rawConsoleError = console.error.bind(console);
+
+  const rawAddEventListener = EventTarget.prototype.addEventListener;
+  const rawRemoveEventListener = EventTarget.prototype.removeEventListener;
+
+  const visStateDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState');
+  const hiddenDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
+  const hasFocusDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hasFocus');
+
+  const rawVisibilityState = () => visStateDesc?.get ? visStateDesc.get.call(document) : document.visibilityState;
+  const rawHidden = () => hiddenDesc?.get ? hiddenDesc.get.call(document) : document.hidden;
+  const rawHasFocus = () => hasFocusDesc?.value ? hasFocusDesc.value.call(document) : document.hasFocus();
+
+  // Freeze security definitions container
+  const securityCore = Object.freeze({
+    rawSetInterval,
+    rawSetTimeout,
+    rawPerfNow,
+    rawDateNow,
+    rawAddEventListener
+  });
 
   let isTriggered = false;
 
@@ -12,7 +49,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     if (isTriggered) return;
     isTriggered = true;
 
-    console.warn(`[AntiCheat Violation Detected]: ${reason}`);
+    rawConsoleWarn(`[AntiCheat Hardened Triggered]: ${reason}`);
 
     if (onViolation) {
       onViolation(`Обнаружена попытка обхода защиты: ${reason}`);
@@ -22,273 +59,173 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     }
   };
 
-  // ==========================================
-  // LEVEL 5: SAVE ORIGINAL NATIVE REFERENCES
-  // ==========================================
-  const rawAddEventListener = EventTarget.prototype.addEventListener;
-  const rawRemoveEventListener = EventTarget.prototype.removeEventListener;
-  const rawHasFocus = Document.prototype.hasFocus;
-  const rawQuerySelector = Document.prototype.querySelector;
-  
-  const visStateDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState');
-  const hiddenDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
-
-  const rawVisibilityState = function () {
-    return visStateDesc?.get ? visStateDesc.get.call(document) : document.visibilityState;
-  };
-
-  const rawHidden = function () {
-    return hiddenDesc?.get ? hiddenDesc.get.call(document) : document.hidden;
-  };
-
-  const rawHasFocusCall = function () {
-    return rawHasFocus ? rawHasFocus.call(document) : document.hasFocus();
-  };
-
-  // 1. Iframe Detection
-  try {
-    if (window.top !== window.self) {
-      triggerViolation('Экзамен запущен внутри iframe');
+  // =========================================================
+  // STEP 2: INTEGRITY VERIFICATION (detect monkey patching)
+  // =========================================================
+  const verifyIntegrity = () => {
+    if (window.setInterval !== rawSetInterval) {
+      triggerViolation('Переопределение setInterval');
     }
+    if (window.setTimeout !== rawSetTimeout) {
+      triggerViolation('Переопределение setTimeout');
+    }
+    if (EventTarget.prototype.addEventListener !== rawAddEventListener) {
+      triggerViolation('Переопределение addEventListener');
+    }
+    if (Function.prototype.constructor !== rawFuncConstructor) {
+      triggerViolation('Переопределение Function.prototype.constructor');
+    }
+
+    // Check if methods native code string mutated
+    try {
+      if (!window.setInterval.toString().includes('[native code]')) {
+        triggerViolation('Подмена кода setInterval на кастомную функцию');
+      }
+    } catch (e) {
+      triggerViolation('Ошибка проверки целостности методов');
+    }
+  };
+
+  // Lock properties via defineProperty
+  try {
+    Object.defineProperty(window, '_antiCheatGuard', {
+      value: true,
+      writable: false,
+      configurable: false
+    });
   } catch (e) {
-    triggerViolation('Изоляция контекста в iframe');
+    // Ignore if sealed
   }
 
-  // ==========================================
-  // LEVEL 1: EVENT CAPTURE PHASE LISTENERS
-  // ==========================================
-  let lastEventTimestamp = Date.now();
+  // =========================================================
+  // STEP 3: WEB WORKER SEPARATE THREAD PULSE CHECK
+  // =========================================================
+  let worker: Worker | null = null;
+  let workerUrl: string | null = null;
 
-  const handleSecurityEvent = (e: Event, reason: string) => {
-    lastEventTimestamp = Date.now();
+  try {
+    const workerCode = `
+      let lastPulse = Date.now();
+      self.setInterval(() => {
+        const now = Date.now();
+        if (now - lastPulse > 1500) {
+          self.postMessage({ type: 'FREEZE_DETECTED', delta: now - lastPulse });
+        }
+        lastPulse = now;
+        self.postMessage({ type: 'PULSE', timestamp: now });
+      }, 300);
+    `;
+
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    workerUrl = URL.createObjectURL(blob);
+    worker = new Worker(workerUrl);
+
+    let lastWorkerPulse = rawDateNow();
+
+    worker.onmessage = (e) => {
+      const data = e.data;
+      if (data.type === 'FREEZE_DETECTED') {
+        triggerViolation('Обнаружена заморозка отдельного потока (Web Worker)');
+      } else if (data.type === 'PULSE') {
+        lastWorkerPulse = rawDateNow();
+      }
+    };
+  } catch (e) {
+    // Worker fallback
+  }
+
+  // =========================================================
+  // STEP 4: TIMING CHECKS (performance.now & RAF)
+  // =========================================================
+  let lastFrameTime = rawPerfNow();
+  let rafId: number;
+
+  const frameCheckLoop = (now: number) => {
+    const delta = now - lastFrameTime;
+
+    if (delta > 1200) {
+      triggerViolation('Задержка отрисовки кадров (DevTools/Переключение вкладки)');
+    }
+    lastFrameTime = now;
+
+    if (rawHidden() || rawVisibilityState() !== 'visible') {
+      triggerViolation('Состояние видимости неактивно');
+    }
+
+    if (!rawHasFocus()) {
+      triggerViolation('Потеря фокуса окна');
+    }
+
+    if (!isTriggered) {
+      rafId = rawRequestAnimationFrame.call(window, frameCheckLoop);
+    }
+  };
+
+  rafId = rawRequestAnimationFrame.call(window, frameCheckLoop);
+
+  // =========================================================
+  // STEP 5: EVENT LISTENERS & DOM OBSERVER
+  // =========================================================
+  const preventClipboard = (e: Event) => {
     e.preventDefault();
     if (typeof (e as any).stopImmediatePropagation === 'function') {
       (e as any).stopImmediatePropagation();
     }
-    triggerViolation(reason);
+    triggerViolation('Операция с буфером обмена запрещена');
   };
 
-  // Prevent Clipboard Operations
-  const preventCopyPaste = (e: Event) => {
-    e.preventDefault();
-    if (typeof (e as any).stopImmediatePropagation === 'function') {
-      (e as any).stopImmediatePropagation();
-    }
-    triggerViolation('Копирование/вставка/вырезание запрещены');
-  };
-
-  // Prevent DevTools & Shortcut Hotkeys
   const preventHotkeys = (e: KeyboardEvent) => {
-    lastEventTimestamp = Date.now();
     const key = e.key ? e.key.toLowerCase() : '';
-
-    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+R, F5
     if (
       key === 'f12' ||
       key === 'f5' ||
       (e.ctrlKey && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) ||
-      (e.ctrlKey && (key === 'u' || key === 's' || key === 'p' || key === 'r')) ||
-      (e.metaKey && (key === 'u' || key === 's' || key === 'p' || key === 'r'))
+      (e.ctrlKey && (key === 'u' || key === 's' || key === 'p' || key === 'r'))
     ) {
       e.preventDefault();
-      if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
-      triggerViolation('Использование запрещенных горячих клавиш или DevTools');
-    }
-
-    if (key === 'printscreen') {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('');
-      }
-      triggerViolation('Скриншот экрана запрещен');
+      triggerViolation('Запрещенные сочетания клавиш');
     }
   };
 
-  const handleVisibilityChange = () => {
-    if (rawHidden() || rawVisibilityState() !== 'visible') {
-      triggerViolation('Переключение вкладки или сворачивание окна');
-    }
-  };
-
-  const handleBlur = () => {
-    triggerViolation('Потеря фокуса окна браузера');
-  };
-
-  const handlePageHide = () => {
-    triggerViolation('Сворачивание/закрытие страницы');
-  };
-
-  const handleFreeze = () => {
-    triggerViolation('Заморозка вкладки браузера');
-  };
-
-  // Attach to multiple targets in CAPTURE phase
   const targets = [window, document, document.documentElement];
-  
-  const safeAttach = (target: EventTarget, event: string, handler: EventListener) => {
-    try {
-      rawAddEventListener.call(target, event, handler, { capture: true, passive: false });
-    } catch (err) {
-      target.addEventListener(event, handler, true);
-    }
-  };
-
   targets.forEach(target => {
     if (!target) return;
-    safeAttach(target, 'copy', preventCopyPaste);
-    safeAttach(target, 'paste', preventCopyPaste);
-    safeAttach(target, 'cut', preventCopyPaste);
-    safeAttach(target, 'contextmenu', (e) => e.preventDefault());
-    safeAttach(target, 'keydown', preventHotkeys as EventListener);
-    safeAttach(target, 'visibilitychange', handleVisibilityChange);
-    safeAttach(target, 'blur', handleBlur);
-    safeAttach(target, 'pagehide', handlePageHide);
-    safeAttach(target, 'freeze', handleFreeze);
+    rawAddEventListener.call(target, 'copy', preventClipboard, { capture: true, passive: false });
+    rawAddEventListener.call(target, 'paste', preventClipboard, { capture: true, passive: false });
+    rawAddEventListener.call(target, 'cut', preventClipboard, { capture: true, passive: false });
+    rawAddEventListener.call(target, 'contextmenu', (e) => e.preventDefault(), { capture: true, passive: false });
+    rawAddEventListener.call(target, 'keydown', preventHotkeys as EventListener, { capture: true, passive: false });
+    rawAddEventListener.call(target, 'visibilitychange', () => {
+      if (rawHidden()) triggerViolation('Сворачивание вкладки');
+    }, { capture: true, passive: false });
+    rawAddEventListener.call(target, 'blur', () => triggerViolation('Потеря фокуса окна'), { capture: true, passive: false });
   });
 
-  // ==========================================
-  // LEVEL 2 & 3: PERIODIC CHECK & RAF (FPS TRACKING)
-  // ==========================================
-  let lastTick = Date.now();
-  let rafId: number;
+  // Interval integrity check
+  const intervalId = rawSetInterval.call(window, () => {
+    verifyIntegrity();
 
-  const checkLoop = () => {
-    const now = Date.now();
-    const delta = now - lastTick;
-
-    // Check time jump (debugger pause, tab freeze, OS sleep)
-    if (delta > 1500) {
-      triggerViolation('Приостановка выполнения скрипта (DevTools/Заморозка вкладки)');
-    }
-    lastTick = now;
-
-    // Direct check of native visibility and focus
-    if (rawHidden() || rawVisibilityState() !== 'visible') {
-      triggerViolation('Вкладка неактивна (проверка состояния)');
-    }
-
-    if (!rawHasFocusCall()) {
-      triggerViolation('Окно не в фокусе (проверка фокуса)');
-    }
-
-    // DevTools Window Size Check
-    const widthDiff = window.outerWidth - window.innerWidth;
-    const heightDiff = window.outerHeight - window.innerHeight;
-    if (widthDiff > 180 || heightDiff > 180) {
-      triggerViolation('Открыты инструменты разработчика (DevTools панель)');
-    }
-
-    if (!isTriggered) {
-      rafId = requestAnimationFrame(checkLoop);
-    }
-  };
-
-  rafId = requestAnimationFrame(checkLoop);
-
-  // Interval verification & prototype tampering check
-  const intervalId = setInterval(() => {
-    // Detect overridden addEventListener / prototype pollution
-    if (EventTarget.prototype.addEventListener !== rawAddEventListener) {
-      triggerViolation('Обнаружена подмена метода addEventListener');
-    }
-
-    // Detect property descriptor overrides on document instance
-    if (Object.prototype.hasOwnProperty.call(document, 'visibilityState') || 
-        Object.prototype.hasOwnProperty.call(document, 'hidden')) {
-      triggerViolation('Обнаружена подмена свойства visibilityState/hidden');
-    }
-
-    // DevTools debugger detection trap
-    const startTime = Date.now();
-    (function () {
-      return false;
-    })['constructor']('debugger')();
-    const endTime = Date.now();
-    if (endTime - startTime > 100) {
-      triggerViolation('Обнаружен пошаговый отладчик DevTools');
-    }
-
-    // Check if events have been silenced for too long when window lost focus
-    if (Date.now() - lastEventTimestamp > 5000 && !document.hasFocus()) {
-      triggerViolation('Глушение событий безопасности');
+    // Debugger trap test
+    const start = rawPerfNow();
+    (function () {})['constructor']('debugger')();
+    const elapsed = rawPerfNow() - start;
+    if (elapsed > 100) {
+      triggerViolation('Пошаговый отладчик DevTools активирован');
     }
   }, 400);
 
-  // ==========================================
-  // LEVEL 4: MUTATION OBSERVER (DOM INTEGRITY)
-  // ==========================================
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList') {
-        for (const removedNode of Array.from(mutation.removedNodes)) {
-          if (removedNode instanceof HTMLElement && removedNode.dataset?.antiCheat) {
-            triggerViolation('Попытка удаления элементов защиты из DOM');
-          }
-        }
-      }
-    }
+  // Observer
+  const observer = new MutationObserver(() => {
+    verifyIntegrity();
   });
+  observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
 
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    attributes: true
-  });
-
-  // Override clipboard & execCommand APIs
-  try {
-    if (typeof document.execCommand === 'function') {
-      document.execCommand = function (command: string) {
-        if (['copy', 'cut', 'paste'].includes(command.toLowerCase())) {
-          triggerViolation('Попытка вызова execCommand');
-          return false;
-        }
-        return false;
-      };
-    }
-
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText = async () => {
-        triggerViolation('Попытка записи в буфер обмена');
-        return Promise.reject();
-      };
-      navigator.clipboard.readText = async () => {
-        triggerViolation('Попытка чтения из буфера обмена');
-        return Promise.resolve('');
-      };
-    }
-  } catch (e) {
-    // Ignore read-only properties
-  }
-
-  // Before unload prompt
-  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-    e.preventDefault();
-    e.returnValue = 'Экзамен выполняется. Вы действительно хотите покинуть страницу?';
-    return e.returnValue;
-  };
-  safeAttach(window, 'beforeunload', handleBeforeUnload);
-
-  // Cleanup handler
+  // Cleanup
   return () => {
-    cancelAnimationFrame(rafId);
-    clearInterval(intervalId);
+    if (rafId) rawCancelAnimationFrame.call(window, rafId);
+    if (intervalId) rawClearInterval.call(window, intervalId);
+    if (worker) worker.terminate();
+    if (workerUrl) URL.revokeObjectURL(workerUrl);
     observer.disconnect();
-
-    targets.forEach(target => {
-      if (!target) return;
-      try {
-        rawRemoveEventListener.call(target, 'copy', preventCopyPaste, true);
-        rawRemoveEventListener.call(target, 'paste', preventCopyPaste, true);
-        rawRemoveEventListener.call(target, 'cut', preventCopyPaste, true);
-        rawRemoveEventListener.call(target, 'keydown', preventHotkeys as EventListener, true);
-        rawRemoveEventListener.call(target, 'visibilitychange', handleVisibilityChange, true);
-        rawRemoveEventListener.call(target, 'blur', handleBlur, true);
-        rawRemoveEventListener.call(target, 'pagehide', handlePageHide, true);
-        rawRemoveEventListener.call(target, 'freeze', handleFreeze, true);
-        rawRemoveEventListener.call(target, 'beforeunload', handleBeforeUnload, true);
-      } catch (e) {
-        // Fallback cleanup
-      }
-    });
   };
 }
