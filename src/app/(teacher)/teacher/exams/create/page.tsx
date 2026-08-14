@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { createExam, createQuestion } from "@/lib/actions"
+import { t } from "@/lib/translations"
 
 function CreateExamForm() {
   const router = useRouter()
@@ -81,21 +82,21 @@ function CreateExamForm() {
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Room
+        {t.backToRoom}
       </Link>
 
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Create New Exam</h1>
-        <p className="text-slate-500 mt-1">Add details and questions for the exam.</p>
+        <h1 className="text-3xl font-bold text-slate-900">{t.createNewExamTitle}</h1>
+        <p className="text-slate-500 mt-1">{t.addDetailsAndQuestions}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <Card className="p-6">
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-base">Exam Title</Label>
+            <Label htmlFor="title" className="text-base">{t.examTitleLabel}</Label>
             <Input
               id="title"
-              placeholder="e.g. Midterm Test, Chapter 4 Quiz"
+              placeholder={t.examTitlePlaceholder}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -106,7 +107,7 @@ function CreateExamForm() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">Questions</h2>
+            <h2 className="text-xl font-semibold text-slate-900">{t.questionsHeading}</h2>
           </div>
 
           {questions.map((q, i) => (
@@ -116,16 +117,16 @@ function CreateExamForm() {
               </div>
               <div className="flex gap-4 items-start pt-2">
                 <div className="flex-1 space-y-2">
-                  <Label>Question Text</Label>
+                  <Label>{t.questionTextLabel}</Label>
                   <textarea
                     value={q}
                     onChange={(e) => updateQuestion(i, e.target.value)}
-                    placeholder="Enter the question here..."
+                    placeholder={t.questionPlaceholder}
                     required
                     rows={2}
                     className="flex w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
                   />
-                  <p className="text-xs text-slate-500">Students will answer with a text field.</p>
+                  <p className="text-xs text-slate-500">{t.studentAnswerInfo}</p>
                 </div>
                 {questions.length > 1 && (
                   <button
@@ -148,18 +149,18 @@ function CreateExamForm() {
             className="w-full border-dashed border-2 py-6 text-slate-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"
           >
             <Plus className="w-5 h-5 mr-2" />
-            Add Another Question
+            {t.addAnotherQuestion}
           </Button>
         </div>
 
         {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
-        <div className="flex justify-end gap-4 pb-12">
-          <Link href={`/teacher/rooms/${roomId}`}>
-            <Button type="button" variant="ghost">Cancel</Button>
+        <div className="flex flex-col sm:flex-row justify-end gap-4 pb-12">
+          <Link href={`/teacher/rooms/${roomId}`} className="w-full sm:w-auto">
+            <Button type="button" variant="ghost" className="w-full">{t.cancel}</Button>
           </Link>
-          <Button type="submit" disabled={loading || !title.trim()}>
-            {loading ? "Saving Exam..." : "Save Exam & Finish"}
+          <Button type="submit" disabled={loading || !title.trim()} className="w-full sm:w-auto">
+            {loading ? t.savingExam : t.saveAndFinish}
           </Button>
         </div>
       </form>

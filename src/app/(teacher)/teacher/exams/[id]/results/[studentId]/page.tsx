@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card"
 import { createClient } from "@/lib/supabase/client"
 import { getStudentAnswersForExam, approveAnswer } from "@/lib/actions"
 import { cn } from "@/lib/utils"
+import { t } from "@/lib/translations"
 
 export default function ReviewStudent() {
   const params = useParams()
@@ -59,12 +60,12 @@ export default function ReviewStudent() {
       setData(newData)
     } catch (err) {
       console.error(err)
-      alert("Failed to save grade")
+      alert(t.error)
     }
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading student answers...</div>
+    return <div className="text-center py-20 text-slate-500">{t.loadingResults}</div>
   }
 
   return (
@@ -74,7 +75,7 @@ export default function ReviewStudent() {
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Results List
+        {t.backToResults}
       </Link>
 
       <div className="flex items-center space-x-4 mb-8">
@@ -82,8 +83,8 @@ export default function ReviewStudent() {
           {studentName.charAt(0).toUpperCase()}
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{studentName}'s Answers</h1>
-          <p className="text-slate-500">Review and grade the submission</p>
+          <h1 className="text-2xl font-bold text-slate-900">{studentName} - {t.reviewStudentTitle}</h1>
+          <p className="text-slate-500">{t.reviewSubmissions}</p>
         </div>
       </div>
 
@@ -108,17 +109,17 @@ export default function ReviewStudent() {
                 <div className="flex-1 space-y-4">
                   <div>
                     <h3 className="text-sm font-semibold tracking-wide text-slate-500 uppercase mb-1">
-                      Question {index + 1}
+                      {t.questionIndex.replace('{index}', String(index + 1))}
                     </h3>
                     <p className="text-lg text-slate-900 font-medium">{item.question.text}</p>
                   </div>
                   
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <h4 className="text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2">Student's Answer</h4>
+                    <h4 className="text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2">{t.studentAnswer}</h4>
                     {ans ? (
                       <p className="text-slate-800 whitespace-pre-wrap">{ans.answer_text}</p>
                     ) : (
-                      <p className="text-slate-400 italic">No answer provided.</p>
+                      <p className="text-slate-400 italic">{t.noAnswerProvided}</p>
                     )}
                   </div>
                 </div>
@@ -135,7 +136,7 @@ export default function ReviewStudent() {
                       )}
                     >
                       <Check className="w-5 h-5" />
-                      <span>Correct</span>
+                      <span>{t.markCorrect}</span>
                     </button>
                     <button
                       onClick={() => handleGrade(ans.id, false, index)}
@@ -147,7 +148,7 @@ export default function ReviewStudent() {
                       )}
                     >
                       <X className="w-5 h-5" />
-                      <span>Wrong</span>
+                      <span>{t.markIncorrect}</span>
                     </button>
                   </div>
                 )}

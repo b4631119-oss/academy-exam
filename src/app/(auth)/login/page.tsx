@@ -19,8 +19,15 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const [attempts, setAttempts] = useState(0)
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (attempts >= 5) {
+      setError("Слишком много неудачных попыток. Пожалуйста, подождите немного перед следующей попыткой.")
+      return
+    }
+
     setLoading(true)
     setError("")
 
@@ -29,8 +36,9 @@ export default function LoginPage() {
       if (error) throw error
 
       router.push("/teacher/dashboard")
-      router.refresh() // important to refresh so middleware catches the new session state
+      router.refresh()
     } catch (err: any) {
+      setAttempts(prev => prev + 1)
       setError(err.message)
     } finally {
       setLoading(false)

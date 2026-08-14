@@ -1,88 +1,294 @@
-export function initAntiCheat(onViolation?: (reason: string) => void) {
-  if (typeof window === 'undefined') return;
+/**
+ * Bulletproof Enterprise Anti-Cheat System
+ * Multi-layered protection against DevTools, Tab Swaps, DOM Tampering, Prototype Overrides, and Automation.
+ */
 
-  const handleViolation = (reason: string) => {
+export function initAntiCheat(onViolation?: (reason: string) => void) {
+  if (typeof window === 'undefined') return () => {};
+
+  let isTriggered = false;
+
+  const triggerViolation = (reason: string) => {
+    if (isTriggered) return;
+    isTriggered = true;
+
+    console.warn(`[AntiCheat Violation Detected]: ${reason}`);
+
     if (onViolation) {
-      onViolation(reason);
+      onViolation(`Обнаружена попытка обхода защиты: ${reason}`);
     } else {
-      alert(`⚠️ Внимание! ${reason}. Это действие зафиксировано.`);
+      alert(`⚠️ Обнаружена попытка взлома! Экзамен завершён.\nПричина: ${reason}`);
+      window.location.reload();
     }
   };
 
-  // 1. Блокировка копирования, вставки и вырезания
-  const preventCopyPaste = (e: ClipboardEvent) => {
-    e.preventDefault();
-    handleViolation('Копирование и вставка запрещены');
-  };
-  document.addEventListener('copy', preventCopyPaste);
-  document.addEventListener('paste', preventCopyPaste);
-  document.addEventListener('cut', preventCopyPaste);
+  // ==========================================
+  // LEVEL 5: SAVE ORIGINAL NATIVE REFERENCES
+  // ==========================================
+  const rawAddEventListener = EventTarget.prototype.addEventListener;
+  const rawRemoveEventListener = EventTarget.prototype.removeEventListener;
+  const rawHasFocus = Document.prototype.hasFocus;
+  const rawQuerySelector = Document.prototype.querySelector;
+  
+  const visStateDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState');
+  const hiddenDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
 
-  // 2. Блокировка контекстного меню
-  const preventContextMenu = (e: MouseEvent) => {
-    e.preventDefault();
+  const rawVisibilityState = function () {
+    return visStateDesc?.get ? visStateDesc.get.call(document) : document.visibilityState;
   };
-  document.addEventListener('contextmenu', preventContextMenu);
 
-  // 3. Блокировка горячих клавиш (DevTools, Печать, Сохранение, Обновление)
+  const rawHidden = function () {
+    return hiddenDesc?.get ? hiddenDesc.get.call(document) : document.hidden;
+  };
+
+  const rawHasFocusCall = function () {
+    return rawHasFocus ? rawHasFocus.call(document) : document.hasFocus();
+  };
+
+  // 1. Iframe Detection
+  try {
+    if (window.top !== window.self) {
+      triggerViolation('Экзамен запущен внутри iframe');
+    }
+  } catch (e) {
+    triggerViolation('Изоляция контекста в iframe');
+  }
+
+  // ==========================================
+  // LEVEL 1: EVENT CAPTURE PHASE LISTENERS
+  // ==========================================
+  let lastEventTimestamp = Date.now();
+
+  const handleSecurityEvent = (e: Event, reason: string) => {
+    lastEventTimestamp = Date.now();
+    e.preventDefault();
+    if (typeof (e as any).stopImmediatePropagation === 'function') {
+      (e as any).stopImmediatePropagation();
+    }
+    triggerViolation(reason);
+  };
+
+  // Prevent Clipboard Operations
+  const preventCopyPaste = (e: Event) => {
+    e.preventDefault();
+    if (typeof (e as any).stopImmediatePropagation === 'function') {
+      (e as any).stopImmediatePropagation();
+    }
+    triggerViolation('Копирование/вставка/вырезание запрещены');
+  };
+
+  // Prevent DevTools & Shortcut Hotkeys
   const preventHotkeys = (e: KeyboardEvent) => {
-    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (DevTools)
+    lastEventTimestamp = Date.now();
+    const key = e.key ? e.key.toLowerCase() : '';
+
+    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+R, F5
     if (
-      e.key === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) ||
-      (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
+      key === 'f12' ||
+      key === 'f5' ||
+      (e.ctrlKey && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) ||
+      (e.ctrlKey && (key === 'u' || key === 's' || key === 'p' || key === 'r')) ||
+      (e.metaKey && (key === 'u' || key === 's' || key === 'p' || key === 'r'))
     ) {
       e.preventDefault();
-      handleViolation('Попытка открыть инструменты разработчика');
+      if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+      triggerViolation('Использование запрещенных горячих клавиш или DevTools');
     }
-    // Ctrl+P (Печать), Ctrl+S (Сохранение)
-    if (e.ctrlKey && (e.key === 'P' || e.key === 'p' || e.key === 'S' || e.key === 's')) {
-      e.preventDefault();
-      handleViolation('Печать и сохранение страницы запрещены');
-    }
-    // F5, Ctrl+R (Обновление)
-    if (e.key === 'F5' || (e.ctrlKey && (e.key === 'R' || e.key === 'r'))) {
-      e.preventDefault();
-      handleViolation('Обновление страницы во время экзамена запрещено');
-    }
-    // Попытка перехватить скриншот (PrintScreen)
-    if (e.key === 'PrintScreen') {
-      navigator.clipboard.writeText(''); // Очистка буфера обмена
-      handleViolation('Попытка сделать скриншот');
-    }
-  };
-  document.addEventListener('keydown', preventHotkeys);
 
-  // 4. Отслеживание потери фокуса (уход в другую вкладку/окно)
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      handleViolation('Переключение вкладок или сворачивание окна браузера');
+    if (key === 'printscreen') {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('');
+      }
+      triggerViolation('Скриншот экрана запрещен');
     }
   };
-  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  const handleVisibilityChange = () => {
+    if (rawHidden() || rawVisibilityState() !== 'visible') {
+      triggerViolation('Переключение вкладки или сворачивание окна');
+    }
+  };
 
   const handleBlur = () => {
-    handleViolation('Потеря фокуса окна браузера');
+    triggerViolation('Потеря фокуса окна браузера');
   };
-  window.addEventListener('blur', handleBlur);
 
-  // 5. Предупреждение при попытке закрыть вкладку
+  const handlePageHide = () => {
+    triggerViolation('Сворачивание/закрытие страницы');
+  };
+
+  const handleFreeze = () => {
+    triggerViolation('Заморозка вкладки браузера');
+  };
+
+  // Attach to multiple targets in CAPTURE phase
+  const targets = [window, document, document.documentElement];
+  
+  const safeAttach = (target: EventTarget, event: string, handler: EventListener) => {
+    try {
+      rawAddEventListener.call(target, event, handler, { capture: true, passive: false });
+    } catch (err) {
+      target.addEventListener(event, handler, true);
+    }
+  };
+
+  targets.forEach(target => {
+    if (!target) return;
+    safeAttach(target, 'copy', preventCopyPaste);
+    safeAttach(target, 'paste', preventCopyPaste);
+    safeAttach(target, 'cut', preventCopyPaste);
+    safeAttach(target, 'contextmenu', (e) => e.preventDefault());
+    safeAttach(target, 'keydown', preventHotkeys as EventListener);
+    safeAttach(target, 'visibilitychange', handleVisibilityChange);
+    safeAttach(target, 'blur', handleBlur);
+    safeAttach(target, 'pagehide', handlePageHide);
+    safeAttach(target, 'freeze', handleFreeze);
+  });
+
+  // ==========================================
+  // LEVEL 2 & 3: PERIODIC CHECK & RAF (FPS TRACKING)
+  // ==========================================
+  let lastTick = Date.now();
+  let rafId: number;
+
+  const checkLoop = () => {
+    const now = Date.now();
+    const delta = now - lastTick;
+
+    // Check time jump (debugger pause, tab freeze, OS sleep)
+    if (delta > 1500) {
+      triggerViolation('Приостановка выполнения скрипта (DevTools/Заморозка вкладки)');
+    }
+    lastTick = now;
+
+    // Direct check of native visibility and focus
+    if (rawHidden() || rawVisibilityState() !== 'visible') {
+      triggerViolation('Вкладка неактивна (проверка состояния)');
+    }
+
+    if (!rawHasFocusCall()) {
+      triggerViolation('Окно не в фокусе (проверка фокуса)');
+    }
+
+    // DevTools Window Size Check
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    if (widthDiff > 180 || heightDiff > 180) {
+      triggerViolation('Открыты инструменты разработчика (DevTools панель)');
+    }
+
+    if (!isTriggered) {
+      rafId = requestAnimationFrame(checkLoop);
+    }
+  };
+
+  rafId = requestAnimationFrame(checkLoop);
+
+  // Interval verification & prototype tampering check
+  const intervalId = setInterval(() => {
+    // Detect overridden addEventListener / prototype pollution
+    if (EventTarget.prototype.addEventListener !== rawAddEventListener) {
+      triggerViolation('Обнаружена подмена метода addEventListener');
+    }
+
+    // Detect property descriptor overrides on document instance
+    if (Object.prototype.hasOwnProperty.call(document, 'visibilityState') || 
+        Object.prototype.hasOwnProperty.call(document, 'hidden')) {
+      triggerViolation('Обнаружена подмена свойства visibilityState/hidden');
+    }
+
+    // DevTools debugger detection trap
+    const startTime = Date.now();
+    (function () {
+      return false;
+    })['constructor']('debugger')();
+    const endTime = Date.now();
+    if (endTime - startTime > 100) {
+      triggerViolation('Обнаружен пошаговый отладчик DevTools');
+    }
+
+    // Check if events have been silenced for too long when window lost focus
+    if (Date.now() - lastEventTimestamp > 5000 && !document.hasFocus()) {
+      triggerViolation('Глушение событий безопасности');
+    }
+  }, 400);
+
+  // ==========================================
+  // LEVEL 4: MUTATION OBSERVER (DOM INTEGRITY)
+  // ==========================================
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        for (const removedNode of Array.from(mutation.removedNodes)) {
+          if (removedNode instanceof HTMLElement && removedNode.dataset?.antiCheat) {
+            triggerViolation('Попытка удаления элементов защиты из DOM');
+          }
+        }
+      }
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true
+  });
+
+  // Override clipboard & execCommand APIs
+  try {
+    if (typeof document.execCommand === 'function') {
+      document.execCommand = function (command: string) {
+        if (['copy', 'cut', 'paste'].includes(command.toLowerCase())) {
+          triggerViolation('Попытка вызова execCommand');
+          return false;
+        }
+        return false;
+      };
+    }
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText = async () => {
+        triggerViolation('Попытка записи в буфер обмена');
+        return Promise.reject();
+      };
+      navigator.clipboard.readText = async () => {
+        triggerViolation('Попытка чтения из буфера обмена');
+        return Promise.resolve('');
+      };
+    }
+  } catch (e) {
+    // Ignore read-only properties
+  }
+
+  // Before unload prompt
   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
     e.preventDefault();
-    e.returnValue = 'Вы уверены, что хотите покинуть страницу? Прогресс может быть утерян.';
+    e.returnValue = 'Экзамен выполняется. Вы действительно хотите покинуть страницу?';
     return e.returnValue;
   };
-  window.addEventListener('beforeunload', handleBeforeUnload);
+  safeAttach(window, 'beforeunload', handleBeforeUnload);
 
-  // Возвращаем функцию для отключения защиты (при завершении экзамена/размонтировании)
+  // Cleanup handler
   return () => {
-    document.removeEventListener('copy', preventCopyPaste);
-    document.removeEventListener('paste', preventCopyPaste);
-    document.removeEventListener('cut', preventCopyPaste);
-    document.removeEventListener('contextmenu', preventContextMenu);
-    document.removeEventListener('keydown', preventHotkeys);
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-    window.removeEventListener('blur', handleBlur);
-    window.removeEventListener('beforeunload', handleBeforeUnload);
+    cancelAnimationFrame(rafId);
+    clearInterval(intervalId);
+    observer.disconnect();
+
+    targets.forEach(target => {
+      if (!target) return;
+      try {
+        rawRemoveEventListener.call(target, 'copy', preventCopyPaste, true);
+        rawRemoveEventListener.call(target, 'paste', preventCopyPaste, true);
+        rawRemoveEventListener.call(target, 'cut', preventCopyPaste, true);
+        rawRemoveEventListener.call(target, 'keydown', preventHotkeys as EventListener, true);
+        rawRemoveEventListener.call(target, 'visibilitychange', handleVisibilityChange, true);
+        rawRemoveEventListener.call(target, 'blur', handleBlur, true);
+        rawRemoveEventListener.call(target, 'pagehide', handlePageHide, true);
+        rawRemoveEventListener.call(target, 'freeze', handleFreeze, true);
+        rawRemoveEventListener.call(target, 'beforeunload', handleBeforeUnload, true);
+      } catch (e) {
+        // Fallback cleanup
+      }
+    });
   };
 }

@@ -12,6 +12,8 @@ import { createClient } from "@/lib/supabase/client"
 import { createRoom } from "@/lib/actions"
 import { generateRoomCode } from "@/lib/utils"
 
+import { t } from "@/lib/translations"
+
 export default function CreateRoom() {
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
@@ -45,7 +47,7 @@ export default function CreateRoom() {
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Dashboard
+        {t.backToDashboard}
       </Link>
 
       <Card className="p-8">
@@ -54,17 +56,17 @@ export default function CreateRoom() {
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Create a New Room</h1>
-            <p className="text-slate-500 text-sm">A unique access code will be generated automatically.</p>
+            <h1 className="text-2xl font-bold text-slate-900">{t.createNewRoom}</h1>
+            <p className="text-slate-500 text-sm">{t.roomGeneratedCodeMsg}</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Room Name</Label>
+            <Label htmlFor="name">{t.roomName}</Label>
             <Input
               id="name"
-              placeholder="e.g. 8th Grade Math, Biology 101"
+              placeholder={t.roomNamePlaceholder}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -74,12 +76,12 @@ export default function CreateRoom() {
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Link href="/teacher/dashboard">
-              <Button type="button" variant="ghost">Cancel</Button>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+            <Link href="/teacher/dashboard" className="w-full sm:w-auto">
+              <Button type="button" variant="ghost" className="w-full">{t.cancel}</Button>
             </Link>
-            <Button type="submit" disabled={loading || !name.trim()}>
-              {loading ? "Creating..." : "Create Room"}
+            <Button type="submit" disabled={loading || !name.trim()} className="w-full sm:w-auto">
+              {loading ? t.creating : t.createRoom}
             </Button>
           </div>
         </form>

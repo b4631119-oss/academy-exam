@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { createClient } from "@/lib/supabase/client"
 import { getQuestions, deleteQuestion, updateQuestion, createQuestion } from "@/lib/actions"
+import { t } from "@/lib/translations"
 
 export default function ManageExamQuestions() {
   const params = useParams()
@@ -49,7 +50,7 @@ export default function ManageExamQuestions() {
   }, [examId, router, supabase])
 
   const handleEditQuestion = async (qId: string, currentText: string) => {
-    const newText = window.prompt("Edit question:", currentText)
+    const newText = window.prompt(t.editQuestionPrompt, currentText)
     if (newText && newText !== currentText) {
       try {
         const updated = await updateQuestion(qId, newText)
@@ -61,7 +62,7 @@ export default function ManageExamQuestions() {
   }
 
   const handleDeleteQuestion = async (qId: string) => {
-    if (window.confirm("Are you sure you want to delete this question?")) {
+    if (window.confirm(t.deleteQuestionAlert)) {
       try {
         await deleteQuestion(qId)
         setQuestions(questions.filter(q => q.id !== qId))
@@ -72,7 +73,7 @@ export default function ManageExamQuestions() {
   }
 
   const handleAddQuestion = async () => {
-    const text = window.prompt("New question text:")
+    const text = window.prompt(t.newQuestionPrompt)
     if (text) {
       try {
         const newQ = await createQuestion(examId, text)
@@ -84,11 +85,11 @@ export default function ManageExamQuestions() {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading questions...</div>
+    return <div className="text-center py-20 text-slate-500">{t.loadingQuestions}</div>
   }
 
   if (!exam) {
-    return <div className="text-center py-20 text-red-500">Exam not found.</div>
+    return <div className="text-center py-20 text-red-500">{t.examNotFound}</div>
   }
 
   return (
@@ -98,25 +99,25 @@ export default function ManageExamQuestions() {
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to {exam.rooms.name}
+        {t.backToRoomWith} {exam.rooms.name}
       </Link>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Manage Questions</h1>
-          <p className="text-slate-500 mt-1">Exam: {exam.title}</p>
+          <h1 className="text-3xl font-bold text-slate-900">{t.manageQuestionsTitle}</h1>
+          <p className="text-slate-500 mt-1">{t.examLabel} {exam.title}</p>
         </div>
-        <Button onClick={handleAddQuestion} className="gap-2">
+        <Button onClick={handleAddQuestion} className="w-full sm:w-auto gap-2">
           <Plus className="w-4 h-4" />
-          Add Question
+          {t.addQuestionBtn}
         </Button>
       </div>
 
       <div className="space-y-4 mt-8">
         {questions.length === 0 ? (
           <Card className="text-center py-12">
-            <h3 className="text-lg font-medium text-slate-900">No questions</h3>
-            <p className="text-slate-500 mt-1">Add a question to get started.</p>
+            <h3 className="text-lg font-medium text-slate-900">{t.noQuestionsTitle}</h3>
+            <p className="text-slate-500 mt-1">{t.noQuestionsDesc}</p>
           </Card>
         ) : (
           questions.map((q, i) => (

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { getStudent, getQuestions, saveAnswer, getStudentAnswersForExam } from "@/lib/actions"
+import { getStudent, getQuestions, saveAnswer, getStudentAnswersForExam, completeExam, saveAllAnswers } from "@/lib/actions"
 import { createClient } from "@/lib/supabase/client"
 import { initAntiCheat } from "@/lib/anti-cheat"
 import { t } from "@/lib/translations"
@@ -26,9 +26,22 @@ export default function TakeExam() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    const cleanupAntiCheat = initAntiCheat((reason) => {
+    const cleanupAntiCheat = initAntiCheat(async (reason) => {
       console.warn("Anti-cheat violation:", reason);
-      alert(`⚠️ Нарушение правил: ${reason}.`);
+      alert(`⚠️ Нарушение правил: ${reason}. Экзамен будет завершен.`);
+      
+      // Auto-finish exam on violation
+      try {
+        const currentStudent = await getStudent();
+        if (currentStudent?.id) {
+          // Pass answers from state but actually we should use a ref if we want latest answers,
+          // However, for MVP, we'll try to just finish the exam.
+          await completeExam(currentStudent.id);
+          router.push(`/student/result/${examId}`);
+        }
+      } catch (err) {
+        console.error(err);
+      }
     });
 
     async function loadData() {
@@ -105,13 +118,14 @@ export default function TakeExam() {
 
     setSaving(true)
     try {
-      // Save current answer
-      await saveAnswer(student.id, currentQ.id, answerText)
-      
       if (currentIndex < questions.length - 1) {
+        // Save current answer and go next
+        await saveAnswer(student.id, currentQ.id, answerText)
         setCurrentIndex(currentIndex + 1)
       } else {
-        // Finish exam
+        // Save all answers just to be sure, then finish
+        await saveAllAnswers(student.id, { ...answers, [currentQ.id]: answerText })
+        await completeExam(student.id)
         router.push(`/student/result/${examId}`)
       }
     } catch (err) {

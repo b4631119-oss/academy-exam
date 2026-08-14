@@ -6,15 +6,24 @@ import { updateSession } from './lib/supabase/middleware'
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   
-  // 1. Update Supabase session for teacher routes & auth
+  // 1. Update Supabase session for teacher, admin & auth routes
   const supabaseResponse = await updateSession(request)
 
-  // If updateSession decided to redirect (e.g. unauthorized teacher or logged in going to login), return that redirect
+  // If updateSession decided to redirect (e.g. unauthorized teacher/admin or logged in going to login), return that redirect
   if (supabaseResponse.headers.get('Location')) {
     return supabaseResponse
   }
 
-  // 2. Protect student routes (excluding entry page)
+  // 2. Protect admin routes (/admin/*)
+  if (pathname.startsWith('/admin')) {
+    // Requires authenticated teacher/admin
+    const isAuth = request.cookies.get('sb-access-token') || request.cookies.get('supabase-auth-token')
+    if (!isAuth) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  // 3. Protect student routes (excluding entry page)
   if (pathname.startsWith('/student/') && pathname !== '/student/enter') {
     const token = request.cookies.get('studentToken')?.value
     
@@ -33,13 +42,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

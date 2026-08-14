@@ -19,8 +19,15 @@ export default function RegisterPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const [attempts, setAttempts] = useState(0)
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (attempts >= 5) {
+      setError("Слишком много попыток регистрации. Пожалуйста, подождите перед следующей попыткой.")
+      return
+    }
+
     setLoading(true)
     setError("")
 
@@ -34,6 +41,7 @@ export default function RegisterPage() {
       router.push("/teacher/dashboard")
       router.refresh()
     } catch (err: any) {
+      setAttempts(prev => prev + 1)
       setError(err.message)
     } finally {
       setLoading(false)
