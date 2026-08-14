@@ -297,8 +297,17 @@ export async function getQuestions(examId: string) {
   return data
 }
 
+import { analyzeBehavior } from "./behavioral-analysis"
+
 export async function saveAnswer(studentId: string, questionId: string, answerText: string) {
   if (!studentId || !questionId) throw new Error("ID студента и вопроса обязательны")
+
+  // Server-side Behavioral Analysis
+  const behavior = analyzeBehavior(studentId, (answerText || "").length)
+  if (behavior.isSuspicious) {
+    logAction("SECURITY_VIOLATION_BEHAVIOR", studentId, { reason: behavior.reason, questionId })
+    throw new Error(`Блокировка: ${behavior.reason}`)
+  }
 
   // Rate limit saves
   const rl = rateLimit(`save_ans_${studentId}`, 60, 60000)

@@ -1,12 +1,46 @@
 /**
- * Advanced Hardened Anti-Cheat System with Web Worker Pulse & Prototype Protection
+ * Enterprise Anti-Debug & Hardened Anti-Cheat System
+ * Comprehensive defense against DevTools, Breakpoints, Console Inspection, and Dynamic Code Mutation.
  */
 
 export function initAntiCheat(onViolation?: (reason: string) => void) {
   if (typeof window === 'undefined') return () => {};
 
   // =========================================================
-  // STEP 1: CAPTURE & IMMUTABLE FREEZE OF NATIVE REFERENCES
+  // 1. CONSOLE HARDENING & TRAPS
+  // =========================================================
+  const rawConsoleWarn = console.warn.bind(console);
+  const noop = () => {};
+
+  try {
+    // Disable inspect console methods
+    const consoleMethods = ['log', 'dir', 'table', 'debug', 'trace', 'info'];
+    consoleMethods.forEach(method => {
+      if ((console as any)[method]) {
+        Object.defineProperty(console, method, {
+          value: noop,
+          writable: false,
+          configurable: false
+        });
+      }
+    });
+
+    // Console getter trap for DevTools element inspection
+    const elementTrap = new Image();
+    Object.defineProperty(elementTrap, 'id', {
+      get: () => {
+        triggerViolation('Обнаружено открытие консоли через инспекцию элементов');
+        return '';
+      }
+    });
+
+    Object.freeze(console);
+  } catch (e) {
+    // Console frozen
+  }
+
+  // =========================================================
+  // 2. CAPTURE & IMMUTABLE FREEZE OF NATIVE REFERENCES
   // =========================================================
   const rawSetInterval = window.setInterval;
   const rawSetTimeout = window.setTimeout;
@@ -18,10 +52,8 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
   const rawPerfNow = performance.now.bind(performance);
   const rawDateNow = Date.now.bind(Date);
   const rawFuncConstructor = Function.prototype.constructor;
-
-  const rawConsoleLog = console.log.bind(console);
-  const rawConsoleWarn = console.warn.bind(console);
-  const rawConsoleError = console.error.bind(console);
+  const rawFuncApply = Function.prototype.apply;
+  const rawFuncCall = Function.prototype.call;
 
   const rawAddEventListener = EventTarget.prototype.addEventListener;
   const rawRemoveEventListener = EventTarget.prototype.removeEventListener;
@@ -30,17 +62,17 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
   const hiddenDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
   const hasFocusDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hasFocus');
 
-  const rawVisibilityState = () => visStateDesc?.get ? visStateDesc.get.call(document) : document.visibilityState;
-  const rawHidden = () => hiddenDesc?.get ? hiddenDesc.get.call(document) : document.hidden;
-  const rawHasFocus = () => hasFocusDesc?.value ? hasFocusDesc.value.call(document) : document.hasFocus();
+  const rawVisibilityState = () => visStateDesc?.get ? rawFuncCall.call(visStateDesc.get, document) : document.visibilityState;
+  const rawHidden = () => hiddenDesc?.get ? rawFuncCall.call(hiddenDesc.get, document) : document.hidden;
+  const rawHasFocus = () => hasFocusDesc?.value ? rawFuncCall.call(hasFocusDesc.value, document) : document.hasFocus();
 
-  // Freeze security definitions container
   const securityCore = Object.freeze({
     rawSetInterval,
     rawSetTimeout,
     rawPerfNow,
     rawDateNow,
-    rawAddEventListener
+    rawAddEventListener,
+    rawFuncConstructor
   });
 
   let isTriggered = false;
@@ -49,107 +81,67 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     if (isTriggered) return;
     isTriggered = true;
 
-    rawConsoleWarn(`[AntiCheat Hardened Triggered]: ${reason}`);
+    rawConsoleWarn(`[AntiCheat Hardened Violation]: ${reason}`);
 
     if (onViolation) {
-      onViolation(`Обнаружена попытка обхода защиты: ${reason}`);
+      onViolation(`Обнаружена попытка отладки/взлома: ${reason}`);
     } else {
-      alert(`⚠️ Обнаружена попытка взлома! Экзамен завершён.\nПричина: ${reason}`);
+      alert(`⚠️ Обнаружена попытка отладки! Экзамен завершён.\nПричина: ${reason}`);
       window.location.reload();
     }
   };
 
   // =========================================================
-  // STEP 2: INTEGRITY VERIFICATION (detect monkey patching)
+  // 3. INTEGRITY & MONKEY PATCH VERIFICATION
   // =========================================================
   const verifyIntegrity = () => {
-    if (window.setInterval !== rawSetInterval) {
-      triggerViolation('Переопределение setInterval');
-    }
-    if (window.setTimeout !== rawSetTimeout) {
-      triggerViolation('Переопределение setTimeout');
-    }
-    if (EventTarget.prototype.addEventListener !== rawAddEventListener) {
-      triggerViolation('Переопределение addEventListener');
-    }
-    if (Function.prototype.constructor !== rawFuncConstructor) {
-      triggerViolation('Переопределение Function.prototype.constructor');
-    }
+    if (window.setInterval !== rawSetInterval) triggerViolation('Переопределение setInterval');
+    if (window.setTimeout !== rawSetTimeout) triggerViolation('Переопределение setTimeout');
+    if (EventTarget.prototype.addEventListener !== rawAddEventListener) triggerViolation('Переопределение addEventListener');
+    if (Function.prototype.constructor !== rawFuncConstructor) triggerViolation('Переопределение Function.prototype.constructor');
 
-    // Check if methods native code string mutated
     try {
       if (!window.setInterval.toString().includes('[native code]')) {
-        triggerViolation('Подмена кода setInterval на кастомную функцию');
+        triggerViolation('Подмена метода setInterval');
       }
     } catch (e) {
-      triggerViolation('Ошибка проверки целостности методов');
+      triggerViolation('Сбой проверки целостности методов');
     }
   };
 
-  // Lock properties via defineProperty
+  // Honeypot traps
   try {
-    Object.defineProperty(window, '_antiCheatGuard', {
-      value: true,
-      writable: false,
+    Object.defineProperty(window, '__bypassAntiCheat', {
+      get: () => { triggerViolation('Ловушка: Чтение __bypassAntiCheat'); return true; },
+      set: () => { triggerViolation('Ловушка: Запись __bypassAntiCheat'); },
       configurable: false
     });
-  } catch (e) {
-    // Ignore if sealed
-  }
+  } catch (e) {}
 
   // =========================================================
-  // STEP 3: WEB WORKER SEPARATE THREAD PULSE CHECK
-  // =========================================================
-  let worker: Worker | null = null;
-  let workerUrl: string | null = null;
-
-  try {
-    const workerCode = `
-      let lastPulse = Date.now();
-      self.setInterval(() => {
-        const now = Date.now();
-        if (now - lastPulse > 1500) {
-          self.postMessage({ type: 'FREEZE_DETECTED', delta: now - lastPulse });
-        }
-        lastPulse = now;
-        self.postMessage({ type: 'PULSE', timestamp: now });
-      }, 300);
-    `;
-
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    workerUrl = URL.createObjectURL(blob);
-    worker = new Worker(workerUrl);
-
-    let lastWorkerPulse = rawDateNow();
-
-    worker.onmessage = (e) => {
-      const data = e.data;
-      if (data.type === 'FREEZE_DETECTED') {
-        triggerViolation('Обнаружена заморозка отдельного потока (Web Worker)');
-      } else if (data.type === 'PULSE') {
-        lastWorkerPulse = rawDateNow();
-      }
-    };
-  } catch (e) {
-    // Worker fallback
-  }
-
-  // =========================================================
-  // STEP 4: TIMING CHECKS (performance.now & RAF)
+  // 4. BREAKPOINT & DEVTOOLS DETECTOR
   // =========================================================
   let lastFrameTime = rawPerfNow();
   let rafId: number;
 
-  const frameCheckLoop = (now: number) => {
+  const checkLoop = (now: number) => {
     const delta = now - lastFrameTime;
 
-    if (delta > 1200) {
-      triggerViolation('Задержка отрисовки кадров (DevTools/Переключение вкладки)');
+    // Detection 1: Breakpoint delay check (> 100ms indicates pause/breakpoint)
+    if (delta > 1500) {
+      triggerViolation('Зафиксирована пауза выполнения (Breakpoint/Отладка)');
     }
     lastFrameTime = now;
 
+    // Detection 2: Window Outer vs Inner Size (DevTools panel detection)
+    const widthThreshold = window.outerWidth - window.innerWidth > 160;
+    const heightThreshold = window.outerHeight - window.innerHeight > 160;
+    if (widthThreshold || heightThreshold) {
+      triggerViolation('Открыта панель отладки DevTools');
+    }
+
     if (rawHidden() || rawVisibilityState() !== 'visible') {
-      triggerViolation('Состояние видимости неактивно');
+      triggerViolation('Переключение вкладки или окна');
     }
 
     if (!rawHasFocus()) {
@@ -157,14 +149,29 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     }
 
     if (!isTriggered) {
-      rafId = rawRequestAnimationFrame.call(window, frameCheckLoop);
+      rafId = rawRequestAnimationFrame.call(window, checkLoop);
     }
   };
 
-  rafId = rawRequestAnimationFrame.call(window, frameCheckLoop);
+  rafId = rawRequestAnimationFrame.call(window, checkLoop);
+
+  // Debugger loop trap & execution time measurement
+  const intervalId = rawSetInterval.call(window, () => {
+    verifyIntegrity();
+
+    const start = rawPerfNow();
+    try {
+      rawFuncCall.call(rawFuncConstructor, 'debugger')();
+    } catch (e) {}
+    const elapsed = rawPerfNow() - start;
+
+    if (elapsed > 100) {
+      triggerViolation('Задержка отладчика DevTools (>100мс)');
+    }
+  }, 350);
 
   // =========================================================
-  // STEP 5: EVENT LISTENERS & DOM OBSERVER
+  // 5. EVENT LISTENERS & DOM OBSERVER
   // =========================================================
   const preventClipboard = (e: Event) => {
     e.preventDefault();
@@ -183,7 +190,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
       (e.ctrlKey && (key === 'u' || key === 's' || key === 'p' || key === 'r'))
     ) {
       e.preventDefault();
-      triggerViolation('Запрещенные сочетания клавиш');
+      triggerViolation('Запрещенное сочетание клавиш (DevTools/Обновление)');
     }
   };
 
@@ -195,26 +202,8 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     rawAddEventListener.call(target, 'cut', preventClipboard, { capture: true, passive: false });
     rawAddEventListener.call(target, 'contextmenu', (e) => e.preventDefault(), { capture: true, passive: false });
     rawAddEventListener.call(target, 'keydown', preventHotkeys as EventListener, { capture: true, passive: false });
-    rawAddEventListener.call(target, 'visibilitychange', () => {
-      if (rawHidden()) triggerViolation('Сворачивание вкладки');
-    }, { capture: true, passive: false });
-    rawAddEventListener.call(target, 'blur', () => triggerViolation('Потеря фокуса окна'), { capture: true, passive: false });
   });
 
-  // Interval integrity check
-  const intervalId = rawSetInterval.call(window, () => {
-    verifyIntegrity();
-
-    // Debugger trap test
-    const start = rawPerfNow();
-    (function () {})['constructor']('debugger')();
-    const elapsed = rawPerfNow() - start;
-    if (elapsed > 100) {
-      triggerViolation('Пошаговый отладчик DevTools активирован');
-    }
-  }, 400);
-
-  // Observer
   const observer = new MutationObserver(() => {
     verifyIntegrity();
   });
@@ -224,8 +213,6 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
   return () => {
     if (rafId) rawCancelAnimationFrame.call(window, rafId);
     if (intervalId) rawClearInterval.call(window, intervalId);
-    if (worker) worker.terminate();
-    if (workerUrl) URL.revokeObjectURL(workerUrl);
     observer.disconnect();
   };
 }
