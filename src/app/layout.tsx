@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy-exam.cc.cd"),
-  title: "PROlab Academy Exam — Система проведения и оценки экзаменов",
-  description: "Официальная платформа PROlab Academy для создания, проведения и автоматической оценки онлайн-экзаменов. Вход для студентов по коду доступа.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"),
+  title: "PROlab Academy — Образовательная платформа",
+  description: "PROlab Academy — современная образовательная платформа для проведения экзаменов, управления студентами и оценками. Обучение в Оше, Кыргызстан.",
   keywords: [
-    // === PROLAB (брендовые) ===
+    "PROlab Academy",
     "PROLAB Academy",
     "PROLAB Academy Exam",
     "PROLAB Agency",
@@ -29,9 +29,16 @@ export const metadata: Metadata = {
     "PROLAB тестирование",
     "PROLAB экзамены",
     
-    // === Общие ===
+    "образовательная платформа",
     "онлайн экзамены",
-    "проведение экзаменов онлайн",
+    "управление студентами",
+    "обучение в Оше",
+    "Кыргызстан образование",
+    "PROlab Ош",
+    "академия",
+    "оценки студентов",
+    "экзамены онлайн",
+       "проведение экзаменов онлайн",
     "система тестирования",
     "платформа для экзаменов",
     "пройти тест онлайн",
@@ -60,24 +67,24 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "PROlab Academy Exam",
-    description: "Платформа для онлайн-тестирования студентов",
+    title: "PROlab Academy — Образовательная платформа",
+    description: "PROlab Academy — современная образовательная платформа для проведения экзаменов и управления студентами.",
     type: "website",
-    url: "/",
-    siteName: "PROlab Academy Exam",
+    url: "https://prolab-academy.site",
+    siteName: "PROlab Academy",
     images: [
       {
         url: "/hero-image.png",
         width: 1200,
         height: 630,
-        alt: "Платформа PROlab Academy Exam",
+        alt: "Платформа PROlab Academy",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PROlab Academy Exam — Оценка знаний",
-    description: "Платформа PROlab Academy для онлайн-тестирования студентов.",
+    title: "PROlab Academy — Образовательная платформа",
+    description: "PROlab Academy — современная образовательная платформа для проведения экзаменов и управления студентами.",
     images: ["/hero-image.png"],
   },
   alternates: {
