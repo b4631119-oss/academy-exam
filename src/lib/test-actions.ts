@@ -26,11 +26,20 @@ async function verifyRoomOwnership(roomId: string, teacherId: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("rooms")
-    .select("id")
+    .select("id, teacher_id")
     .eq("id", roomId)
-    .eq("teacher_id", teacherId)
     .maybeSingle()
-  if (error || !data) throw new Error("Нет доступа к этой аудитории")
+
+  const roomTeacherId = data?.teacher_id ?? null
+  const matches = roomTeacherId === teacherId
+
+  console.error("[createTest room]", {
+    roomTeacherId,
+    currentTeacherId: teacherId,
+    matches
+  })
+
+  if (error || !data || !matches) throw new Error("Нет доступа к этой аудитории")
 }
 
 async function verifyTestOwnership(testId: string, teacherId: string) {
@@ -69,46 +78,85 @@ export async function getTeacherTests(roomId: string) {
 }
 
 export async function createTest(roomId: string, title: string, description?: string) {
-  if (!roomId || !UUID_REGEX.test(roomId)) {
-    throw new Error("Невалидный ID комнаты")
+  let currentStep = "validation"
+  try {
+    if (!roomId || !UUID_REGEX.test(roomId)) {
+      throw new Error("Невалидный ID комнаты")
+    }
+
+    const trimmedTitle = title ? title.trim() : ""
+    if (!trimmedTitle) {
+      throw new Error("Название теста не может быть пустым")
+    }
+    if (trimmedTitle.length > 200) {
+      throw new Error("Название теста слишком длинное (максимум 200 символов)")
+    }
+
+    const trimmedDescription = description ? description.trim() : ""
+    if (trimmedDescription.length > 1000) {
+      throw new Error("Описание слишком длинное (максимум 1000 символов)")
+    }
+
+    currentStep = "getCurrentTeacherId"
+    const supabaseClient = await createClient()
+    const { data: { user } } = await supabaseClient.auth.getUser()
+
+    console.error("[createTest auth]", {
+      hasUser: !!user,
+      userId: user?.id ?? null,
+      roomId
+    })
+
+    if (!user) throw new Error("Не авторизован")
+    const teacherId = user.id
+
+    currentStep = "verifyRoomOwnership"
+    await verifyRoomOwnership(roomId, teacherId)
+
+    currentStep = "supabase_insert"
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("tests")
+      .insert([
+        {
+          room_id: roomId,
+          teacher_id: teacherId,
+          title: trimmedTitle,
+          description: trimmedDescription || null,
+          status: "draft"
+        }
+      ])
+      .select()
+      .single()
+
+    if (error) {
+      console.error("[createTest]", {
+        step: currentStep,
+        errorCode: error.code || null,
+        errorMessage: error.message || null,
+        errorDetails: error.details || null,
+        errorHint: error.hint || null,
+        roomId
+      })
+      throw new Error(error.message)
+    }
+
+    logAction("CREATE_TEST", teacherId, { testId: data.id, roomId, title: trimmedTitle })
+
+    return data
+  } catch (err: any) {
+    if (currentStep !== "supabase_insert" || !err.code) {
+      console.error("[createTest]", {
+        step: currentStep,
+        errorCode: err.code || null,
+        errorMessage: err.message || err.toString(),
+        errorDetails: err.details || null,
+        errorHint: err.hint || null,
+        roomId
+      })
+    }
+    throw err
   }
-
-  const trimmedTitle = title ? title.trim() : ""
-  if (!trimmedTitle) {
-    throw new Error("Название теста не может быть пустым")
-  }
-  if (trimmedTitle.length > 200) {
-    throw new Error("Название теста слишком длинное (максимум 200 символов)")
-  }
-
-  const trimmedDescription = description ? description.trim() : ""
-  if (trimmedDescription.length > 1000) {
-    throw new Error("Описание слишком длинное (максимум 1000 символов)")
-  }
-
-  const teacherId = await getCurrentTeacherId()
-  await verifyRoomOwnership(roomId, teacherId)
-
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("tests")
-    .insert([
-      {
-        room_id: roomId,
-        teacher_id: teacherId,
-        title: trimmedTitle,
-        description: trimmedDescription || null,
-        status: "draft"
-      }
-    ])
-    .select()
-    .single()
-
-  if (error) throw new Error(error.message)
-
-  logAction("CREATE_TEST", teacherId, { testId: data.id, roomId, title: trimmedTitle })
-
-  return data
 }
 
 export async function getTest(testId: string) {
