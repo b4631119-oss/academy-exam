@@ -16,6 +16,11 @@ const DEFAULT_BLOCK_DURATION = 24 * 60 * 60 * 1000; // 24 hours
  */
 export function isIPBlocked(ip: string): boolean {
   if (!ip) return false;
+  const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === 'localhost';
+  if (isLoopback && process.env.NODE_ENV === 'development') {
+    return false;
+  }
+
   const record = blockedIPs.get(ip);
   if (!record) return false;
 
@@ -32,6 +37,12 @@ export function isIPBlocked(ip: string): boolean {
  */
 export function blockIP(ip: string, reason: string = 'DDoS / Rate Limit Exceeded', durationMs: number = DEFAULT_BLOCK_DURATION) {
   if (!ip) return;
+  const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === 'localhost';
+  if (isLoopback && process.env.NODE_ENV === 'development') {
+    console.log(`[SECURITY DEBUG] Skipped 24h IP block for loopback address ${ip} in development.`);
+    return;
+  }
+
   blockedIPs.set(ip, {
     blockedUntil: Date.now() + durationMs,
     reason

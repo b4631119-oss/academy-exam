@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "./supabase/server"
+import { createAdminClient } from "./supabase/admin"
 import { cookies } from "next/headers"
 import { signStudentToken, verifyStudentToken } from "./jwt"
 import { logAction } from "./logger"
@@ -61,6 +62,9 @@ export async function createExam(roomId: string, title: string) {
 }
 
 export async function getExams(roomId: string) {
+  const teacherId = await getCurrentTeacherId()
+  await verifyRoomOwnership(roomId, teacherId)
+
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("exams")
@@ -95,7 +99,7 @@ export async function getExamResults(examId: string) {
   const currentTeacherId = await getCurrentTeacherId()
   await verifyExamOwnership(examId, currentTeacherId)
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: questions, error: qError } = await supabase
     .from("questions")
     .select("id")
@@ -140,7 +144,28 @@ export async function getExamResults(examId: string) {
 }
 
 export async function getStudentAnswersForExam(studentId: string, examId: string) {
-  const supabase = await createClient()
+  let targetStudentId = studentId
+
+  // Check if caller is Teacher
+  let isTeacher = false
+  try {
+    const currentTeacherId = await getCurrentTeacherId()
+    await verifyExamOwnership(examId, currentTeacherId)
+    isTeacher = true
+  } catch {
+    isTeacher = false
+  }
+
+  if (!isTeacher) {
+    // Caller is Student -> must match verified student identity
+    const verifiedStudentId = await getVerifiedStudentId()
+    if (studentId && studentId !== verifiedStudentId) {
+      throw new Error("AUTHORIZATION_ERROR: Вы не можете просматривать ответы других студентов")
+    }
+    targetStudentId = verifiedStudentId
+  }
+
+  const supabase = createAdminClient()
   
   const { data: questions, error: qError } = await supabase
     .from("questions")
@@ -157,7 +182,7 @@ export async function getStudentAnswersForExam(studentId: string, examId: string
   const { data: answers, error: aError } = await supabase
     .from("answers")
     .select("*")
-    .eq("student_id", studentId)
+    .eq("student_id", targetStudentId)
     .in("question_id", questionIds)
     
   if (aError) throw new Error(aError.message)
@@ -176,7 +201,24 @@ export async function getStudentAnswersForExam(studentId: string, examId: string
 export async function approveAnswer(answerId: string, isCorrect: boolean) {
   const currentTeacherId = await getCurrentTeacherId()
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
+
+  // Ensure the answer belongs to a question owned by this teacher
+  const { data: answerRow, error: fetchErr } = await supabase
+    .from("answers")
+    .select("id, question_id")
+    .eq("id", answerId)
+    .maybeSingle()
+
+  if (fetchErr) throw new Error(fetchErr.message)
+  if (!answerRow) throw new Error("NOT_FOUND: Ответ не найден")
+
+  try {
+    await verifyQuestionOwnership(answerRow.question_id, currentTeacherId)
+  } catch (e) {
+    throw new Error("AUTHORIZATION_ERROR: Нет доступа к этому ответу")
+  }
+
   const { data, error } = await supabase
     .from("answers")
     .update({ is_correct: isCorrect })
@@ -193,6 +235,19 @@ export async function approveAnswer(answerId: string, isCorrect: boolean) {
 // ========================
 // STUDENT ACTIONS
 // ========================
+
+export async function getVerifiedStudentId(): Promise<string> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get("studentToken")?.value
+  if (!token) {
+    throw new Error("AUTHORIZATION_ERROR: Токен студента не найден")
+  }
+  const payload = await verifyStudentToken(token)
+  if (!payload || !payload.studentId) {
+    throw new Error("AUTHORIZATION_ERROR: Недействительный токен студента")
+  }
+  return payload.studentId
+}
 
 export async function validateRoomCode(code: string) {
   if (!code || typeof code !== 'string') return null
@@ -271,17 +326,21 @@ export async function getStudent() {
 }
 
 export async function completeExam(studentId: string) {
-  if (!studentId) throw new Error("ID студента обязателен")
+  const verifiedStudentId = await getVerifiedStudentId()
+  if (studentId && studentId !== verifiedStudentId) {
+    throw new Error("AUTHORIZATION_ERROR: Нельзя завершить экзамен от имени другого студента")
+  }
+
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("students")
     .update({ exam_completed: true })
-    .eq("id", studentId)
+    .eq("id", verifiedStudentId)
     .select()
     .single()
 
   if (error) throw new Error(error.message)
-  logAction("EXAM_COMPLETED", studentId)
+  logAction("EXAM_COMPLETED", verifiedStudentId)
   return data
 }
 
@@ -300,27 +359,32 @@ export async function getQuestions(examId: string) {
 import { analyzeBehavior } from "./behavioral-analysis"
 
 export async function saveAnswer(studentId: string, questionId: string, answerText: string) {
-  if (!studentId || !questionId) throw new Error("ID студента и вопроса обязательны")
+  if (!questionId) throw new Error("ID вопроса обязателен")
+
+  const verifiedStudentId = await getVerifiedStudentId()
+  if (studentId && studentId !== verifiedStudentId) {
+    throw new Error("AUTHORIZATION_ERROR: Отправка ответа от имени другого студента запрещена")
+  }
 
   // Server-side Behavioral Analysis
-  const behavior = analyzeBehavior(studentId, (answerText || "").length)
+  const behavior = analyzeBehavior(verifiedStudentId, (answerText || "").length)
   if (behavior.isSuspicious) {
-    logAction("SECURITY_VIOLATION_BEHAVIOR", studentId, { reason: behavior.reason, questionId })
+    logAction("SECURITY_VIOLATION_BEHAVIOR", verifiedStudentId, { reason: behavior.reason, questionId })
     throw new Error(`Блокировка: ${behavior.reason}`)
   }
 
   // Rate limit saves
-  const rl = rateLimit(`save_ans_${studentId}`, 60, 60000)
+  const rl = rateLimit(`save_ans_${verifiedStudentId}`, 60, 60000)
   if (!rl.allowed) {
     throw new Error("Слишком частая отправка ответов")
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   const { data: existing, error: existError } = await supabase
     .from("answers")
     .select("id")
-    .eq("student_id", studentId)
+    .eq("student_id", verifiedStudentId)
     .eq("question_id", questionId)
     .maybeSingle()
 
@@ -343,7 +407,7 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
     const { data, error } = await supabase
       .from("answers")
       .insert([{ 
-        student_id: studentId, 
+        student_id: verifiedStudentId, 
         question_id: questionId, 
         answer_text: answerText || "",
         is_correct: null
@@ -357,9 +421,14 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
 }
 
 export async function saveAllAnswers(studentId: string, answers: Record<string, string>) {
+  const verifiedStudentId = await getVerifiedStudentId()
+  if (studentId && studentId !== verifiedStudentId) {
+    throw new Error("AUTHORIZATION_ERROR: Нельзя сохранять ответы чужого студента")
+  }
+
   for (const [questionId, answerText] of Object.entries(answers)) {
     if (answerText && answerText.trim() !== "") {
-      await saveAnswer(studentId, questionId, answerText);
+      await saveAnswer(verifiedStudentId, questionId, answerText);
     }
   }
 }
