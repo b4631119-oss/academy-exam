@@ -136,6 +136,13 @@ export async function createTest(roomId: string, title: string, description?: st
 }
 
 export async function getTest(testId: string) {
+  console.error("[ENV RUNTIME CHECK]", {
+    hasSupabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    hasServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    hasJwtSecret: Boolean(process.env.JWT_SECRET),
+    nodeEnv: process.env.NODE_ENV
+  })
+
   if (!testId || !UUID_REGEX.test(testId)) {
     throw new Error("Невалидный ID теста")
   }
