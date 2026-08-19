@@ -61,9 +61,19 @@ export async function getTeacherTests(roomId: string) {
   }
 
   const teacherId = await getCurrentTeacherId()
-  await verifyRoomOwnership(roomId, teacherId)
-
   const supabase = await createClient()
+
+  // Verify room ownership
+  const { data: room, error: roomError } = await supabase
+    .from("rooms")
+    .select("id, teacher_id")
+    .eq("id", roomId)
+    .maybeSingle()
+
+  if (roomError || !room || room.teacher_id !== teacherId) {
+    throw new Error("Нет доступа к этой аудитории")
+  }
+
   const { data, error } = await supabase
     .from("tests")
     .select("*, test_questions(id)")
@@ -130,38 +140,23 @@ export async function getTest(testId: string) {
     throw new Error("Невалидный ID теста")
   }
   const teacherId = await getCurrentTeacherId()
-  const adminSupabase = createAdminClient()
+  const supabase = await createClient()
 
-  const { data, error } = await adminSupabase
+  const { data: test, error } = await supabase
     .from("tests")
-    .select("*, rooms(*)")
+    .select("*")
     .eq("id", testId)
-    .single()
+    .maybeSingle()
 
-  const roomTeacherId = Array.isArray(data?.rooms)
-    ? data.rooms[0]?.teacher_id
-    : data?.rooms?.teacher_id
+  if (error || !test) {
+    throw new Error("Тест не найден")
+  }
 
-  console.error("[TEST BUILDER DIAG]", {
-    step: "getTest",
-    testId,
-    hasTest: !!data,
-    errorCode: error?.code ?? null,
-    errorMessage: error?.message ?? null,
-    testTeacherId: data?.teacher_id ?? null,
-    roomTeacherId: roomTeacherId ?? null,
-    currentTeacherId: teacherId
-  })
-
-  if (error || !data) throw new Error("Тест не найден")
-
-  const isTestOwner = data.teacher_id === teacherId
-  const isRoomOwner = roomTeacherId === teacherId
-  if (!isTestOwner || !isRoomOwner) {
+  if (test.teacher_id !== teacherId) {
     throw new Error("Нет доступа к этому тесту")
   }
 
-  return data
+  return test
 }
 
 export async function getTestQuestions(testId: string) {
@@ -169,57 +164,29 @@ export async function getTestQuestions(testId: string) {
     throw new Error("Невалидный ID теста")
   }
   const teacherId = await getCurrentTeacherId()
-  const adminSupabase = createAdminClient()
+  const supabase = await createClient()
 
-  const { data: testData, error: testError } = await adminSupabase
+  // 1. Verify test ownership
+  const { data: test, error: testErr } = await supabase
     .from("tests")
-    .select("id, teacher_id, room_id, rooms(teacher_id)")
+    .select("id, teacher_id")
     .eq("id", testId)
-    .single()
+    .maybeSingle()
 
-  const roomTeacherId = Array.isArray((testData as any)?.rooms)
-    ? (testData as any).rooms[0]?.teacher_id
-    : (testData as any)?.rooms?.teacher_id
-
-  if (testError || !testData) {
-    console.error("[TEST BUILDER DIAG]", {
-      step: "getTestQuestions_testCheck",
-      testId,
-      hasTest: !!testData,
-      errorCode: testError?.code ?? null,
-      errorMessage: testError?.message ?? null
-    })
+  if (testErr || !test) {
     throw new Error("Тест не найден")
   }
 
-  const isTestOwner = testData.teacher_id === teacherId
-  const isRoomOwner = roomTeacherId === teacherId
-  if (!isTestOwner || !isRoomOwner) {
-    console.error("[TEST BUILDER DIAG]", {
-      step: "getTestQuestions_ownershipDenied",
-      testId,
-      hasTest: true,
-      testTeacherId: testData.teacher_id,
-      roomTeacherId,
-      currentTeacherId: teacherId
-    })
+  if (test.teacher_id !== teacherId) {
     throw new Error("Нет доступа к этому тесту")
   }
 
-  const { data, error } = await adminSupabase
+  // 2. Fetch questions with options
+  const { data, error } = await supabase
     .from("test_questions")
     .select("*, test_options(*)")
     .eq("test_id", testId)
     .order("position", { ascending: true })
-
-  console.error("[TEST BUILDER DIAG]", {
-    step: "getTestQuestions",
-    testId,
-    hasTest: true,
-    questionsCount: data?.length ?? 0,
-    errorCode: error?.code ?? null,
-    errorMessage: error?.message ?? null
-  })
 
   if (error) throw new Error(error.message)
 
@@ -277,11 +244,24 @@ export async function saveTestQuestions(
     throw new Error("Невалидный ID теста")
   }
   const teacherId = await getCurrentTeacherId()
-  await verifyTestOwnership(testId, teacherId)
-
   const supabase = await createClient()
 
-  // TEST_LOCKED: block editing while an active session exists (lobby/running).
+  // 1. Verify test ownership directly
+  const { data: test, error: testErr } = await supabase
+    .from("tests")
+    .select("id, teacher_id")
+    .eq("id", testId)
+    .maybeSingle()
+
+  if (testErr || !test) {
+    throw new Error("Тест не найден")
+  }
+
+  if (test.teacher_id !== teacherId) {
+    throw new Error("Нет доступа к этому тесту")
+  }
+
+  // 2. TEST_LOCKED: block editing while an active session exists (lobby/running).
   // Editing is allowed again only after the session is finished (or no session yet).
   const { data: activeSession } = await supabase
     .from("test_sessions")
@@ -365,7 +345,7 @@ export async function saveTestQuestions(
     }
   }
 
-  // 1. Update Test title and description
+  // 3. Update Test title and description
   const { error: testUpdateErr } = await supabase
     .from("tests")
     .update({ title: trimmedTitle, description: trimmedDesc || null })
@@ -373,7 +353,7 @@ export async function saveTestQuestions(
 
   if (testUpdateErr) throw new Error(testUpdateErr.message)
 
-  // 2. Fetch existing questions to delete removed ones
+  // 4. Fetch existing questions to delete removed ones
   const { data: existingQuestions } = await supabase
     .from("test_questions")
     .select("id")
@@ -387,7 +367,7 @@ export async function saveTestQuestions(
     await supabase.from("test_questions").delete().in("id", idsToDelete)
   }
 
-  // 3. Save each question and its options
+  // 5. Save each question and its options
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i]
     const pos = i + 1
