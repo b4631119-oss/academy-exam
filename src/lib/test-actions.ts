@@ -130,16 +130,22 @@ export async function getTest(testId: string) {
     throw new Error("Невалидный ID теста")
   }
   const teacherId = await getCurrentTeacherId()
-  await verifyTestOwnership(testId, teacherId)
+  const adminSupabase = createAdminClient()
 
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data, error } = await adminSupabase
     .from("tests")
     .select("*, rooms(*)")
     .eq("id", testId)
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error || !data) throw new Error("Тест не найден")
+
+  const isTestOwner = data.teacher_id === teacherId
+  const isRoomOwner = (data.rooms as any)?.teacher_id === teacherId
+  if (!isTestOwner || !isRoomOwner) {
+    throw new Error("Нет доступа к этому тесту")
+  }
+
   return data
 }
 
@@ -148,10 +154,23 @@ export async function getTestQuestions(testId: string) {
     throw new Error("Невалидный ID теста")
   }
   const teacherId = await getCurrentTeacherId()
-  await verifyTestOwnership(testId, teacherId)
+  const adminSupabase = createAdminClient()
 
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data: testData, error: testError } = await adminSupabase
+    .from("tests")
+    .select("id, teacher_id, room_id, rooms(teacher_id)")
+    .eq("id", testId)
+    .single()
+
+  if (testError || !testData) throw new Error("Тест не найден")
+
+  const isTestOwner = testData.teacher_id === teacherId
+  const isRoomOwner = (testData.rooms as any)?.teacher_id === teacherId
+  if (!isTestOwner || !isRoomOwner) {
+    throw new Error("Нет доступа к этому тесту")
+  }
+
+  const { data, error } = await adminSupabase
     .from("test_questions")
     .select("*, test_options(*)")
     .eq("test_id", testId)
