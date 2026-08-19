@@ -138,10 +138,25 @@ export async function getTest(testId: string) {
     .eq("id", testId)
     .single()
 
+  const roomTeacherId = Array.isArray(data?.rooms)
+    ? data.rooms[0]?.teacher_id
+    : data?.rooms?.teacher_id
+
+  console.error("[TEST BUILDER DIAG]", {
+    step: "getTest",
+    testId,
+    hasTest: !!data,
+    errorCode: error?.code ?? null,
+    errorMessage: error?.message ?? null,
+    testTeacherId: data?.teacher_id ?? null,
+    roomTeacherId: roomTeacherId ?? null,
+    currentTeacherId: teacherId
+  })
+
   if (error || !data) throw new Error("Тест не найден")
 
   const isTestOwner = data.teacher_id === teacherId
-  const isRoomOwner = (data.rooms as any)?.teacher_id === teacherId
+  const isRoomOwner = roomTeacherId === teacherId
   if (!isTestOwner || !isRoomOwner) {
     throw new Error("Нет доступа к этому тесту")
   }
@@ -162,11 +177,32 @@ export async function getTestQuestions(testId: string) {
     .eq("id", testId)
     .single()
 
-  if (testError || !testData) throw new Error("Тест не найден")
+  const roomTeacherId = Array.isArray((testData as any)?.rooms)
+    ? (testData as any).rooms[0]?.teacher_id
+    : (testData as any)?.rooms?.teacher_id
+
+  if (testError || !testData) {
+    console.error("[TEST BUILDER DIAG]", {
+      step: "getTestQuestions_testCheck",
+      testId,
+      hasTest: !!testData,
+      errorCode: testError?.code ?? null,
+      errorMessage: testError?.message ?? null
+    })
+    throw new Error("Тест не найден")
+  }
 
   const isTestOwner = testData.teacher_id === teacherId
-  const isRoomOwner = (testData.rooms as any)?.teacher_id === teacherId
+  const isRoomOwner = roomTeacherId === teacherId
   if (!isTestOwner || !isRoomOwner) {
+    console.error("[TEST BUILDER DIAG]", {
+      step: "getTestQuestions_ownershipDenied",
+      testId,
+      hasTest: true,
+      testTeacherId: testData.teacher_id,
+      roomTeacherId,
+      currentTeacherId: teacherId
+    })
     throw new Error("Нет доступа к этому тесту")
   }
 
@@ -175,6 +211,15 @@ export async function getTestQuestions(testId: string) {
     .select("*, test_options(*)")
     .eq("test_id", testId)
     .order("position", { ascending: true })
+
+  console.error("[TEST BUILDER DIAG]", {
+    step: "getTestQuestions",
+    testId,
+    hasTest: true,
+    questionsCount: data?.length ?? 0,
+    errorCode: error?.code ?? null,
+    errorMessage: error?.message ?? null
+  })
 
   if (error) throw new Error(error.message)
 
