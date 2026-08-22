@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import TestStatusBadge from "@/components/ui/TestStatusBadge"
-import { getTest, getTestQuestions, saveTestQuestions, createTestSession } from "@/lib/test-actions"
+import { getTest, getTestQuestions, saveTestQuestions } from "@/lib/test-actions"
 import { friendlyError } from "@/lib/error-messages"
 
 interface OptionItem {
@@ -265,37 +265,6 @@ export default function TestConstructorPage() {
     }
   }
 
-  const handlePublishTest = async () => {
-    const errors = validateQuestions(questions)
-    setValidationErrors(errors)
-    if (Object.keys(errors).length > 0) {
-      setError("Исправьте ошибки в вопросах перед публикацией теста")
-      setSuccessMsg("")
-      return
-    }
-
-    setLaunching(true)
-    setError("")
-    setSuccessMsg("")
-
-    try {
-      await saveTestQuestions(testId, title, description, questions)
-      const sess = await createTestSession(testId)
-      setTest((prev: any) => ({ ...prev, status: "running" }))
-      setSuccessMsg("Тест успешно опубликован и открыт для учеников!")
-      setTimeout(() => setSuccessMsg(""), 5000)
-      
-      if (sess?.id) {
-        // Option to directly navigate to results page
-        router.push(`/teacher/tests/${testId}/results/${sess.id}`)
-      }
-    } catch (err: any) {
-      setError(friendlyError(err.message || "Ошибка при публикации теста"))
-    } finally {
-      setLaunching(false)
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
@@ -330,10 +299,6 @@ export default function TestConstructorPage() {
           <Button onClick={handleSave} disabled={saving || launching} variant="outline" className="gap-2 flex-1 sm:flex-initial">
             <Save className="w-4 h-4" />
             {saving ? "Сохраняю..." : "Сохранить"}
-          </Button>
-          <Button onClick={handlePublishTest} disabled={saving || launching} className="gap-2 bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-initial">
-            <Play className="w-4 h-4 fill-white" />
-            {launching ? "Публикация..." : "Опубликовать тест"}
           </Button>
         </div>
       </div>

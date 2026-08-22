@@ -325,6 +325,57 @@ export async function getStudent() {
   return data
 }
 
+export async function getStudentRoomAssignments(roomId: string) {
+  const studentId = await getVerifiedStudentId()
+  const supabase = await createClient()
+
+  const { data: student, error: studentError } = await supabase
+    .from("students")
+    .select("id, room_id")
+    .eq("id", studentId)
+    .maybeSingle()
+
+  if (studentError || !student) {
+    throw new Error("Студент не найден")
+  }
+
+  if (student.room_id !== roomId) {
+    throw new Error("Доступ к этой аудитории запрещён")
+  }
+
+  const [examsRes, testsRes] = await Promise.all([
+    supabase
+      .from("exams")
+      .select("*")
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("tests")
+      .select("*, test_questions(id)")
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: false })
+  ])
+
+  if (examsRes.error) throw new Error(examsRes.error.message)
+  if (testsRes.error) throw new Error(testsRes.error.message)
+
+  return {
+    exams: (examsRes.data || []).map((exam: any) => ({
+      ...exam,
+      type: "exam",
+      question_count: exam.question_count ?? 0,
+      description: exam.description || ""
+    })),
+    tests: (testsRes.data || []).map((test: any) => ({
+      ...test,
+      type: "test",
+      title: test.title || "Тест",
+      description: test.description || "",
+      question_count: Array.isArray(test.test_questions) ? test.test_questions.length : 0
+    }))
+  }
+}
+
 export async function completeExam(studentId: string) {
   const verifiedStudentId = await getVerifiedStudentId()
   if (studentId && studentId !== verifiedStudentId) {
