@@ -11,7 +11,7 @@
 
 **PROlab Academy Exam** — это современная и безопасная платформа для проведения онлайн-экзаменов с интегрированной защитой от списывания. Проект разработан специально для **PROlab Academy** (г. Ош, Кыргызстан) с целью обеспечения честного и прозрачного процесса тестирования студентов.
 
-🔗 **Сайт проекта:** [https://prolab-academy-exam.cc.cd](https://prolab-academy-exam.cc.cd)  
+🔗 **Сайт проекта:** [https://prolab-academy.site](https://prolab-academy.site)  
 💻 **GitHub репозиторий:** [https://github.com/b4631119-oss/academy-exam](https://github.com/b4631119-oss/academy-exam)
 
 ---
