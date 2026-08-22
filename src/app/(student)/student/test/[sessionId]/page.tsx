@@ -160,12 +160,26 @@ export default function StudentAutonomousTestPage() {
   // Handle finish test
   const handleFinishTest = async () => {
     if (finishing) return
+
+    const currentQuestionId = currentQuestion?.id
+    const selectedOptionId = currentQuestionId ? selectedAnswers[currentQuestionId] : null
+
+    if (currentQuestionId && selectedOptionId && !currentQuestion?.has_answered) {
+      setSubmitting(true)
+      try {
+        await submitStudentAnswer(sessionId, currentQuestionId, selectedOptionId)
+      } catch (err: any) {
+        console.warn("Final answer submission warning:", err)
+      } finally {
+        setSubmitting(false)
+      }
+    }
+
     setFinishing(true)
     try {
       await finishStudentTest(sessionId)
       router.push(`/student/test/result/${sessionId}`)
     } catch (err: any) {
-      // Even if already finished on server, navigate to result
       router.push(`/student/test/result/${sessionId}`)
     }
   }
@@ -191,15 +205,21 @@ export default function StudentAutonomousTestPage() {
 
     try {
       await submitStudentAnswer(sessionId, qId, optionId)
+      if (currentIndex >= questions.length - 1) {
+        await handleFinishTest()
+        return
+      }
+      setCurrentIndex((prev) => prev + 1)
     } catch (err: any) {
       console.warn("Answer submission warning:", err)
       // Keep local selection to allow user progression
+      if (currentIndex >= questions.length - 1) {
+        await handleFinishTest()
+        return
+      }
+      setCurrentIndex((prev) => prev + 1)
     } finally {
       setSubmitting(false)
-      // Move to next question after small delay for smooth transition
-      setTimeout(() => {
-        advanceToNextOrFinish(currentIndex + 1)
-      }, 300)
     }
   }
 

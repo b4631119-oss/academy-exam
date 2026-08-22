@@ -953,7 +953,6 @@ export async function finishStudentTest(sessionId: string) {
   const student = await getCurrentStudentVerified()
   const supabase = await createClient()
 
-  // 1. Single joined query: verify participant, session, and test details
   const { data: participantData, error: pErr } = await supabase
     .from("test_participants")
     .select("id, joined_at, finished_at, test_sessions!inner(test_id, tests!inner(title, description))")
@@ -967,16 +966,19 @@ export async function finishStudentTest(sessionId: string) {
 
   const sessionObj = (participantData as any).test_sessions
   const testObj = sessionObj?.tests || {}
+  const finishedAt = participantData.finished_at || new Date().toISOString()
 
-  // 2. Set finished_at if not set
   if (!participantData.finished_at) {
-    await supabase
+    const { error: finishErr } = await supabase
       .from("test_participants")
-      .update({ finished_at: new Date().toISOString() })
+      .update({ finished_at: finishedAt })
       .eq("id", participantData.id)
+
+    if (finishErr) {
+      throw new Error(finishErr.message)
+    }
   }
 
-  // 3. Parallel queries: questions (for max points) + student answers
   const [questionsRes, answersRes] = await Promise.all([
     supabase
       .from("test_questions")
@@ -1011,7 +1013,7 @@ export async function finishStudentTest(sessionId: string) {
     total_answered: totalAnswered,
     total_questions: qList.length,
     percentage,
-    finished_at: participantData.finished_at || new Date().toISOString()
+    finished_at: finishedAt
   }
 }
 
