@@ -44,6 +44,7 @@ export default function StudentAutonomousTestPage() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const currentQRef = useRef<QuestionItem | null>(null)
+  const selectedAnswersRef = useRef<Record<string, string>>({})
 
   // 1. Initial Load: Load all test questions once (no polling)
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function StudentAutonomousTestPage() {
           }
         })
         setSelectedAnswers(initialAnswers)
+        selectedAnswersRef.current = initialAnswers
 
         // Position current index at the first unanswered question
         const firstUnanswered = qList.findIndex((q) => !q.has_answered)
@@ -89,7 +91,7 @@ export default function StudentAutonomousTestPage() {
           setCurrentIndex(firstUnanswered)
         } else {
           // All questions answered — finish test
-          handleFinishTest()
+          finishTestAtomic()
           return
         }
       } catch (err: any) {
@@ -153,35 +155,50 @@ export default function StudentAutonomousTestPage() {
     if (nextIdx < questions.length) {
       setCurrentIndex(nextIdx)
     } else {
-      handleFinishTest()
+      finishTestAtomic()
     }
   }
 
-  // Handle finish test
-  const handleFinishTest = async () => {
+  // Atomic finish: submit last answer THEN finish. No reliance on React state.
+  const finishTestAtomic = async () => {
     if (finishing) return
-
-    const currentQuestionId = currentQuestion?.id
-    const selectedOptionId = currentQuestionId ? selectedAnswers[currentQuestionId] : null
-
-    if (currentQuestionId && selectedOptionId && !currentQuestion?.has_answered) {
-      setSubmitting(true)
-      try {
-        await submitStudentAnswer(sessionId, currentQuestionId, selectedOptionId)
-      } catch (err: any) {
-        console.warn("Final answer submission warning:", err)
-      } finally {
-        setSubmitting(false)
-      }
-    }
-
     setFinishing(true)
     try {
       await finishStudentTest(sessionId)
       router.push(`/student/test/result/${sessionId}`)
     } catch (err: any) {
+      console.warn("finishStudentTest failed:", err)
       router.push(`/student/test/result/${sessionId}`)
     }
+  }
+
+  // Handle finish test (called from UI "Завершить тест" button)
+  const handleFinishTest = async () => {
+    if (finishing || submitting) return
+
+    // Use ref to get the LATEST selected answers (not stale closure state)
+    const latestAnswers = selectedAnswersRef.current
+    const latestQuestion = questions[currentIndex] || null
+
+    // Try to submit current answer if it exists and hasn't been saved yet
+    if (latestQuestion) {
+      const currentQuestionId = latestQuestion.id
+      const selectedOptionId = latestAnswers[currentQuestionId] || latestQuestion.selected_option_id || null
+
+      if (currentQuestionId && selectedOptionId) {
+        try {
+          const result = await submitStudentAnswer(sessionId, currentQuestionId, selectedOptionId)
+          if (result && (result as any).already_answered) {
+            // Already saved — proceed to finish
+          }
+        } catch (err: any) {
+          console.warn("Final answer submission warning:", err)
+          // Proceed to finish even if re-submit fails (answer may already be saved)
+        }
+      }
+    }
+
+    await finishTestAtomic()
   }
 
   // 3. Submit Option Selection
@@ -196,7 +213,9 @@ export default function StudentAutonomousTestPage() {
     setErrorMsg("")
 
     // Optimistically record selected option locally
-    setSelectedAnswers((prev) => ({ ...prev, [qId]: optionId }))
+    const updatedAnswers = { ...selectedAnswers, [qId]: optionId }
+    setSelectedAnswers(updatedAnswers)
+    selectedAnswersRef.current = updatedAnswers
     setQuestions((prev) =>
       prev.map((q) =>
         q.id === qId ? { ...q, has_answered: true, selected_option_id: optionId } : q
@@ -205,19 +224,17 @@ export default function StudentAutonomousTestPage() {
 
     try {
       await submitStudentAnswer(sessionId, qId, optionId)
+
       if (currentIndex >= questions.length - 1) {
-        await handleFinishTest()
+        // Last question — finish atomically (answer is already saved above)
+        await finishTestAtomic()
         return
       }
       setCurrentIndex((prev) => prev + 1)
     } catch (err: any) {
-      console.warn("Answer submission warning:", err)
-      // Keep local selection to allow user progression
-      if (currentIndex >= questions.length - 1) {
-        await handleFinishTest()
-        return
-      }
-      setCurrentIndex((prev) => prev + 1)
+      console.warn("Answer submission error:", err)
+      setErrorMsg(err.message || "Ошибка сохранения ответа")
+      // Do NOT proceed to finish on error — let the student see the error
     } finally {
       setSubmitting(false)
     }

@@ -130,6 +130,14 @@ export async function createTest(roomId: string, title: string, description?: st
     throw new Error(error.message)
   }
 
+  console.error("[TEST DEBUG] createTest", {
+    teacherId,
+    roomId,
+    testId: data.id,
+    title: trimmedTitle,
+    status: data.status
+  })
+
   logAction("CREATE_TEST", teacherId, { testId: data.id, roomId, title: trimmedTitle })
 
   return data
@@ -675,7 +683,9 @@ async function getCurrentStudentVerified() {
     throw new Error("Студент не авторизован (токен невалиден)")
   }
 
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth),
+  // so the regular server client has no auth session and RLS may block queries.
+  const supabase = createAdminClient()
   const { data: student, error } = await supabase
     .from("students")
     .select("id, name, room_id")
@@ -695,7 +705,8 @@ export async function startOrJoinStudentTest(testId: string) {
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth)
+  const supabase = createAdminClient()
 
   // 1. Get test
   const { data: test, error: tErr } = await supabase
@@ -705,8 +716,11 @@ export async function startOrJoinStudentTest(testId: string) {
     .maybeSingle()
 
   if (tErr || !test) {
+    console.error("[TEST DEBUG] startOrJoinStudentTest test lookup failed", { testId, studentId: student.id, error: tErr?.message })
     throw new Error("Тест не найден")
   }
+
+  console.error("[TEST DEBUG] startOrJoinStudentTest", { testId, studentId: student.id, roomId: test.room_id, testStatus: test.status })
 
   // 2. Find or create active test_session for room & test
   let { data: session } = await supabase
@@ -780,7 +794,8 @@ export async function getStudentTestQuestions(sessionId: string) {
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth)
+  const supabase = createAdminClient()
 
   // 1. Single joined query: verify participant AND fetch session & test details
   const { data: participantData, error: pErr } = await supabase
@@ -865,7 +880,9 @@ export async function submitStudentAnswer(sessionId: string, questionId: string,
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth),
+  // so the regular server client has no auth session and RLS may block queries.
+  const supabase = createAdminClient()
 
   // 1. Single joined query: verify participant, session, and finished_at status
   const { data: participant, error: pErr } = await supabase
@@ -876,6 +893,7 @@ export async function submitStudentAnswer(sessionId: string, questionId: string,
     .maybeSingle()
 
   if (pErr || !participant) {
+    console.error("[TEST ANSWER ERROR] participant lookup failed", { sessionId, studentId: student.id, error: pErr?.message })
     throw new Error("INVALID_PARTICIPANT_OR_SESSION")
   }
 
@@ -898,6 +916,7 @@ export async function submitStudentAnswer(sessionId: string, questionId: string,
     .maybeSingle()
 
   if (optErr || !optionData) {
+    console.error("[TEST ANSWER ERROR] option verification failed", { sessionId, participantId: participant.id, questionId, optionId, error: optErr?.message })
     throw new Error("Вариант ответа или вопрос не принадлежат данному тесту")
   }
 
@@ -934,6 +953,7 @@ export async function submitStudentAnswer(sessionId: string, questionId: string,
     ])
 
   if (insErr) {
+    console.error("[TEST ANSWER ERROR] insert failed", { sessionId, participantId: participant.id, questionId, optionId, code: insErr.code, message: insErr.message })
     if (insErr.code === "23505") {
       return { success: true, already_answered: true }
     }
@@ -951,7 +971,8 @@ export async function finishStudentTest(sessionId: string) {
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth)
+  const supabase = createAdminClient()
 
   const { data: participantData, error: pErr } = await supabase
     .from("test_participants")
@@ -961,6 +982,7 @@ export async function finishStudentTest(sessionId: string) {
     .maybeSingle()
 
   if (pErr || !participantData) {
+    console.error("[TEST DEBUG] finishStudentTest participant lookup failed", { sessionId, studentId: student.id, error: pErr?.message })
     throw new Error("Участник сессии не найден")
   }
 
@@ -1023,7 +1045,8 @@ export async function getStudentTestResult(sessionId: string) {
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth)
+  const supabase = createAdminClient()
 
   // 1. Single joined query: verify participant, session, and test details
   const { data: participantData, error: pErr } = await supabase
@@ -1084,7 +1107,7 @@ export async function joinTestSessionAction(sessionCode: string) {
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const cleanCode = sessionCode.trim().toUpperCase()
 
   let targetRoomId = student.room_id
@@ -1119,7 +1142,7 @@ export async function getStudentTestSessionStatus(sessionId: string) {
   }
 
   const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: participant } = await supabase
     .from("test_participants")
@@ -1184,7 +1207,7 @@ export async function submitTestAnswerAction(
   questionId: string,
   optionId: string
 ) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: participant } = await supabase
     .from("test_participants")
     .select("session_id")

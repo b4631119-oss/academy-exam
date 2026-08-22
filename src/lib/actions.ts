@@ -314,7 +314,9 @@ export async function getStudent() {
   
   const studentId = payload.studentId
 
-  const supabase = await createClient()
+  // Use admin client: students authenticate via custom JWT (not Supabase Auth),
+  // so the regular server client has no auth session and RLS may block queries.
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("students")
     .select("*, rooms(*)")
@@ -327,7 +329,11 @@ export async function getStudent() {
 
 export async function getStudentRoomAssignments(roomId: string) {
   const studentId = await getVerifiedStudentId()
-  const supabase = await createClient()
+
+  // Use admin client for read queries: students authenticate via custom JWT
+  // (not Supabase Auth), so the regular server client has no auth session
+  // and RLS policies would block access to tests/exams.
+  const supabase = createAdminClient()
 
   const { data: student, error: studentError } = await supabase
     .from("students")
@@ -336,10 +342,12 @@ export async function getStudentRoomAssignments(roomId: string) {
     .maybeSingle()
 
   if (studentError || !student) {
+    console.error("[TEST DEBUG] getStudentRoomAssignments student lookup failed", { studentId, studentError: studentError?.message })
     throw new Error("Студент не найден")
   }
 
   if (student.room_id !== roomId) {
+    console.error("[TEST DEBUG] getStudentRoomAssignments room mismatch", { studentId, studentRoomId: student.room_id, requestedRoomId: roomId })
     throw new Error("Доступ к этой аудитории запрещён")
   }
 
@@ -358,6 +366,13 @@ export async function getStudentRoomAssignments(roomId: string) {
 
   if (examsRes.error) throw new Error(examsRes.error.message)
   if (testsRes.error) throw new Error(testsRes.error.message)
+
+  console.error("[TEST DEBUG] getStudentRoomAssignments", {
+    studentId,
+    roomId,
+    testsFound: testsRes.data?.length ?? 0,
+    examsFound: examsRes.data?.length ?? 0
+  })
 
   return {
     exams: (examsRes.data || []).map((exam: any) => ({
