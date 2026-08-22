@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { createClient } from "@/lib/supabase/client"
 import { getExams, deleteRoom, updateRoom, deleteExam, updateExam } from "@/lib/actions"
-import { getTeacherTests } from "@/lib/test-actions"
+import { getTeacherTests, createTestSession } from "@/lib/test-actions"
 import TestStatusBadge from "@/components/ui/TestStatusBadge"
 import { t } from "@/lib/translations"
 
@@ -110,6 +110,21 @@ export default function RoomDetails() {
       } catch (err: any) {
         alert(err.message)
       }
+    }
+  }
+
+  const handlePublishTest = async (testId: string) => {
+    try {
+      const sess = await createTestSession(testId)
+      setTests((prev) =>
+        prev.map((t) => (t.id === testId ? { ...t, status: "running" } : t))
+      )
+      alert("Тест успешно опубликован! Ученики аудитории могут приступать к прохождению.")
+      if (sess?.id) {
+        router.push(`/teacher/tests/${testId}/results/${sess.id}`)
+      }
+    } catch (err: any) {
+      alert(err.message || "Ошибка при публикации теста")
     }
   }
 
@@ -305,6 +320,12 @@ export default function RoomDetails() {
                           Настроить
                         </Button>
                       </Link>
+                      <Button
+                        onClick={() => handlePublishTest(test.id)}
+                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Опубликовать
+                      </Button>
                     </div>
                   </Card>
                 ))}

@@ -72,13 +72,11 @@ export default function TeacherTestLobbyPage() {
   }
 
   useEffect(() => {
-    loadData()
-    // Poll participants every 3 seconds
-    const interval = setInterval(() => {
-      loadData(true)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [testId])
+    // Immediately redirect teacher from legacy lobby to test page
+    if (testId) {
+      router.replace(`/teacher/tests/${testId}`)
+    }
+  }, [testId, router])
 
   const copyCode = () => {
     if (!test?.rooms?.code) return

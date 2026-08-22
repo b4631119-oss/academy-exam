@@ -55,11 +55,11 @@ export default function TeacherTestResultsPage() {
     <div className="max-w-3xl mx-auto space-y-6 fade-in py-6 px-4">
       <div className="flex items-center justify-between">
         <Link
-          href={`/teacher/tests/${testId}/lobby`}
+          href={`/teacher/tests/${testId}`}
           className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Вернуться в лобби
+          Вернуться к тесту
         </Link>
         <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
           Максимум: {data?.max_points ?? 0} б.

@@ -26,34 +26,9 @@ export default function StudentTestWaitingRoomPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    async function checkStatus(isFirstLoad = false) {
-      if (isFirstLoad) setLoading(true)
-      try {
-        const data = await getStudentTestSessionStatus(sessionId)
-        setSessionData(data)
-
-        if (data.status === "running") {
-          router.push(`/student/test/${sessionId}`)
-        } else if (data.status === "finished") {
-          // L2: don't leave the student on a dead-end — go to the result screen
-          router.push(`/student/test/result/${sessionId}`)
-        }
-      } catch (err: any) {
-        setError(err.message || "Ошибка получения статуса теста")
-      } finally {
-        if (isFirstLoad) setLoading(false)
-      }
-    }
-
-    checkStatus(true)
-
-    // Poll every 2 seconds
-    intervalRef.current = setInterval(() => {
-      checkStatus(false)
-    }, 2000)
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
+    // Immediately redirect student from legacy lobby to autonomous test page
+    if (sessionId) {
+      router.replace(`/student/test/${sessionId}`)
     }
   }, [sessionId, router])
 

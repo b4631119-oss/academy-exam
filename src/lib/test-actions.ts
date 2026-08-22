@@ -199,7 +199,13 @@ export async function getTestQuestions(testId: string) {
 
   return (data || []).map((q: any) => ({
     ...q,
-    test_options: (q.test_options || []).sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+    text: q.question_text || q.text || "",
+    test_options: (q.test_options || [])
+      .map((opt: any) => ({
+        ...opt,
+        text: opt.option_text || opt.text || ""
+      }))
+      .sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
   }))
 }
 
@@ -315,15 +321,13 @@ export async function saveTestQuestions(
     }
 
     const timeLimit = Number(q.time_limit_seconds)
-    // Range matches the constructor UI (0.5–10 minutes = 30–600 seconds).
-    // Min stays at 1 so previously saved low values (e.g. 15s) keep working.
-    if (isNaN(timeLimit) || timeLimit < 1 || timeLimit > 600) {
-      throw new Error(`Время на вопрос №${qIndex} должно быть от 1 до 600 секунд (0.5–10 минут)`)
+    if (isNaN(timeLimit) || timeLimit < 5 || timeLimit > 300) {
+      throw new Error(`Время на вопрос №${qIndex} должно быть от 5 до 300 секунд`)
     }
 
     const pts = Number(q.points)
-    if (isNaN(pts) || pts <= 0) {
-      throw new Error(`Баллы за вопрос №${qIndex} должны быть больше 0`)
+    if (isNaN(pts) || pts < 5 || pts > 100) {
+      throw new Error(`Баллы за вопрос №${qIndex} должны быть от 5 до 100`)
     }
 
     const opts = q.test_options || []
@@ -386,7 +390,7 @@ export async function saveTestQuestions(
       const { error: qErr } = await supabase
         .from("test_questions")
         .update({
-          text: q.text.trim(),
+          question_text: q.text.trim(),
           position: pos,
           time_limit_seconds: q.time_limit_seconds,
           points: q.points
@@ -401,7 +405,7 @@ export async function saveTestQuestions(
         .insert([
           {
             test_id: testId,
-            text: q.text.trim(),
+            question_text: q.text.trim(),
             position: pos,
             time_limit_seconds: q.time_limit_seconds,
             points: q.points
@@ -436,7 +440,7 @@ export async function saveTestQuestions(
         const { error: optErr } = await supabase
           .from("test_options")
           .update({
-            text: opt.text.trim(),
+            option_text: opt.text.trim(),
             position: optPos,
             is_correct: opt.is_correct
           })
@@ -447,7 +451,7 @@ export async function saveTestQuestions(
         const { error: optErr } = await supabase.from("test_options").insert([
           {
             question_id: questionId,
-            text: opt.text.trim(),
+            option_text: opt.text.trim(),
             position: optPos,
             is_correct: opt.is_correct
           }
@@ -474,7 +478,7 @@ export async function createTestSession(testId: string) {
   // 1. Verify test validity: must have at least 1 question
   const { data: questions, error: qErr } = await supabase
     .from("test_questions")
-    .select("id, text, test_options(id, text, is_correct)")
+    .select("id, question_text, test_options(id, option_text, is_correct)")
     .eq("test_id", testId)
 
   if (qErr) throw new Error(qErr.message)
@@ -674,9 +678,9 @@ async function getCurrentStudentVerified() {
   const supabase = await createClient()
   const { data: student, error } = await supabase
     .from("students")
-    .select("*, rooms(*)")
+    .select("id, name, room_id")
     .eq("id", payload.studentId)
-    .single()
+    .maybeSingle()
 
   if (error || !student) {
     throw new Error("Студент не найден")
@@ -685,6 +689,393 @@ async function getCurrentStudentVerified() {
   return student
 }
 
+export async function startOrJoinStudentTest(testId: string) {
+  if (!testId || !UUID_REGEX.test(testId)) {
+    throw new Error("Невалидный ID теста")
+  }
+
+  const student = await getCurrentStudentVerified()
+  const supabase = await createClient()
+
+  // 1. Get test
+  const { data: test, error: tErr } = await supabase
+    .from("tests")
+    .select("id, room_id, title, status")
+    .eq("id", testId)
+    .maybeSingle()
+
+  if (tErr || !test) {
+    throw new Error("Тест не найден")
+  }
+
+  // 2. Find or create active test_session for room & test
+  let { data: session } = await supabase
+    .from("test_sessions")
+    .select("id, test_id, room_id, status")
+    .eq("test_id", testId)
+    .eq("room_id", test.room_id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!session) {
+    const { data: newSession, error: sErr } = await supabase
+      .from("test_sessions")
+      .insert([
+        {
+          test_id: testId,
+          room_id: test.room_id,
+          status: "running"
+        }
+      ])
+      .select("id, test_id, room_id, status")
+      .single()
+
+    if (sErr || !newSession) {
+      throw new Error(sErr?.message || "Ошибка создания сессии теста")
+    }
+    session = newSession
+  }
+
+  // 3. Find or create test_participant for current student
+  let { data: participant } = await supabase
+    .from("test_participants")
+    .select("id, finished_at")
+    .eq("session_id", session.id)
+    .eq("student_id", student.id)
+    .maybeSingle()
+
+  if (!participant) {
+    const { data: newParticipant, error: pErr } = await supabase
+      .from("test_participants")
+      .insert([
+        {
+          session_id: session.id,
+          student_id: student.id
+        }
+      ])
+      .select("id, finished_at")
+      .single()
+
+    if (pErr || !newParticipant) {
+      throw new Error(pErr?.message || "Ошибка записи участника теста")
+    }
+    participant = newParticipant
+  }
+
+  logAction("START_OR_JOIN_STUDENT_TEST", student.id, { testId, sessionId: session.id, participantId: participant.id })
+
+  return {
+    session_id: session.id,
+    participant_id: participant.id,
+    test_id: testId,
+    test_title: test.title,
+    is_finished: !!participant.finished_at
+  }
+}
+
+export async function getStudentTestQuestions(sessionId: string) {
+  if (!sessionId || !UUID_REGEX.test(sessionId)) {
+    throw new Error("Невалидный ID сессии")
+  }
+
+  const student = await getCurrentStudentVerified()
+  const supabase = await createClient()
+
+  // 1. Single joined query: verify participant AND fetch session & test details
+  const { data: participantData, error: pErr } = await supabase
+    .from("test_participants")
+    .select("id, finished_at, session_id, test_sessions!inner(id, test_id, tests!inner(title, description))")
+    .eq("session_id", sessionId)
+    .eq("student_id", student.id)
+    .maybeSingle()
+
+  if (pErr || !participantData) {
+    throw new Error("Вы не являетесь участником этой сессии")
+  }
+
+  const sessionObj = (participantData as any).test_sessions
+  if (!sessionObj) {
+    throw new Error("Сессия теста не найдена")
+  }
+
+  const testObj = sessionObj.tests || {}
+
+  // 2. Parallel queries: questions (with options, WITHOUT is_correct) + existing student answers
+  const [questionsRes, answersRes] = await Promise.all([
+    supabase
+      .from("test_questions")
+      .select("id, question_text, position, time_limit_seconds, points, test_options(id, option_text, position)")
+      .eq("test_id", sessionObj.test_id)
+      .order("position", { ascending: true }),
+    supabase
+      .from("test_answers")
+      .select("question_id, option_id")
+      .eq("session_id", sessionId)
+      .eq("participant_id", participantData.id)
+  ])
+
+  if (questionsRes.error) {
+    throw new Error(questionsRes.error.message)
+  }
+
+  const questions = questionsRes.data || []
+  const existingAnswers = answersRes.data || []
+
+  const answerMap = new Map<string, string>()
+  for (const ans of existingAnswers) {
+    answerMap.set(ans.question_id, ans.option_id)
+  }
+
+  const formattedQuestions = questions.map((q: any) => ({
+    id: q.id,
+    question_text: q.question_text || q.text || "",
+    text: q.question_text || q.text || "",
+    position: q.position || 1,
+    time_limit_seconds: q.time_limit_seconds || 15,
+    points: q.points || 20,
+    has_answered: answerMap.has(q.id),
+    selected_option_id: answerMap.get(q.id) || null,
+    options: (q.test_options || [])
+      .map((opt: any) => ({
+        id: opt.id,
+        option_text: opt.option_text || opt.text || "",
+        text: opt.option_text || opt.text || "",
+        position: opt.position || 1
+      }))
+      .sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+  }))
+
+  logAction("GET_STUDENT_TEST_QUESTIONS", student.id, { sessionId, questionCount: formattedQuestions.length })
+
+  return {
+    session_id: sessionId,
+    participant_id: participantData.id,
+    test_id: sessionObj.test_id,
+    test_title: testObj.title || "Тест",
+    test_description: testObj.description || "",
+    is_finished: !!participantData.finished_at,
+    questions: formattedQuestions
+  }
+}
+
+export async function submitStudentAnswer(sessionId: string, questionId: string, optionId: string) {
+  if (!sessionId || !UUID_REGEX.test(sessionId) || !questionId || !optionId) {
+    throw new Error("Невалидные параметры ответа")
+  }
+
+  const student = await getCurrentStudentVerified()
+  const supabase = await createClient()
+
+  // 1. Single joined query: verify participant, session, and finished_at status
+  const { data: participant, error: pErr } = await supabase
+    .from("test_participants")
+    .select("id, finished_at, session_id, test_sessions!inner(test_id)")
+    .eq("session_id", sessionId)
+    .eq("student_id", student.id)
+    .maybeSingle()
+
+  if (pErr || !participant) {
+    throw new Error("INVALID_PARTICIPANT_OR_SESSION")
+  }
+
+  if (participant.finished_at) {
+    throw new Error("TEST_FINISHED_CANNOT_ANSWER: Попытка уже завершена")
+  }
+
+  const testId = (participant as any).test_sessions?.test_id
+  if (!testId) {
+    throw new Error("Сессия теста не найдена")
+  }
+
+  // 2. Single joined query: verify option belongs to question AND question belongs to test
+  const { data: optionData, error: optErr } = await supabase
+    .from("test_options")
+    .select("id, question_id, is_correct, test_questions!inner(id, test_id, points)")
+    .eq("id", optionId)
+    .eq("question_id", questionId)
+    .eq("test_questions.test_id", testId)
+    .maybeSingle()
+
+  if (optErr || !optionData) {
+    throw new Error("Вариант ответа или вопрос не принадлежат данному тесту")
+  }
+
+  const questionPoints = (optionData as any).test_questions?.points || 20
+  const isCorrect = !!optionData.is_correct
+  const pointsEarned = isCorrect ? questionPoints : 0
+
+  // 3. Fast Duplicate Answer Check
+  const { data: existingAnswer } = await supabase
+    .from("test_answers")
+    .select("id")
+    .eq("session_id", sessionId)
+    .eq("participant_id", participant.id)
+    .eq("question_id", questionId)
+    .maybeSingle()
+
+  if (existingAnswer) {
+    return { success: true, already_answered: true }
+  }
+
+  // 4. Insert Answer
+  const { error: insErr } = await supabase
+    .from("test_answers")
+    .insert([
+      {
+        session_id: sessionId,
+        participant_id: participant.id,
+        question_id: questionId,
+        option_id: optionId,
+        is_correct: isCorrect,
+        points_earned: pointsEarned,
+        answered_at: new Date().toISOString()
+      }
+    ])
+
+  if (insErr) {
+    if (insErr.code === "23505") {
+      return { success: true, already_answered: true }
+    }
+    throw new Error(insErr.message)
+  }
+
+  logAction("SUBMIT_STUDENT_ANSWER", student.id, { sessionId, questionId, optionId })
+
+  return { success: true, question_id: questionId, option_id: optionId }
+}
+
+export async function finishStudentTest(sessionId: string) {
+  if (!sessionId || !UUID_REGEX.test(sessionId)) {
+    throw new Error("Невалидный ID сессии")
+  }
+
+  const student = await getCurrentStudentVerified()
+  const supabase = await createClient()
+
+  // 1. Single joined query: verify participant, session, and test details
+  const { data: participantData, error: pErr } = await supabase
+    .from("test_participants")
+    .select("id, joined_at, finished_at, test_sessions!inner(test_id, tests!inner(title, description))")
+    .eq("session_id", sessionId)
+    .eq("student_id", student.id)
+    .maybeSingle()
+
+  if (pErr || !participantData) {
+    throw new Error("Участник сессии не найден")
+  }
+
+  const sessionObj = (participantData as any).test_sessions
+  const testObj = sessionObj?.tests || {}
+
+  // 2. Set finished_at if not set
+  if (!participantData.finished_at) {
+    await supabase
+      .from("test_participants")
+      .update({ finished_at: new Date().toISOString() })
+      .eq("id", participantData.id)
+  }
+
+  // 3. Parallel queries: questions (for max points) + student answers
+  const [questionsRes, answersRes] = await Promise.all([
+    supabase
+      .from("test_questions")
+      .select("id, points")
+      .eq("test_id", sessionObj.test_id),
+    supabase
+      .from("test_answers")
+      .select("id, question_id, is_correct, points_earned")
+      .eq("session_id", sessionId)
+      .eq("participant_id", participantData.id)
+  ])
+
+  const qList = questionsRes.data || []
+  const ansList = answersRes.data || []
+
+  const maxPoints = qList.reduce((acc, q) => acc + (q.points || 20), 0)
+  const totalAnswered = ansList.length
+  const totalCorrect = ansList.filter((a) => a.is_correct).length
+  const totalPoints = ansList.reduce((acc, a) => acc + (a.points_earned || 0), 0)
+  const percentage = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0
+
+  logAction("FINISH_STUDENT_TEST", student.id, { sessionId, totalPoints, percentage })
+
+  return {
+    session_id: sessionId,
+    participant_id: participantData.id,
+    test_title: testObj.title || "Тест",
+    test_description: testObj.description || "",
+    total_points: totalPoints,
+    max_points: maxPoints,
+    total_correct: totalCorrect,
+    total_answered: totalAnswered,
+    total_questions: qList.length,
+    percentage,
+    finished_at: participantData.finished_at || new Date().toISOString()
+  }
+}
+
+export async function getStudentTestResult(sessionId: string) {
+  if (!sessionId || !UUID_REGEX.test(sessionId)) {
+    throw new Error("Невалидный ID сессии")
+  }
+
+  const student = await getCurrentStudentVerified()
+  const supabase = await createClient()
+
+  // 1. Single joined query: verify participant, session, and test details
+  const { data: participantData, error: pErr } = await supabase
+    .from("test_participants")
+    .select("id, joined_at, finished_at, test_sessions!inner(test_id, tests!inner(title, description))")
+    .eq("session_id", sessionId)
+    .eq("student_id", student.id)
+    .maybeSingle()
+
+  if (pErr || !participantData) {
+    throw new Error("Вы не являетесь участником этой сессии")
+  }
+
+  const sessionObj = (participantData as any).test_sessions
+  const testObj = sessionObj?.tests || {}
+
+  // 2. Parallel queries: questions (for max points) + student answers
+  const [questionsRes, answersRes] = await Promise.all([
+    supabase
+      .from("test_questions")
+      .select("id, points")
+      .eq("test_id", sessionObj.test_id),
+    supabase
+      .from("test_answers")
+      .select("id, question_id, is_correct, points_earned")
+      .eq("session_id", sessionId)
+      .eq("participant_id", participantData.id)
+  ])
+
+  const qList = questionsRes.data || []
+  const ansList = answersRes.data || []
+
+  const maxPoints = qList.reduce((acc, q) => acc + (q.points || 20), 0)
+  const totalAnswered = ansList.length
+  const totalCorrect = ansList.filter((a) => a.is_correct).length
+  const totalPoints = ansList.reduce((acc, a) => acc + (a.points_earned || 0), 0)
+  const percentage = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0
+
+  logAction("GET_STUDENT_TEST_RESULT", student.id, { sessionId, totalPoints, percentage })
+
+  return {
+    test_title: testObj.title || "Тест",
+    test_description: testObj.description || "",
+    total_points: totalPoints,
+    max_points: maxPoints,
+    total_correct: totalCorrect,
+    total_answered: totalAnswered,
+    total_questions: qList.length,
+    percentage,
+    student_name: student.name || "Ученик"
+  }
+}
+
+// BACKWARD-COMPATIBLE WRAPPERS (LEGACY SUPPORT FOR UI)
 export async function joinTestSessionAction(sessionCode: string) {
   if (!sessionCode || !sessionCode.trim()) {
     throw new Error("Введите код для подключения к тесту")
@@ -694,7 +1085,6 @@ export async function joinTestSessionAction(sessionCode: string) {
   const supabase = await createClient()
   const cleanCode = sessionCode.trim().toUpperCase()
 
-  // Resolve the target room by code (the student's own room is the default)
   let targetRoomId = student.room_id
   const { data: roomByCode } = await supabase
     .from("rooms")
@@ -706,91 +1096,19 @@ export async function joinTestSessionAction(sessionCode: string) {
     targetRoomId = roomByCode.id
   }
 
-  // Find the active session (lobby or running) in the target room
-  const { data: activeSession, error: sErr } = await supabase
-    .from("test_sessions")
-    .select("*, tests!inner(id, title, status, room_id, test_questions(id))")
+  const { data: activeTest } = await supabase
+    .from("tests")
+    .select("id")
     .eq("room_id", targetRoomId)
-    .in("status", ["lobby", "running"])
     .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle()
 
-  if (sErr || !activeSession) {
-    const { data: finishedSession } = await supabase
-      .from("test_sessions")
-      .select("id, status")
-      .eq("room_id", targetRoomId)
-      .eq("status", "finished")
-      .maybeSingle()
-
-    if (finishedSession) {
-      throw new Error("TEST_ALREADY_FINISHED: Тест уже завершён")
-    }
+  if (!activeTest) {
     throw new Error("Нет активного теста по данному коду")
   }
 
-  // Existing participants keep working regardless of session status.
-  // New students may join ONLY while the session is in the lobby.
-  const { data: existingParticipant } = await supabase
-    .from("test_participants")
-    .select("id")
-    .eq("session_id", activeSession.id)
-    .eq("student_id", student.id)
-    .maybeSingle()
-
-  if (!existingParticipant) {
-    if (activeSession.status === "running") {
-      throw new Error("TEST_ALREADY_STARTED: Тест уже начался. Подключение новых учеников невозможно.")
-    }
-    if (activeSession.status === "finished") {
-      throw new Error("TEST_ALREADY_FINISHED: Тест уже завершён")
-    }
-  }
-
-  // 1. Try calling the database RPC join_test_session
-  try {
-    const { data: rpcData, error: rpcError } = await supabase.rpc("join_test_session", {
-      p_student_id: student.id,
-      p_session_code: cleanCode
-    })
-
-    if (!rpcError && rpcData) {
-      logAction("STUDENT_JOINED_TEST_RPC", student.id, { cleanCode })
-      return rpcData
-    }
-  } catch (e) {
-    console.warn("RPC join_test_session error/fallback:", e)
-  }
-
-  // 2. Fallback direct join logic via server client
-  let participantId = existingParticipant?.id
-
-  if (!participantId) {
-    const { data: newParticipant, error: pErr } = await supabase
-      .from("test_participants")
-      .insert([
-        {
-          session_id: activeSession.id,
-          student_id: student.id
-        }
-      ])
-      .select("id")
-      .single()
-
-    if (pErr) throw new Error(pErr.message)
-    participantId = newParticipant.id
-  }
-
-  logAction("STUDENT_JOINED_TEST", student.id, { sessionId: activeSession.id })
-
-  return {
-    participant_id: participantId,
-    session_id: activeSession.id,
-    test_id: activeSession.test_id,
-    test_title: activeSession.tests?.title || "Тест",
-    session_status: activeSession.status,
-    question_count: activeSession.tests?.test_questions?.length || 0
-  }
+  return await startOrJoinStudentTest(activeTest.id)
 }
 
 export async function getStudentTestSessionStatus(sessionId: string) {
@@ -801,152 +1119,61 @@ export async function getStudentTestSessionStatus(sessionId: string) {
   const student = await getCurrentStudentVerified()
   const supabase = await createClient()
 
-  // Verify student is participant in this session
-  const { data: participant, error: pErr } = await supabase
+  const { data: participant } = await supabase
     .from("test_participants")
-    .select(`
-      id,
-      session_id,
-      student_id,
-      test_sessions!inner(
-        id,
-        test_id,
-        status,
-        current_question_index,
-        tests!inner(
-          title,
-          description,
-          test_questions(id, position, time_limit_seconds)
-        )
-      )
-    `)
+    .select("id, finished_at")
     .eq("session_id", sessionId)
     .eq("student_id", student.id)
     .maybeSingle()
 
-  if (pErr || !participant) {
+  if (!participant) {
     throw new Error("Сессия не найдена или вы не являетесь её участником")
   }
 
-  const sessionObj = (participant.test_sessions as any) || {}
-  const testObj = (sessionObj.tests as any) || {}
+  const { data: session } = await supabase
+    .from("test_sessions")
+    .select("id, test_id, status, tests(title, description, test_questions(id))")
+    .eq("id", sessionId)
+    .maybeSingle()
+
+  const testObj = (session?.tests as any) || {}
 
   return {
-    status: sessionObj.status as "lobby" | "running" | "finished",
-    session_id: sessionObj.id,
-    test_id: sessionObj.test_id,
-    current_question_index: sessionObj.current_question_index || 0,
+    status: (participant.finished_at ? "finished" : session?.status || "running") as "lobby" | "running" | "finished",
+    session_id: sessionId,
+    test_id: session?.test_id || "",
+    current_question_index: 0,
     title: testObj.title || "Тест",
     description: testObj.description || "",
     question_count: testObj.test_questions ? testObj.test_questions.length : 0,
-    time_limit_seconds: getCurrentQuestionTimeLimit(testObj.test_questions, sessionObj.current_question_index || 0),
+    time_limit_seconds: 15,
     student_name: student.name || "Ученик"
   }
 }
 
 export async function getCurrentTestQuestionAction(sessionId: string) {
-  if (!sessionId || !UUID_REGEX.test(sessionId)) {
-    throw new Error("INVALID_PARTICIPANT_OR_SESSION")
+  const data = await getStudentTestQuestions(sessionId)
+  const qList = data.questions || []
+  const firstQ = qList[0] || {
+    id: "",
+    question_text: "",
+    position: 1,
+    time_limit_seconds: 15,
+    points: 20,
+    options: []
   }
-
-  const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
-
-  // 1. Get participant for this session & student
-  const { data: participant, error: pErr } = await supabase
-    .from("test_participants")
-    .select("id, session_id, student_id")
-    .eq("session_id", sessionId)
-    .eq("student_id", student.id)
-    .maybeSingle()
-
-  if (pErr || !participant) {
-    throw new Error("INVALID_PARTICIPANT_OR_SESSION")
-  }
-
-  // 2. Call Supabase RPC get_current_test_question
-  try {
-    const { data: rpcData, error: rpcError } = await supabase.rpc("get_current_test_question", {
-      p_student_id: student.id,
-      p_participant_id: participant.id
-    })
-
-    if (!rpcError && rpcData) {
-      logAction("GET_CURRENT_QUESTION_RPC", student.id, { sessionId })
-      return {
-        ...rpcData,
-        participant_id: participant.id
-      }
-    }
-  } catch (e) {
-    console.warn("RPC get_current_test_question error/fallback:", e)
-  }
-
-  // 3. Fallback query if RPC does not return data directly
-  const { data: session, error: sErr } = await supabase
-    .from("test_sessions")
-    .select("id, test_id, status, current_question_index, question_started_at")
-    .eq("id", sessionId)
-    .single()
-
-  if (sErr || !session || session.status !== "running") {
-    throw new Error("CURRENT_QUESTION_NOT_FOUND_OR_NOT_STARTED")
-  }
-
-  // Get total question count for test
-  const { data: allQuestions } = await supabase
-    .from("test_questions")
-    .select("id, text, position, time_limit_seconds, points")
-    .eq("test_id", session.test_id)
-    .order("position", { ascending: true })
-
-  if (!allQuestions || allQuestions.length === 0) {
-    throw new Error("CURRENT_QUESTION_NOT_FOUND_OR_NOT_STARTED")
-  }
-
-  const totalQuestions = allQuestions.length
-  const qIndex = session.current_question_index || 0
-
-  if (qIndex < 0 || qIndex >= totalQuestions) {
-    throw new Error("CURRENT_QUESTION_NOT_FOUND_OR_NOT_STARTED")
-  }
-
-  const currentQ = allQuestions[qIndex]
-
-  // Get options for current question WITHOUT is_correct
-  const { data: options } = await supabase
-    .from("test_options")
-    .select("id, text, position")
-    .eq("question_id", currentQ.id)
-    .order("position", { ascending: true })
-
-  // Check if student has already answered this question
-  const { data: existingAnswer } = await supabase
-    .from("test_answers")
-    .select("id, option_id")
-    .eq("session_id", sessionId)
-    .eq("student_id", student.id)
-    .eq("question_id", currentQ.id)
-    .maybeSingle()
-
-  logAction("GET_CURRENT_QUESTION", student.id, { questionId: currentQ.id })
 
   return {
-    participant_id: participant.id,
-    question_id: currentQ.id,
-    question_text: currentQ.text,
-    position: qIndex + 1,
-    total_questions: totalQuestions,
-    time_limit_seconds: currentQ.time_limit_seconds || 15,
-    points: currentQ.points || 20,
-    question_started_at: session.question_started_at,
-    has_answered: !!existingAnswer,
-    selected_option_id: existingAnswer?.option_id || null,
-    options: (options || []).map((opt) => ({
-      id: opt.id,
-      option_text: opt.text,
-      position: opt.position
-    }))
+    participant_id: data.participant_id,
+    question_id: firstQ.id,
+    question_text: firstQ.question_text || (firstQ as any).text || "",
+    position: firstQ.position,
+    total_questions: qList.length,
+    time_limit_seconds: firstQ.time_limit_seconds || 15,
+    points: firstQ.points || 20,
+    has_answered: firstQ.has_answered || false,
+    selected_option_id: firstQ.selected_option_id || null,
+    options: firstQ.options || []
   }
 }
 
@@ -955,154 +1182,19 @@ export async function submitTestAnswerAction(
   questionId: string,
   optionId: string
 ) {
-  if (!participantId || !questionId || !optionId) {
-    throw new Error("Неверные параметры ответа")
-  }
-
-  const student = await getCurrentStudentVerified()
   const supabase = await createClient()
-
-  // 1. Verify participant ownership
-  const { data: participant, error: pErr } = await supabase
+  const { data: participant } = await supabase
     .from("test_participants")
-    .select("id, session_id, student_id, test_sessions!inner(id, test_id, status, current_question_index, question_started_at)")
+    .select("session_id")
     .eq("id", participantId)
-    .eq("student_id", student.id)
-    .single()
-
-  if (pErr || !participant) {
-    throw new Error("INVALID_PARTICIPANT_OR_SESSION")
-  }
-
-  // 2. Call Supabase RPC submit_test_answer
-  try {
-    const { data: rpcData, error: rpcError } = await supabase.rpc("submit_test_answer", {
-      p_student_id: student.id,
-      p_participant_id: participantId,
-      p_question_id: questionId,
-      p_option_id: optionId
-    })
-
-    if (rpcError) {
-      // Any DB-level RPC error is authoritative: propagate it, never fall through.
-      const errMsg = rpcError.message || ""
-      if (errMsg.includes("QUESTION_TIME_EXCEEDED") || errMsg.includes("time") || errMsg.includes("expired")) {
-        throw new Error("QUESTION_TIME_EXCEEDED")
-      }
-      if (errMsg.includes("ALREADY_ANSWERED") || errMsg.includes("duplicate")) {
-        return { success: true, already_answered: true }
-      }
-      throw new Error(errMsg)
-    }
-
-    logAction("SUBMIT_TEST_ANSWER_RPC", student.id, { questionId, optionId })
-    return { success: true, ...(rpcData || {}) }
-  } catch (e: any) {
-    const msg = e?.message || ""
-    // Known business errors reach the client as-is.
-    if (msg === "QUESTION_TIME_EXCEEDED" || msg === "QUESTION_NOT_CURRENT" || msg === "QUESTION_NOT_STARTED") {
-      throw e
-    }
-    // Only genuine transient failures (network / RPC unavailable) may use the fallback.
-    if (!/failed to fetch|fetch failed|network|load failed|abort|econn|timeout|unavailable/i.test(msg)) {
-      throw e
-    }
-    console.warn("RPC submit_test_answer unavailable (transient), using fallback:", e)
-  }
-
-  // 3. Fallback direct answer submission via server client & RLS
-  const sessionObj = participant.test_sessions as any
-
-  if (!sessionObj || sessionObj.status !== "running") {
-    throw new Error("CURRENT_QUESTION_NOT_FOUND_OR_NOT_STARTED")
-  }
-
-  // Ensure the question being answered is the CURRENT one.
-  // Answers for a previous question must be rejected after the teacher advances.
-  const { data: sessionQuestions } = await supabase
-    .from("test_questions")
-    .select("id, position")
-    .eq("test_id", sessionObj.test_id)
-    .order("position", { ascending: true })
-
-  const qIndex = sessionObj.current_question_index || 0
-  const currentQuestion = (sessionQuestions || [])[qIndex]
-  if (!currentQuestion || currentQuestion.id !== questionId) {
-    throw new Error("QUESTION_NOT_CURRENT")
-  }
-
-  // question_started_at is the source of truth for the time budget.
-  // Without it the fallback cannot validate timing and must reject the answer.
-  if (!sessionObj.question_started_at) {
-    throw new Error("QUESTION_NOT_STARTED")
-  }
-
-  // Strict timeout: no grace period.
-  const { data: qObj } = await supabase
-    .from("test_questions")
-    .select("time_limit_seconds")
-    .eq("id", questionId)
-    .single()
-
-  const timeLimit = qObj?.time_limit_seconds || 15
-  const startedAt = new Date(sessionObj.question_started_at).getTime()
-  const elapsedSeconds = (Date.now() - startedAt) / 1000
-
-  if (elapsedSeconds > timeLimit) {
-    throw new Error("QUESTION_TIME_EXCEEDED")
-  }
-
-  // The option must belong to the question being answered
-  const { data: optObj } = await supabase
-    .from("test_options")
-    .select("is_correct")
-    .eq("id", optionId)
-    .eq("question_id", questionId)
     .maybeSingle()
 
-  if (!optObj) {
-    throw new Error("OPTION_NOT_FOR_QUESTION")
-  }
+  const sessionId = participant?.session_id || participantId
+  return await submitStudentAnswer(sessionId, questionId, optionId)
+}
 
-  const isCorrect = !!optObj?.is_correct
-
-  // Check existing answer
-  const { data: existingAnswer } = await supabase
-    .from("test_answers")
-    .select("id")
-    .eq("session_id", participant.session_id)
-    .eq("student_id", student.id)
-    .eq("question_id", questionId)
-    .maybeSingle()
-
-  if (existingAnswer) {
-    return { success: true, already_answered: true }
-  }
-
-  // Insert answer
-  const { error: insErr } = await supabase
-    .from("test_answers")
-    .insert([
-      {
-        session_id: participant.session_id,
-        participant_id: participantId,
-        student_id: student.id,
-        question_id: questionId,
-        option_id: optionId,
-        is_correct: isCorrect
-      }
-    ])
-
-  if (insErr) {
-    if (insErr.code === "23505") {
-      return { success: true, already_answered: true }
-    }
-    throw new Error(insErr.message)
-  }
-
-  logAction("SUBMIT_TEST_ANSWER", student.id, { questionId, optionId, isCorrect })
-
-  return { success: true, is_correct: isCorrect }
+export async function getMyTestResultAction(sessionId: string) {
+  return await getStudentTestResult(sessionId)
 }
 
 export async function advanceTestQuestion(sessionId: string) {
@@ -1186,119 +1278,16 @@ export async function advanceTestQuestion(sessionId: string) {
   return updatedSession
 }
 
-export async function getMyTestResultAction(sessionId: string) {
-  if (!sessionId || !UUID_REGEX.test(sessionId)) {
-    throw new Error("Невалидный ID сессии")
-  }
 
-  const student = await getCurrentStudentVerified()
-  const supabase = await createClient()
-
-  // Verify participant
-  const { data: participant, error: pErr } = await supabase
-    .from("test_participants")
-    .select("id, session_id, student_id")
-    .eq("session_id", sessionId)
-    .eq("student_id", student.id)
-    .maybeSingle()
-
-  if (pErr || !participant) {
-    throw new Error("Вы не являетесь участником этой сессии")
-  }
-
-  // Result is available ONLY after the session has finished.
-  // Guard lives in the Server Action so partial results are never returned
-  // regardless of what the RPC does.
-  const { data: sessionRow, error: ssErr } = await supabase
-    .from("test_sessions")
-    .select("status")
-    .eq("id", sessionId)
-    .maybeSingle()
-
-  if (ssErr || !sessionRow || sessionRow.status !== "finished") {
-    throw new Error("RESULT_NOT_AVAILABLE")
-  }
-
-  // 1. Try calling database RPC get_my_test_result
-  try {
-    const { data: rpcData, error: rpcError } = await supabase.rpc("get_my_test_result", {
-      p_student_id: student.id,
-      p_participant_id: participant.id
-    })
-
-    if (!rpcError && rpcData) {
-      logAction("GET_MY_TEST_RESULT_RPC", student.id, { sessionId })
-      return rpcData
-    }
-  } catch (e) {
-    console.warn("RPC get_my_test_result error/fallback:", e)
-  }
-
-  // 2. Fallback calculation via server client
-  const { data: session, error: sErr } = await supabase
-    .from("test_sessions")
-    .select("id, test_id, status, tests!inner(id, title, description)")
-    .eq("id", sessionId)
-    .single()
-
-  if (sErr || !session) {
-    throw new Error("Сессия теста не найдена")
-  }
-
-  // Get all test questions for max points calculation
-  const { data: questions } = await supabase
-    .from("test_questions")
-    .select("id, points")
-    .eq("test_id", session.test_id)
-
-  const qList = questions || []
-  const maxPoints = qList.reduce((acc, q) => acc + (q.points || 20), 0)
-
-  // Get student's answers for this session
-  const { data: studentAnswers } = await supabase
-    .from("test_answers")
-    .select("id, question_id, is_correct")
-    .eq("session_id", sessionId)
-    .eq("student_id", student.id)
-
-  const answers = studentAnswers || []
-  const totalAnswered = answers.length
-  const correctAnswers = answers.filter((a) => a.is_correct)
-  const totalCorrect = correctAnswers.length
-
-  // Calculate points earned
-  let totalPoints = 0
-  for (const ans of correctAnswers) {
-    const qObj = qList.find((q) => q.id === ans.question_id)
-    totalPoints += qObj?.points || 20
-  }
-
-  const percentage = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0
-
-  logAction("GET_MY_TEST_RESULT", student.id, { sessionId, totalPoints, percentage })
-
-  return {
-    test_title: (session.tests as any)?.title || "Тест",
-    test_description: (session.tests as any)?.description || "",
-    total_points: totalPoints,
-    max_points: maxPoints,
-    total_correct: totalCorrect,
-    total_answered: totalAnswered,
-    total_questions: qList.length,
-    percentage,
-    student_name: student.name || "Ученик"
-  }
-}
 
 export async function getTestSessionResults(sessionId: string) {
   if (!sessionId || !UUID_REGEX.test(sessionId)) {
     throw new Error("Невалидный ID сессии")
   }
   const teacherId = await getCurrentTeacherId()
-
   const supabase = await createClient()
 
-  // Verify the teacher owns this session (session -> test -> room -> teacher)
+  // 1. Verify the teacher owns this session (session -> test -> room -> teacher)
   const { data: session, error: sErr } = await supabase
     .from("test_sessions")
     .select("id, test_id, status, tests!inner(id, title, room_id, rooms!inner(teacher_id))")
@@ -1310,30 +1299,30 @@ export async function getTestSessionResults(sessionId: string) {
     throw new Error("Сессия не найдена или нет доступа")
   }
 
-  // All questions of the test (for max points and total count)
-  const { data: questions } = await supabase
-    .from("test_questions")
-    .select("id, points")
-    .eq("test_id", session.test_id)
+  // 2. Parallel queries: questions, participant count, and answers with student names
+  const [questionsRes, participantsCountRes, answersRes] = await Promise.all([
+    supabase
+      .from("test_questions")
+      .select("id, points")
+      .eq("test_id", session.test_id),
+    supabase
+      .from("test_participants")
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", sessionId),
+    supabase
+      .from("test_answers")
+      .select("student_id, question_id, is_correct, students(name)")
+      .eq("session_id", sessionId)
+  ])
 
-  const qList = questions || []
+  const qList = questionsRes.data || []
   const maxPoints = qList.reduce((acc, q) => acc + (q.points || 20), 0)
   const totalQuestions = qList.length
-
-  // Total participants (some may not have answered yet)
-  const { count: participantCount } = await supabase
-    .from("test_participants")
-    .select("id", { count: "exact", head: true })
-    .eq("session_id", sessionId)
-
-  // All answers of every participant in this session
-  const { data: answers } = await supabase
-    .from("test_answers")
-    .select("student_id, question_id, is_correct, students(name)")
-    .eq("session_id", sessionId)
+  const participantCount = participantsCountRes.count || 0
+  const answers = answersRes.data || []
 
   const perStudent = new Map<string, any>()
-  for (const ans of answers || []) {
+  for (const ans of answers) {
     let s = perStudent.get(ans.student_id)
     if (!s) {
       s = {
@@ -1368,7 +1357,7 @@ export async function getTestSessionResults(sessionId: string) {
     title: (session.tests as any)?.title || "Тест",
     max_points: maxPoints,
     total_questions: totalQuestions,
-    total_participants: participantCount || 0,
+    total_participants: participantCount,
     results
   }
 }

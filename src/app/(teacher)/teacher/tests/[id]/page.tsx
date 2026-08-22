@@ -28,21 +28,10 @@ interface QuestionItem {
   test_options: OptionItem[]
 }
 
-const MIN_MINUTES = 0.5
-const MAX_MINUTES = 10
-
-// Seconds stored in DB -> minutes shown in the constructor UI
-function secondsToMinutes(seconds: number): number {
-  return Math.round((seconds / 60) * 100) / 100
-}
-
-// Minutes entered by the teacher -> whole seconds saved to the DB (minutes * 60)
-function minutesToSeconds(value: string): number {
-  const minutes = Number(value)
-  if (isNaN(minutes)) return Math.round(MIN_MINUTES * 60)
-  const clamped = Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, minutes))
-  return Math.round(clamped * 60)
-}
+const MIN_TIME_LIMIT_SECONDS = 5
+const MAX_TIME_LIMIT_SECONDS = 300
+const MIN_POINTS = 5
+const MAX_POINTS = 100
 
 // Per-question inline validation errors
 function validateQuestions(list: QuestionItem[]): Record<number, string[]> {
@@ -61,10 +50,15 @@ function validateQuestions(list: QuestionItem[]): Record<number, string[]> {
     if (correctCount === 0) errs.push("Выберите правильный вариант")
     if (correctCount > 1) errs.push("Выберите только один правильный вариант")
 
-    const minutes = q.time_limit_seconds / 60
-    if (minutes < MIN_MINUTES) errs.push("Минимум 0.5 минуты")
-    if (minutes > MAX_MINUTES) errs.push("Максимум 10 минут")
-    if (q.points <= 0) errs.push("Баллы должны быть больше 0")
+    const timeLimit = Number(q.time_limit_seconds)
+    if (isNaN(timeLimit) || timeLimit < MIN_TIME_LIMIT_SECONDS || timeLimit > MAX_TIME_LIMIT_SECONDS) {
+      errs.push(`Время на вопрос должно быть от ${MIN_TIME_LIMIT_SECONDS} до ${MAX_TIME_LIMIT_SECONDS} секунд`)
+    }
+
+    const pts = Number(q.points)
+    if (isNaN(pts) || pts < MIN_POINTS || pts > MAX_POINTS) {
+      errs.push(`Баллы за вопрос должны быть от ${MIN_POINTS} до ${MAX_POINTS}`)
+    }
 
     if (errs.length) result[i] = errs
   })
@@ -105,13 +99,13 @@ export default function TestConstructorPage() {
           setQuestions(
             qData.map((q: any) => ({
               id: q.id,
-              text: q.text || "",
+              text: q.question_text || q.text || "",
               position: q.position || 1,
               time_limit_seconds: q.time_limit_seconds ?? 15,
               points: q.points ?? 20,
               test_options: (q.test_options || []).map((opt: any) => ({
                 id: opt.id,
-                text: opt.text || "",
+                text: opt.option_text || opt.text || "",
                 position: opt.position || 1,
                 is_correct: !!opt.is_correct
               }))
@@ -271,23 +265,33 @@ export default function TestConstructorPage() {
     }
   }
 
-  const handleLaunchTest = async () => {
-    // Same inline validation before launch
+  const handlePublishTest = async () => {
     const errors = validateQuestions(questions)
     setValidationErrors(errors)
     if (Object.keys(errors).length > 0) {
-      setError("Исправьте ошибки в вопросах перед запуском теста")
+      setError("Исправьте ошибки в вопросах перед публикацией теста")
+      setSuccessMsg("")
       return
     }
 
     setLaunching(true)
     setError("")
+    setSuccessMsg("")
+
     try {
       await saveTestQuestions(testId, title, description, questions)
-      await createTestSession(testId)
-      router.push(`/teacher/tests/${testId}/lobby`)
+      const sess = await createTestSession(testId)
+      setTest((prev: any) => ({ ...prev, status: "running" }))
+      setSuccessMsg("Тест успешно опубликован и открыт для учеников!")
+      setTimeout(() => setSuccessMsg(""), 5000)
+      
+      if (sess?.id) {
+        // Option to directly navigate to results page
+        router.push(`/teacher/tests/${testId}/results/${sess.id}`)
+      }
     } catch (err: any) {
-      setError(friendlyError(err.message || "Ошибка при запуске теста"))
+      setError(friendlyError(err.message || "Ошибка при публикации теста"))
+    } finally {
       setLaunching(false)
     }
   }
@@ -325,11 +329,11 @@ export default function TestConstructorPage() {
           <TestStatusBadge status={test?.status} />
           <Button onClick={handleSave} disabled={saving || launching} variant="outline" className="gap-2 flex-1 sm:flex-initial">
             <Save className="w-4 h-4" />
-            {saving ? "Сохраняю..." : "Сохранить тест"}
+            {saving ? "Сохраняю..." : "Сохранить"}
           </Button>
-          <Button onClick={handleLaunchTest} disabled={saving || launching} className="gap-2 bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-initial">
+          <Button onClick={handlePublishTest} disabled={saving || launching} className="gap-2 bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-initial">
             <Play className="w-4 h-4 fill-white" />
-            {launching ? "Запуск..." : "Запустить тест"}
+            {launching ? "Публикация..." : "Опубликовать тест"}
           </Button>
         </div>
       </div>
@@ -432,19 +436,19 @@ export default function TestConstructorPage() {
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5 text-slate-600 text-xs font-semibold uppercase tracking-wider">
                   <Clock className="w-3.5 h-3.5 text-sky-500" />
-                  Время на вопрос (минуты)
+                  Время на вопрос (секунды)
                 </Label>
                 <Input
                   type="number"
-                  min={MIN_MINUTES}
-                  max={MAX_MINUTES}
-                  step={0.5}
-                  value={secondsToMinutes(q.time_limit_seconds)}
-                  onChange={(e) => handleQuestionChange(qIdx, "time_limit_seconds", minutesToSeconds(e.target.value))}
+                  min={MIN_TIME_LIMIT_SECONDS}
+                  max={MAX_TIME_LIMIT_SECONDS}
+                  step={1}
+                  value={q.time_limit_seconds}
+                  onChange={(e) => handleQuestionChange(qIdx, "time_limit_seconds", Number(e.target.value))}
                   className="bg-white"
                 />
                 <p className="text-[11px] text-slate-400">
-                  {secondsToMinutes(q.time_limit_seconds)} мин = {q.time_limit_seconds} сек (0.5–10 мин)
+                  От 5 до 300 секунд
                 </p>
               </div>
 
@@ -455,11 +459,16 @@ export default function TestConstructorPage() {
                 </Label>
                 <Input
                   type="number"
-                  min={1}
+                  min={MIN_POINTS}
+                  max={MAX_POINTS}
+                  step={1}
                   value={q.points}
-                  onChange={(e) => handleQuestionChange(qIdx, "points", Math.max(1, Number(e.target.value)))}
+                  onChange={(e) => handleQuestionChange(qIdx, "points", Number(e.target.value))}
                   className="bg-white"
                 />
+                <p className="text-[11px] text-slate-400">
+                  От 5 до 100 баллов
+                </p>
               </div>
             </div>
 

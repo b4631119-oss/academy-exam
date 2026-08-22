@@ -56,7 +56,7 @@ export default function StudentRoomExams() {
     try {
       const result = await joinTestSessionAction(student.rooms.code)
       if (result && result.session_id) {
-        router.push(`/student/test/lobby/${result.session_id}`)
+        router.push(`/student/test/${result.session_id}`)
       }
     } catch (err: any) {
       setTestError(err.message || "Не удалось подключиться к тесту")
