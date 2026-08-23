@@ -739,7 +739,8 @@ export async function startOrJoinStudentTest(testId: string) {
         {
           test_id: testId,
           room_id: test.room_id,
-          status: "running"
+          status: "running",
+          current_question_index: 0
         }
       ])
       .select("id, test_id, room_id, status")
@@ -760,12 +761,19 @@ export async function startOrJoinStudentTest(testId: string) {
     .maybeSingle()
 
   if (!participant) {
+    // Split student name into first/last for DB schema (test_participants requires first_name + last_name NOT NULL)
+    const nameParts = (student.name || '').trim().split(/\s+/)
+    const firstName = nameParts[0] || student.name || 'Student'
+    const lastName = nameParts.slice(1).join(' ') || ''
+
     const { data: newParticipant, error: pErr } = await supabase
       .from("test_participants")
       .insert([
         {
           session_id: session.id,
-          student_id: student.id
+          student_id: student.id,
+          first_name: firstName,
+          last_name: lastName
         }
       ])
       .select("id, finished_at")
@@ -783,7 +791,7 @@ export async function startOrJoinStudentTest(testId: string) {
     session_id: session.id,
     participant_id: participant.id,
     test_id: testId,
-    test_title: test.title,
+    test_title: test.title || "Тест",
     is_finished: !!participant.finished_at
   }
 }
@@ -797,10 +805,10 @@ export async function getStudentTestQuestions(sessionId: string) {
   // Use admin client: students authenticate via custom JWT (not Supabase Auth)
   const supabase = createAdminClient()
 
-  // 1. Single joined query: verify participant AND fetch session & test details
+  // 1. Verify participant exists (no complex joins — avoids FK-related PostgREST errors)
   const { data: participantData, error: pErr } = await supabase
     .from("test_participants")
-    .select("id, finished_at, session_id, test_sessions!inner(id, test_id, tests!inner(title, description))")
+    .select("id, finished_at, session_id")
     .eq("session_id", sessionId)
     .eq("student_id", student.id)
     .maybeSingle()
@@ -809,14 +817,29 @@ export async function getStudentTestQuestions(sessionId: string) {
     throw new Error("Вы не являетесь участником этой сессии")
   }
 
-  const sessionObj = (participantData as any).test_sessions
-  if (!sessionObj) {
+  // 2. Fetch session separately
+  const { data: sessionObj, error: sErr } = await supabase
+    .from("test_sessions")
+    .select("id, test_id")
+    .eq("id", participantData.session_id)
+    .maybeSingle()
+
+  if (sErr || !sessionObj) {
     throw new Error("Сессия теста не найдена")
   }
 
-  const testObj = sessionObj.tests || {}
+  // 3. Fetch test details separately
+  const { data: testObj, error: tErr } = await supabase
+    .from("tests")
+    .select("id, title, description")
+    .eq("id", sessionObj.test_id)
+    .maybeSingle()
 
-  // 2. Parallel queries: questions (with options, WITHOUT is_correct) + existing student answers
+  if (tErr || !testObj) {
+    throw new Error("Тест не найден")
+  }
+
+  // 4. Parallel queries: questions (with options, WITHOUT is_correct) + existing student answers
   const [questionsRes, answersRes] = await Promise.all([
     supabase
       .from("test_questions")
@@ -867,8 +890,8 @@ export async function getStudentTestQuestions(sessionId: string) {
     session_id: sessionId,
     participant_id: participantData.id,
     test_id: sessionObj.test_id,
-    test_title: testObj.title || "Тест",
-    test_description: testObj.description || "",
+    test_title: (testObj as any).title || "Тест",
+    test_description: (testObj as any).description || "",
     is_finished: !!participantData.finished_at,
     questions: formattedQuestions
   }
@@ -884,10 +907,10 @@ export async function submitStudentAnswer(sessionId: string, questionId: string,
   // so the regular server client has no auth session and RLS may block queries.
   const supabase = createAdminClient()
 
-  // 1. Single joined query: verify participant, session, and finished_at status
+  // 1. Verify participant (no joins to avoid FK-related PostgREST errors)
   const { data: participant, error: pErr } = await supabase
     .from("test_participants")
-    .select("id, finished_at, session_id, test_sessions!inner(test_id)")
+    .select("id, finished_at, session_id")
     .eq("session_id", sessionId)
     .eq("student_id", student.id)
     .maybeSingle()
@@ -901,26 +924,44 @@ export async function submitStudentAnswer(sessionId: string, questionId: string,
     throw new Error("TEST_FINISHED_CANNOT_ANSWER: Попытка уже завершена")
   }
 
-  const testId = (participant as any).test_sessions?.test_id
+  // 2. Fetch session to get test_id
+  const { data: sessionRow } = await supabase
+    .from("test_sessions")
+    .select("id, test_id")
+    .eq("id", sessionId)
+    .maybeSingle()
+
+  const testId = sessionRow?.test_id
   if (!testId) {
     throw new Error("Сессия теста не найдена")
   }
 
-  // 2. Single joined query: verify option belongs to question AND question belongs to test
+  // 3. Verify option exists and get is_correct
   const { data: optionData, error: optErr } = await supabase
     .from("test_options")
-    .select("id, question_id, is_correct, test_questions!inner(id, test_id, points)")
+    .select("id, question_id, is_correct")
     .eq("id", optionId)
     .eq("question_id", questionId)
-    .eq("test_questions.test_id", testId)
     .maybeSingle()
 
   if (optErr || !optionData) {
     console.error("[TEST ANSWER ERROR] option verification failed", { sessionId, participantId: participant.id, questionId, optionId, error: optErr?.message })
-    throw new Error("Вариант ответа или вопрос не принадлежат данному тесту")
+    throw new Error("Вариант ответа не найден")
   }
 
-  const questionPoints = (optionData as any).test_questions?.points || 20
+  // 4. Verify question belongs to test and get points
+  const { data: questionData } = await supabase
+    .from("test_questions")
+    .select("id, test_id, points")
+    .eq("id", questionId)
+    .eq("test_id", testId)
+    .maybeSingle()
+
+  if (!questionData) {
+    throw new Error("Вопрос не принадлежит данному тесту")
+  }
+
+  const questionPoints = questionData.points || 20
   const isCorrect = !!optionData.is_correct
   const pointsEarned = isCorrect ? questionPoints : 0
 
@@ -976,7 +1017,7 @@ export async function finishStudentTest(sessionId: string) {
 
   const { data: participantData, error: pErr } = await supabase
     .from("test_participants")
-    .select("id, joined_at, finished_at, test_sessions!inner(test_id, tests!inner(title, description))")
+    .select("id, finished_at")
     .eq("session_id", sessionId)
     .eq("student_id", student.id)
     .maybeSingle()
@@ -986,8 +1027,6 @@ export async function finishStudentTest(sessionId: string) {
     throw new Error("Участник сессии не найден")
   }
 
-  const sessionObj = (participantData as any).test_sessions
-  const testObj = sessionObj?.tests || {}
   const finishedAt = participantData.finished_at || new Date().toISOString()
 
   if (!participantData.finished_at) {
@@ -1001,11 +1040,21 @@ export async function finishStudentTest(sessionId: string) {
     }
   }
 
+  // Fetch session to get test_id
+  const { data: sessionRow } = await supabase
+    .from("test_sessions")
+    .select("id, test_id")
+    .eq("id", sessionId)
+    .maybeSingle()
+
+  const testId = sessionRow?.test_id
+  if (!testId) throw new Error("Сессия теста не найдена")
+
   const [questionsRes, answersRes] = await Promise.all([
     supabase
       .from("test_questions")
       .select("id, points")
-      .eq("test_id", sessionObj.test_id),
+      .eq("test_id", testId),
     supabase
       .from("test_answers")
       .select("id, question_id, is_correct, points_earned")
@@ -1022,13 +1071,20 @@ export async function finishStudentTest(sessionId: string) {
   const totalPoints = ansList.reduce((acc, a) => acc + (a.points_earned || 0), 0)
   const percentage = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0
 
+  // Fetch test title/description separately
+  const { data: testRow } = await supabase
+    .from("tests")
+    .select("title, description")
+    .eq("id", testId)
+    .maybeSingle()
+
   logAction("FINISH_STUDENT_TEST", student.id, { sessionId, totalPoints, percentage })
 
   return {
     session_id: sessionId,
     participant_id: participantData.id,
-    test_title: testObj.title || "Тест",
-    test_description: testObj.description || "",
+    test_title: (testRow as any)?.title || "Тест",
+    test_description: (testRow as any)?.description || "",
     total_points: totalPoints,
     max_points: maxPoints,
     total_correct: totalCorrect,
@@ -1048,10 +1104,10 @@ export async function getStudentTestResult(sessionId: string) {
   // Use admin client: students authenticate via custom JWT (not Supabase Auth)
   const supabase = createAdminClient()
 
-  // 1. Single joined query: verify participant, session, and test details
+  // 1. Verify participant (no complex joins to avoid FK-related PostgREST errors)
   const { data: participantData, error: pErr } = await supabase
     .from("test_participants")
-    .select("id, joined_at, finished_at, test_sessions!inner(test_id, tests!inner(title, description))")
+    .select("id, finished_at")
     .eq("session_id", sessionId)
     .eq("student_id", student.id)
     .maybeSingle()
@@ -1060,15 +1116,29 @@ export async function getStudentTestResult(sessionId: string) {
     throw new Error("Вы не являетесь участником этой сессии")
   }
 
-  const sessionObj = (participantData as any).test_sessions
-  const testObj = sessionObj?.tests || {}
+  // 2. Fetch session
+  const { data: sessionRow } = await supabase
+    .from("test_sessions")
+    .select("id, test_id")
+    .eq("id", sessionId)
+    .maybeSingle()
 
-  // 2. Parallel queries: questions (for max points) + student answers
+  const testId = sessionRow?.test_id
+  if (!testId) throw new Error("Сессия теста не найдена")
+
+  // 3. Fetch test details
+  const { data: testRow } = await supabase
+    .from("tests")
+    .select("title, description")
+    .eq("id", testId)
+    .maybeSingle()
+
+  // 4. Parallel queries: questions (for max points) + student answers
   const [questionsRes, answersRes] = await Promise.all([
     supabase
       .from("test_questions")
       .select("id, points")
-      .eq("test_id", sessionObj.test_id),
+      .eq("test_id", testId),
     supabase
       .from("test_answers")
       .select("id, question_id, is_correct, points_earned")
@@ -1088,8 +1158,8 @@ export async function getStudentTestResult(sessionId: string) {
   logAction("GET_STUDENT_TEST_RESULT", student.id, { sessionId, totalPoints, percentage })
 
   return {
-    test_title: testObj.title || "Тест",
-    test_description: testObj.description || "",
+    test_title: (testRow as any)?.title || "Тест",
+    test_description: (testRow as any)?.description || "",
     total_points: totalPoints,
     max_points: maxPoints,
     total_correct: totalCorrect,
@@ -1324,8 +1394,8 @@ export async function getTestSessionResults(sessionId: string) {
     throw new Error("Сессия не найдена или нет доступа")
   }
 
-  // 2. Parallel queries: questions, participant count, and answers with student names
-  const [questionsRes, participantsCountRes, answersRes] = await Promise.all([
+  // 2. Parallel queries: questions, participant count, answers, and participants (for student names)
+  const [questionsRes, participantsCountRes, answersRes, participantsRes] = await Promise.all([
     supabase
       .from("test_questions")
       .select("id, points")
@@ -1336,7 +1406,11 @@ export async function getTestSessionResults(sessionId: string) {
       .eq("session_id", sessionId),
     supabase
       .from("test_answers")
-      .select("student_id, question_id, is_correct, students(name)")
+      .select("participant_id, question_id, is_correct, points_earned")
+      .eq("session_id", sessionId),
+    supabase
+      .from("test_participants")
+      .select("id, student_id, first_name, last_name")
       .eq("session_id", sessionId)
   ])
 
@@ -1346,18 +1420,24 @@ export async function getTestSessionResults(sessionId: string) {
   const participantCount = participantsCountRes.count || 0
   const answers = answersRes.data || []
 
+  // Build participant → student name map
+  const participantNameMap = new Map<string, string>()
+  for (const p of (participantsRes.data || [])) {
+    participantNameMap.set(p.id, `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Ученик")
+  }
+
   const perStudent = new Map<string, any>()
   for (const ans of answers) {
-    let s = perStudent.get(ans.student_id)
+    let s = perStudent.get(ans.participant_id)
     if (!s) {
       s = {
-        student_id: ans.student_id,
-        name: (ans.students as any)?.name || "Ученик",
+        participant_id: ans.participant_id,
+        name: participantNameMap.get(ans.participant_id) || "Ученик",
         total_correct: 0,
         total_answered: 0,
         total_points: 0
       }
-      perStudent.set(ans.student_id, s)
+      perStudent.set(ans.participant_id, s)
     }
     s.total_answered++
     if (ans.is_correct) {

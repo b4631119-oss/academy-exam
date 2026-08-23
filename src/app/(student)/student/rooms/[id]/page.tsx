@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { FileText, ChevronRight, Play } from "lucide-react"
+import { FileText, ChevronRight } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { getStudent, getStudentRoomAssignments } from "@/lib/actions"
@@ -83,20 +83,23 @@ export default function StudentRoomAssignments() {
     }
   }, [roomId, router])
 
-  const handleStartTest = async (testId: string) => {
+  const handleOpenTest = async (testId: string) => {
     setStartingTestId(testId)
     setError("")
 
     try {
       const result = await startOrJoinStudentTest(testId)
       if (result?.session_id) {
-        router.push(`/student/test/${result.session_id}`)
+        if (result.is_finished) {
+          router.push(`/student/test/result/${result.session_id}`)
+        } else {
+          router.push(`/student/test/${result.session_id}`)
+        }
         return
       }
       throw new Error("Не удалось открыть тест")
     } catch (err: any) {
       setError(err.message || "Не удалось открыть тест")
-    } finally {
       setStartingTestId(null)
     }
   }
@@ -142,10 +145,15 @@ export default function StudentRoomAssignments() {
           <div className="grid gap-4">
             {assignments.map((item) => {
               const isExam = item.type === "exam"
-              const href = isExam ? `/student/exam/${item.id}` : undefined
+              const isStarting = startingTestId === item.id
 
               return (
-                <Card key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:border-sky-300 hover:shadow-md transition-all">
+                <Card
+                  key={item.id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:border-sky-300 hover:shadow-md transition-all ${
+                    isStarting ? "border-sky-400 bg-sky-50/50" : ""
+                  }`}
+                >
                   <div className="flex items-center space-x-4 mb-4 sm:mb-0">
                     <div className="p-3 bg-sky-50 rounded-xl">
                       <FileText className="w-6 h-6 text-sky-500" />
@@ -160,18 +168,22 @@ export default function StudentRoomAssignments() {
 
                   <div className="flex items-center gap-3">
                     {isExam ? (
-                      <Button onClick={() => router.push(href || "#")} className="gap-2">
+                      <Button onClick={() => router.push(`/student/exam/${item.id}`)} className="gap-2">
                         {t.takeExam}
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => handleStartTest(item.id)}
-                        disabled={startingTestId === item.id}
+                        onClick={() => handleOpenTest(item.id)}
+                        disabled={isStarting}
                         className="gap-2"
                       >
-                        <Play className="w-4 h-4 fill-white" />
-                        {startingTestId === item.id ? "Запуск..." : "Начать"}
+                        {isStarting ? "Открытие..." : (
+                          <>
+                            Открыть тест
+                            <ChevronRight className="w-4 h-4" />
+                          </>
+                        )}
                       </Button>
                     )}
                   </div>
@@ -184,4 +196,3 @@ export default function StudentRoomAssignments() {
     </div>
   )
 }
-

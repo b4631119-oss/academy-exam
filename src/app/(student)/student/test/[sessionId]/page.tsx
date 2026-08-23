@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Clock, CheckCircle2, AlertCircle, HelpCircle, Loader2, RefreshCw, ArrowLeft, ArrowRight, Flag } from "lucide-react"
+import { Clock, CheckCircle2, HelpCircle, Loader2, ArrowLeft, ArrowRight, Flag } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { getStudentTestQuestions, submitStudentAnswer, finishStudentTest } from "@/lib/test-actions"
@@ -160,23 +160,26 @@ export default function StudentAutonomousTestPage() {
   }
 
   // Atomic finish: submit last answer THEN finish. No reliance on React state.
+  // If finishStudentTest fails, show error — do NOT redirect.
   const finishTestAtomic = async () => {
     if (finishing) return
     setFinishing(true)
+    setErrorMsg("")
     try {
       await finishStudentTest(sessionId)
       router.push(`/student/test/result/${sessionId}`)
     } catch (err: any) {
-      console.warn("finishStudentTest failed:", err)
-      router.push(`/student/test/result/${sessionId}`)
+      console.error("finishStudentTest failed:", err)
+      setErrorMsg(err.message || "Ошибка завершения теста")
+      setFinishing(false)
     }
   }
 
   // Handle finish test (called from UI "Завершить тест" button)
+  // STRICT: submit → verify saved → finish. If submit fails, show error, do NOT finish.
   const handleFinishTest = async () => {
     if (finishing || submitting) return
 
-    // Use ref to get the LATEST selected answers (not stale closure state)
     const latestAnswers = selectedAnswersRef.current
     const latestQuestion = questions[currentIndex] || null
 
@@ -186,15 +189,24 @@ export default function StudentAutonomousTestPage() {
       const selectedOptionId = latestAnswers[currentQuestionId] || latestQuestion.selected_option_id || null
 
       if (currentQuestionId && selectedOptionId) {
+        setSubmitting(true)
         try {
           const result = await submitStudentAnswer(sessionId, currentQuestionId, selectedOptionId)
-          if (result && (result as any).already_answered) {
-            // Already saved — proceed to finish
+          if (result && !(result as any).already_answered) {
+            // New answer saved — confirm locally
+            setQuestions((prev) =>
+              prev.map((q) =>
+                q.id === currentQuestionId ? { ...q, has_answered: true, selected_option_id: selectedOptionId } : q
+              )
+            )
           }
         } catch (err: any) {
-          console.warn("Final answer submission warning:", err)
-          // Proceed to finish even if re-submit fails (answer may already be saved)
+          // Submit failed — do NOT proceed to finish, show error
+          setSubmitting(false)
+          setErrorMsg(err.message || "Ошибка сохранения ответа")
+          return
         }
+        setSubmitting(false)
       }
     }
 
@@ -212,18 +224,18 @@ export default function StudentAutonomousTestPage() {
     setSubmitting(true)
     setErrorMsg("")
 
-    // Optimistically record selected option locally
-    const updatedAnswers = { ...selectedAnswers, [qId]: optionId }
-    setSelectedAnswers(updatedAnswers)
-    selectedAnswersRef.current = updatedAnswers
-    setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === qId ? { ...q, has_answered: true, selected_option_id: optionId } : q
-      )
-    )
-
     try {
       await submitStudentAnswer(sessionId, qId, optionId)
+
+      // Server confirmed save — update local state
+      const updatedAnswers = { ...selectedAnswers, [qId]: optionId }
+      setSelectedAnswers(updatedAnswers)
+      selectedAnswersRef.current = updatedAnswers
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q.id === qId ? { ...q, has_answered: true, selected_option_id: optionId } : q
+        )
+      )
 
       if (currentIndex >= questions.length - 1) {
         // Last question — finish atomically (answer is already saved above)
@@ -232,7 +244,7 @@ export default function StudentAutonomousTestPage() {
       }
       setCurrentIndex((prev) => prev + 1)
     } catch (err: any) {
-      console.warn("Answer submission error:", err)
+      console.error("Answer submission error:", err)
       setErrorMsg(err.message || "Ошибка сохранения ответа")
       // Do NOT proceed to finish on error — let the student see the error
     } finally {
