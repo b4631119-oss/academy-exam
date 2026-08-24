@@ -1116,14 +1116,15 @@ export async function getStudentTestResult(sessionId: string) {
     throw new Error("Вы не являетесь участником этой сессии")
   }
 
-  // 2. Fetch session
+  // 2. Fetch session (include room_id for navigation back)
   const { data: sessionRow } = await supabase
     .from("test_sessions")
-    .select("id, test_id")
+    .select("id, test_id, room_id")
     .eq("id", sessionId)
     .maybeSingle()
 
   const testId = sessionRow?.test_id
+  const roomId = sessionRow?.room_id
   if (!testId) throw new Error("Сессия теста не найдена")
 
   // 3. Fetch test details
@@ -1166,7 +1167,8 @@ export async function getStudentTestResult(sessionId: string) {
     total_answered: totalAnswered,
     total_questions: qList.length,
     percentage,
-    student_name: student.name || "Ученик"
+    student_name: student.name || "Ученик",
+    room_id: roomId || null
   }
 }
 

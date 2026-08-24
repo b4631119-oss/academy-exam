@@ -24,6 +24,7 @@ export default function TakeExam() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState("")
 
   useEffect(() => {
     const cleanupAntiCheat = initAntiCheat(async (reason) => {
@@ -117,6 +118,7 @@ export default function TakeExam() {
     }
 
     setSaving(true)
+    setSaveError("")
     try {
       if (currentIndex < questions.length - 1) {
         // Save current answer and go next
@@ -128,9 +130,9 @@ export default function TakeExam() {
         await completeExam(student.id)
         router.push(`/student/result/${examId}`)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      alert(t.saveError)
+      setSaveError(err.message || t.saveError)
     } finally {
       setSaving(false)
     }
@@ -179,17 +181,30 @@ export default function TakeExam() {
           />
         </div>
 
+        {saveError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium flex items-center justify-between">
+            <span>{saveError}</span>
+            <button
+              onClick={() => { setSaveError(""); handleNext(); }}
+              className="ml-3 text-red-600 underline hover:text-red-800 whitespace-nowrap"
+            >
+              Повторить
+            </button>
+          </div>
+        )}
+
         <div className="mt-10 flex justify-between items-center pt-6 border-t border-slate-100">
           <Button 
             variant="ghost" 
             onClick={async () => {
               setSaving(true);
+              setSaveError("");
               try {
                 await saveAnswer(student.id, currentQ.id, answers[currentQ.id] || "");
                 setCurrentIndex(Math.max(0, currentIndex - 1));
-              } catch (err) {
+              } catch (err: any) {
                 console.error(err);
-                alert(t.saveError);
+                setSaveError(err.message || t.saveError);
               } finally {
                 setSaving(false);
               }

@@ -273,9 +273,9 @@ export default function StudentAutonomousTestPage() {
             <p className="text-sm text-slate-600">{errorMsg}</p>
           </div>
           <div className="flex flex-col gap-3 pt-2">
-            <Button onClick={() => router.push("/student/enter")} variant="outline" className="gap-2 w-full">
+            <Button onClick={() => router.back()} variant="outline" className="gap-2 w-full">
               <ArrowLeft className="w-4 h-4" />
-              Выйти
+              Назад
             </Button>
           </div>
         </Card>
@@ -361,10 +361,14 @@ export default function StudentAutonomousTestPage() {
           ) : (
             <Button
               onClick={handleFinishTest}
+              disabled={submitting || finishing}
               className="gap-1 bg-green-600 hover:bg-green-700 text-white text-sm py-1.5 px-3"
             >
-              <span>Завершить</span>
-              <Flag className="w-4 h-4" />
+              {submitting || finishing ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Сохранение...</>
+              ) : (
+                <><span>Завершить тест</span><Flag className="w-4 h-4" /></>
+              )}
             </Button>
           )}
         </div>

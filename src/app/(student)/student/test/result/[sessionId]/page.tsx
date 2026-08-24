@@ -44,7 +44,7 @@ export default function StudentTestResultPage() {
       <div className="max-w-md mx-auto py-12 px-4 fade-in text-center">
         <Card className="p-8 space-y-4 shadow-sm border-red-100">
           <p className="text-red-500 font-medium">{error}</p>
-          <Button onClick={() => router.push("/student/enter")}>На главную</Button>
+          <Button onClick={() => router.back()}>Назад</Button>
         </Card>
       </div>
     )
@@ -129,11 +129,11 @@ export default function StudentTestResultPage() {
         {/* Back Button */}
         <div className="pt-2">
           <Button
-            onClick={() => router.push("/student/enter")}
+            onClick={() => result?.room_id ? router.push(`/student/rooms/${result.room_id}`) : router.back()}
             className="w-full sm:w-auto px-8 gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Вернуться на главную
+            К списку тестов
           </Button>
         </div>
       </Card>
