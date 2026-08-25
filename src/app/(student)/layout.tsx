@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Users } from "lucide-react"
+import StudentSessionMenu from "@/components/student/StudentSessionMenu"
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             <Users className="w-6 h-6" />
             <span className="font-bold text-lg hidden sm:inline">Academy Exam Student</span>
           </Link>
+          <StudentSessionMenu />
         </div>
       </header>
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">

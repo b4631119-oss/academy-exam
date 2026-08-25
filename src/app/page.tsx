@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { GraduationCap, Users } from "lucide-react"
+import { BookOpen, GraduationCap, Users } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 
 export default function Home() {
@@ -59,7 +59,19 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-12 max-w-xl mx-auto slide-up">
+        <div className="grid md:grid-cols-2 gap-6 mt-12 max-w-3xl mx-auto slide-up">
+          <Link href="/skills" className="group md:col-span-2">
+            <Card className="h-full flex flex-col items-center justify-center p-8 space-y-4 transition-all hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100/50 cursor-pointer">
+              <div className="p-4 bg-slate-50 rounded-full group-hover:bg-sky-50 transition-colors">
+                <BookOpen className="w-8 h-8 text-slate-600 group-hover:text-sky-500 transition-colors" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-slate-900">Обучение</h3>
+                <p className="text-sm text-slate-500 mt-2">Изучай основы веб-разработки: HTML и CSS</p>
+              </div>
+            </Card>
+          </Link>
+
           <Link href="/student/enter" className="group">
             <Card className="h-full flex flex-col items-center justify-center p-8 space-y-4 transition-all hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100/50 cursor-pointer">
               <div className="p-4 bg-slate-50 rounded-full group-hover:bg-sky-50 transition-colors">

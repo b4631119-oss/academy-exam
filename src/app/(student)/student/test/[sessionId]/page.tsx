@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useCallback, useEffect, useState, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Clock, CheckCircle2, HelpCircle, Loader2, ArrowLeft, ArrowRight, Flag } from "lucide-react"
 import { Card } from "@/components/ui/Card"
@@ -41,10 +41,49 @@ export default function StudentAutonomousTestPage() {
   const [finishing, setFinishing] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string>("")
   const [timeLeft, setTimeLeft] = useState<number>(15)
+  const [timedQuestionId, setTimedQuestionId] = useState<string | null>(null)
 
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const currentQRef = useRef<QuestionItem | null>(null)
+  const finishingRef = useRef(false)
   const selectedAnswersRef = useRef<Record<string, string>>({})
+
+  // Atomic finish: submit last answer THEN finish. No reliance on React state.
+  // If finishStudentTest fails, show error — do NOT redirect.
+  // Guard lives in a ref (not state) so the callback stays referentially stable
+  // and can be safely used inside effects without stale-closure double-finish.
+  const finishTestAtomic = useCallback(async () => {
+    if (finishingRef.current) return
+    finishingRef.current = true
+    setFinishing(true)
+    setErrorMsg("")
+    try {
+      await finishStudentTest(sessionId)
+      router.push(`/student/test/result/${sessionId}`)
+    } catch (err: any) {
+      console.error("finishStudentTest failed:", err)
+      setErrorMsg(err.message || "Ошибка завершения теста")
+      finishingRef.current = false
+      setFinishing(false)
+    }
+  }, [sessionId, router])
+
+  // Helper to advance to next question or trigger test finish
+  const advanceToNextOrFinish = useCallback(
+    (nextIdx = currentIndex + 1) => {
+      if (nextIdx < questions.length) {
+        setCurrentIndex(nextIdx)
+      } else {
+        finishTestAtomic()
+      }
+    },
+    [currentIndex, questions.length, finishTestAtomic]
+  )
+
+  // Handle Timeout (Auto-advance without fake submit)
+  const handleTimeout = useCallback(() => {
+    if (finishingRef.current) return
+    advanceToNextOrFinish()
+  }, [advanceToNextOrFinish])
 
   // 1. Initial Load: Load all test questions once (no polling)
   useEffect(() => {
@@ -109,71 +148,44 @@ export default function StudentAutonomousTestPage() {
     return () => {
       isMounted = false
     }
-  }, [sessionId])
+  }, [sessionId, router, finishTestAtomic])
 
   const currentQuestion = questions[currentIndex] || null
-  currentQRef.current = currentQuestion
+
+  // Reset the per-question countdown when the active question changes.
+  // React-recommended "adjust state during render" pattern — avoids calling
+  // setState synchronously inside an effect (cascading renders).
+  const currentQuestionId = currentQuestion?.id ?? null
+  if (currentQuestionId !== timedQuestionId) {
+    setTimedQuestionId(currentQuestionId)
+    setTimeLeft(currentQuestion?.time_limit_seconds || 15)
+  }
 
   // 2. Local Timer per Question
   useEffect(() => {
     if (loading || finishing || !currentQuestion) return
 
-    const initialTime = currentQuestion.time_limit_seconds || 15
-    setTimeLeft(initialTime)
-
-    if (timerRef.current) clearInterval(timerRef.current)
-
     // Only start timer countdown if current question has not been answered yet
     const alreadyAnswered = !!currentQuestion.has_answered || !!selectedAnswers[currentQuestion.id]
     if (alreadyAnswered) return
 
+    if (timerRef.current) clearInterval(timerRef.current)
+    let remaining = currentQuestion.time_limit_seconds || 15
+
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current)
-          // Timeout occurred on current question
-          handleTimeout()
-          return 0
-        }
-        return prev - 1
-      })
+      remaining -= 1
+      setTimeLeft(remaining > 0 ? remaining : 0)
+      if (remaining <= 0) {
+        // Timeout occurred on current question — fire exactly once per interval
+        if (timerRef.current) clearInterval(timerRef.current)
+        handleTimeout()
+      }
     }, 1000)
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [currentIndex, loading, finishing, questions])
-
-  // Handle Timeout (Auto-advance without fake submit)
-  const handleTimeout = () => {
-    if (finishing) return
-    advanceToNextOrFinish()
-  }
-
-  // Helper to advance to next question or trigger test finish
-  const advanceToNextOrFinish = (nextIdx = currentIndex + 1) => {
-    if (nextIdx < questions.length) {
-      setCurrentIndex(nextIdx)
-    } else {
-      finishTestAtomic()
-    }
-  }
-
-  // Atomic finish: submit last answer THEN finish. No reliance on React state.
-  // If finishStudentTest fails, show error — do NOT redirect.
-  const finishTestAtomic = async () => {
-    if (finishing) return
-    setFinishing(true)
-    setErrorMsg("")
-    try {
-      await finishStudentTest(sessionId)
-      router.push(`/student/test/result/${sessionId}`)
-    } catch (err: any) {
-      console.error("finishStudentTest failed:", err)
-      setErrorMsg(err.message || "Ошибка завершения теста")
-      setFinishing(false)
-    }
-  }
+  }, [loading, finishing, currentQuestion, selectedAnswers, handleTimeout])
 
   // Handle finish test (called from UI "Завершить тест" button)
   // STRICT: submit → verify saved → finish. If submit fails, show error, do NOT finish.

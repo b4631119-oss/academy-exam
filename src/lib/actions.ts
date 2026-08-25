@@ -304,6 +304,29 @@ export async function createStudent(name: string, roomId: string) {
   return data
 }
 
+// Clears the student session cookie (JWT lives 7 days, so explicit logout /
+// room switch is the only way out). Does NOT delete any student data —
+// answers, results and participants stay in the DB.
+export async function studentLogout() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get("studentToken")?.value
+
+  if (token) {
+    const payload = await verifyStudentToken(token)
+    if (payload?.studentId) {
+      logAction("STUDENT_LOGOUT", payload.studentId)
+    }
+  }
+
+  cookieStore.set("studentToken", "", {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 0
+  })
+}
+
 export async function getStudent() {
   const cookieStore = await cookies()
   const token = cookieStore.get("studentToken")?.value
