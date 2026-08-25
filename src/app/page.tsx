@@ -7,7 +7,7 @@ export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "PROlab Academy Exam",
+    "name": "PROlab Academy",
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Any",
     "description": "Платформа для создания, проведения и автоматической оценки онлайн-экзаменов от PROlab Academy.",
