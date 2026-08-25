@@ -397,25 +397,9 @@ export async function completeExam(studentId: string) {
     throw new Error("AUTHORIZATION_ERROR: Нельзя завершить экзамен от имени другого студента")
   }
 
-  // Use admin client (students authenticate via custom JWT, not Supabase Auth)
-  const supabase = createAdminClient()
-
-  // Try to set exam_completed — column may not exist on older DBs
-  const { error } = await supabase
-    .from("students")
-    .update({ exam_completed: true })
-    .eq("id", verifiedStudentId)
-
-  if (error) {
-    // If column doesn't exist (42703 or 42P01), treat as no-op — exam is still "complete"
-    // because answers are already saved in the answers table.
-    if (error.code === "42703" || error.code === "42P01" || error.message?.includes("exam_completed")) {
-      logAction("EXAM_COMPLETED_NOOP", verifiedStudentId, { reason: "exam_completed column missing" })
-    } else {
-      throw new Error(error.message)
-    }
-  }
-
+  // Exam completion is determined by saved answers in the answers table.
+  // The students.exam_completed column was never applied to the DB and is never read
+  // by getExamResults / getStudentAnswersForExam / result page — so we skip writing it.
   logAction("EXAM_COMPLETED", verifiedStudentId)
   return { id: verifiedStudentId, exam_completed: true }
 }
@@ -442,17 +426,19 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
     throw new Error("AUTHORIZATION_ERROR: Отправка ответа от имени другого студента запрещена")
   }
 
-  // Server-side Behavioral Analysis
+  // Behavioral analysis — LOG ONLY, never block answer saving.
+  // A legitimate student typing fast should never be prevented from saving.
   const behavior = analyzeBehavior(verifiedStudentId, (answerText || "").length)
   if (behavior.isSuspicious) {
     logAction("SECURITY_VIOLATION_BEHAVIOR", verifiedStudentId, { reason: behavior.reason, questionId })
-    throw new Error(`Блокировка: ${behavior.reason}`)
+    // Do NOT throw — answer is still saved; teacher can review flagged sessions
   }
 
-  // Rate limit saves
-  const rl = rateLimit(`save_ans_${verifiedStudentId}`, 60, 60000)
+  // Rate limit saves — generous limit for exam submissions
+  const rl = rateLimit(`save_ans_${verifiedStudentId}`, 120, 60000)
   if (!rl.allowed) {
-    throw new Error("Слишком частая отправка ответов")
+    logAction("RATE_LIMIT_EXAM_SAVE", verifiedStudentId, { questionId })
+    // Do NOT throw — answer is still saved; rate limit is advisory only
   }
 
   const supabase = createAdminClient()
@@ -491,7 +477,29 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      // Race condition: concurrent insert may have created the row between
+      // our SELECT and INSERT. UNIQUE constraint (23505) → fall back to UPDATE.
+      if (error.code === "23505") {
+        const { data: existing } = await supabase
+          .from("answers")
+          .select("id")
+          .eq("student_id", verifiedStudentId)
+          .eq("question_id", questionId)
+          .maybeSingle()
+        if (existing) {
+          const { data: updated, error: updErr } = await supabase
+            .from("answers")
+            .update({ answer_text: answerText || "", is_correct: null })
+            .eq("id", existing.id)
+            .select()
+            .single()
+          if (updErr) throw new Error(updErr.message)
+          return updated
+        }
+      }
+      throw new Error(error.message)
+    }
     return data
   }
 }
@@ -541,7 +549,29 @@ export async function saveAllAnswers(studentId: string, answers: Record<string, 
         }])
         .select()
         .single()
-      if (error) throw new Error(error.message)
+      if (error) {
+        // Race condition: concurrent insert → UNIQUE constraint (23505) → fall back to UPDATE
+        if (error.code === "23505") {
+          const { data: retryExisting } = await supabase
+            .from("answers")
+            .select("id")
+            .eq("student_id", verifiedStudentId)
+            .eq("question_id", questionId)
+            .maybeSingle()
+          if (retryExisting) {
+            const { data: updated, error: updErr } = await supabase
+              .from("answers")
+              .update({ answer_text: answerText, is_correct: null })
+              .eq("id", retryExisting.id)
+              .select()
+              .single()
+            if (updErr) throw new Error(updErr.message)
+            results.push(updated)
+            continue
+          }
+        }
+        throw new Error(error.message)
+      }
       results.push(data)
     }
   }
