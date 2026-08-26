@@ -110,36 +110,36 @@ export default function StudentRoomAssignments() {
   }, [assignments.length])
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">{t.loadingExams}</div>
+    return <div className="text-center py-20 text-slate-500 dark:text-slate-400">{t.loadingExams}</div>
   }
 
   return (
     <div className="space-y-6 fade-in max-w-4xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
           {t.helloStudent.replace('{name}', student?.name || '')}
         </h1>
-        <p className="text-slate-500 mt-1">
-          {t.welcomeToRoom.split('{room}')[0]}<span className="font-semibold text-slate-700">{student?.rooms?.name}</span>{t.welcomeToRoom.split('{room}')[1]}
+        <p className="text-slate-500 dark:text-slate-400 mt-1">
+          {t.welcomeToRoom.split('{room}')[0]}<span className="font-semibold text-slate-700 dark:text-slate-300">{student?.rooms?.name}</span>{t.welcomeToRoom.split('{room}')[1]}
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-3 text-sm text-red-600 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div>
-        <h2 className="text-xl font-bold text-slate-900 mb-4">{assignmentTitle}</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">{assignmentTitle}</h2>
 
         {assignments.length === 0 ? (
           <Card className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-              <FileText className="w-8 h-8 text-slate-400" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+              <FileText className="w-8 h-8 text-slate-400 dark:text-slate-500" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-900">Нет доступных заданий</h3>
-            <p className="text-slate-500 mt-2">В этой аудитории пока нет экзаменов или тестов.</p>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Нет доступных заданий</h3>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">В этой аудитории пока нет экзаменов или тестов.</p>
           </Card>
         ) : (
           <div className="grid gap-4">
@@ -150,19 +150,19 @@ export default function StudentRoomAssignments() {
               return (
                 <Card
                   key={item.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:border-sky-300 hover:shadow-md transition-all ${
-                    isStarting ? "border-sky-400 bg-sky-50/50" : ""
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-md transition-all ${
+                    isStarting ? "border-sky-400 dark:border-sky-600 bg-sky-50/50 dark:bg-sky-950/30" : ""
                   }`}
                 >
                   <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-                    <div className="p-3 bg-sky-50 rounded-xl">
-                      <FileText className="w-6 h-6 text-sky-500" />
+                    <div className="p-3 bg-sky-50 dark:bg-sky-950 rounded-xl">
+                      <FileText className="w-6 h-6 text-sky-500 dark:text-sky-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
-                      <p className="text-sm text-slate-500 mt-1">{isExam ? "Экзамен" : "Тест"}</p>
-                      {item.description && <p className="text-sm text-slate-500 mt-1">{item.description}</p>}
-                      <p className="text-sm text-slate-500 mt-2">{item.question_count} вопросов</p>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{item.title}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{isExam ? "Экзамен" : "Тест"}</p>
+                      {item.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{item.description}</p>}
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{item.question_count} вопросов</p>
                     </div>
                   </div>
 

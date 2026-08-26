@@ -255,7 +255,7 @@ export async function validateRoomCode(code: string) {
   if (!formattedCode) return null
 
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     const { data, error } = await supabase
       .from("rooms")
@@ -281,7 +281,7 @@ export async function createStudent(name: string, roomId: string) {
     throw new Error("Слишком много попыток входа. Пожалуйста, подождите минуту.")
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("students")
     .insert([{ name: name.trim(), room_id: roomId }])
@@ -428,12 +428,24 @@ export async function completeExam(studentId: string) {
 }
 
 export async function getQuestions(examId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("questions")
     .select("*")
     .eq("exam_id", examId)
     .order("created_at", { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export async function getExam(examId: string) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from("exams")
+    .select("*")
+    .eq("id", examId)
+    .single()
 
   if (error) throw new Error(error.message)
   return data
@@ -603,7 +615,7 @@ export async function saveAllAnswers(studentId: string, answers: Record<string, 
 }
 
 export async function checkStudentExists(name: string, roomId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("students")
     .select("id")

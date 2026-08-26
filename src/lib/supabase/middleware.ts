@@ -30,8 +30,9 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
-  const isTeacherRoute = request.nextUrl.pathname.startsWith('/teacher')
+  const pathname = request.nextUrl.pathname
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname === '/teacher/login'
+  const isTeacherRoute = pathname.startsWith('/teacher') && pathname !== '/teacher/login'
 
   // Optimization: Only validate user if we are on a route that cares about auth
   if (!isAuthRoute && !isTeacherRoute) {
@@ -46,9 +47,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (isTeacherRoute && !user) {
-    // If trying to access teacher routes without being logged in, redirect to login
+    // If trying to access teacher routes without being logged in, redirect to teacher login
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/teacher/login'
     return NextResponse.redirect(url)
   }
 

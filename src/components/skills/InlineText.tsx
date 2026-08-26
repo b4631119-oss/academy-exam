@@ -8,7 +8,7 @@ export function InlineText({ text }: { text: string }) {
           return (
             <code
               key={index}
-              className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] text-sky-800 break-all"
+              className="rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[0.85em] text-sky-800 dark:text-sky-300 break-all"
             >
               {part.slice(1, -1)}
             </code>

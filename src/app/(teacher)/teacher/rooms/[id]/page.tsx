@@ -31,7 +31,7 @@ export default function RoomDetails() {
       const { data: { session } } = await supabase.auth.getSession()
       const user = session?.user
       if (!user) {
-        router.push("/login")
+        router.push("/teacher/login")
         return
       }
 

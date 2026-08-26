@@ -47,10 +47,6 @@ export default function StudentAutonomousTestPage() {
   const finishingRef = useRef(false)
   const selectedAnswersRef = useRef<Record<string, string>>({})
 
-  // Atomic finish: submit last answer THEN finish. No reliance on React state.
-  // If finishStudentTest fails, show error — do NOT redirect.
-  // Guard lives in a ref (not state) so the callback stays referentially stable
-  // and can be safely used inside effects without stale-closure double-finish.
   const finishTestAtomic = useCallback(async () => {
     if (finishingRef.current) return
     finishingRef.current = true
@@ -67,7 +63,6 @@ export default function StudentAutonomousTestPage() {
     }
   }, [sessionId, router])
 
-  // Helper to advance to next question or trigger test finish
   const advanceToNextOrFinish = useCallback(
     (nextIdx = currentIndex + 1) => {
       if (nextIdx < questions.length) {
@@ -79,13 +74,11 @@ export default function StudentAutonomousTestPage() {
     [currentIndex, questions.length, finishTestAtomic]
   )
 
-  // Handle Timeout (Auto-advance without fake submit)
   const handleTimeout = useCallback(() => {
     if (finishingRef.current) return
     advanceToNextOrFinish()
   }, [advanceToNextOrFinish])
 
-  // 1. Initial Load: Load all test questions once (no polling)
   useEffect(() => {
     let isMounted = true
 
@@ -114,7 +107,6 @@ export default function StudentAutonomousTestPage() {
         setTestDescription(data.test_description || "")
         setQuestions(qList)
 
-        // Reconstruct saved answers map from server response
         const initialAnswers: Record<string, string> = {}
         qList.forEach((q) => {
           if (q.selected_option_id) {
@@ -124,12 +116,10 @@ export default function StudentAutonomousTestPage() {
         setSelectedAnswers(initialAnswers)
         selectedAnswersRef.current = initialAnswers
 
-        // Position current index at the first unanswered question
         const firstUnanswered = qList.findIndex((q) => !q.has_answered)
         if (firstUnanswered !== -1) {
           setCurrentIndex(firstUnanswered)
         } else {
-          // All questions answered — finish test
           finishTestAtomic()
           return
         }
@@ -152,20 +142,15 @@ export default function StudentAutonomousTestPage() {
 
   const currentQuestion = questions[currentIndex] || null
 
-  // Reset the per-question countdown when the active question changes.
-  // React-recommended "adjust state during render" pattern — avoids calling
-  // setState synchronously inside an effect (cascading renders).
   const currentQuestionId = currentQuestion?.id ?? null
   if (currentQuestionId !== timedQuestionId) {
     setTimedQuestionId(currentQuestionId)
     setTimeLeft(currentQuestion?.time_limit_seconds || 15)
   }
 
-  // 2. Local Timer per Question
   useEffect(() => {
     if (loading || finishing || !currentQuestion) return
 
-    // Only start timer countdown if current question has not been answered yet
     const alreadyAnswered = !!currentQuestion.has_answered || !!selectedAnswers[currentQuestion.id]
     if (alreadyAnswered) return
 
@@ -176,7 +161,6 @@ export default function StudentAutonomousTestPage() {
       remaining -= 1
       setTimeLeft(remaining > 0 ? remaining : 0)
       if (remaining <= 0) {
-        // Timeout occurred on current question — fire exactly once per interval
         if (timerRef.current) clearInterval(timerRef.current)
         handleTimeout()
       }
@@ -187,15 +171,12 @@ export default function StudentAutonomousTestPage() {
     }
   }, [loading, finishing, currentQuestion, selectedAnswers, handleTimeout])
 
-  // Handle finish test (called from UI "Завершить тест" button)
-  // STRICT: submit → verify saved → finish. If submit fails, show error, do NOT finish.
   const handleFinishTest = async () => {
     if (finishing || submitting) return
 
     const latestAnswers = selectedAnswersRef.current
     const latestQuestion = questions[currentIndex] || null
 
-    // Try to submit current answer if it exists and hasn't been saved yet
     if (latestQuestion) {
       const currentQuestionId = latestQuestion.id
       const selectedOptionId = latestAnswers[currentQuestionId] || latestQuestion.selected_option_id || null
@@ -205,7 +186,6 @@ export default function StudentAutonomousTestPage() {
         try {
           const result = await submitStudentAnswer(sessionId, currentQuestionId, selectedOptionId)
           if (result && !(result as any).already_answered) {
-            // New answer saved — confirm locally
             setQuestions((prev) =>
               prev.map((q) =>
                 q.id === currentQuestionId ? { ...q, has_answered: true, selected_option_id: selectedOptionId } : q
@@ -213,7 +193,6 @@ export default function StudentAutonomousTestPage() {
             )
           }
         } catch (err: any) {
-          // Submit failed — do NOT proceed to finish, show error
           setSubmitting(false)
           setErrorMsg(err.message || "Ошибка сохранения ответа")
           return
@@ -225,7 +204,6 @@ export default function StudentAutonomousTestPage() {
     await finishTestAtomic()
   }
 
-  // 3. Submit Option Selection
   const handleSelectOption = async (optionId: string) => {
     if (!currentQuestion || submitting || finishing) return
 
@@ -239,7 +217,6 @@ export default function StudentAutonomousTestPage() {
     try {
       await submitStudentAnswer(sessionId, qId, optionId)
 
-      // Server confirmed save — update local state
       const updatedAnswers = { ...selectedAnswers, [qId]: optionId }
       setSelectedAnswers(updatedAnswers)
       selectedAnswersRef.current = updatedAnswers
@@ -250,7 +227,6 @@ export default function StudentAutonomousTestPage() {
       )
 
       if (currentIndex >= questions.length - 1) {
-        // Last question — finish atomically (answer is already saved above)
         await finishTestAtomic()
         return
       }
@@ -258,7 +234,6 @@ export default function StudentAutonomousTestPage() {
     } catch (err: any) {
       console.error("Answer submission error:", err)
       setErrorMsg(err.message || "Ошибка сохранения ответа")
-      // Do NOT proceed to finish on error — let the student see the error
     } finally {
       setSubmitting(false)
     }
@@ -267,8 +242,8 @@ export default function StudentAutonomousTestPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
-        <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
-        <p className="text-slate-500 font-medium">Загрузка теста...</p>
+        <Loader2 className="w-8 h-8 text-sky-600 dark:text-sky-400 animate-spin" />
+        <p className="text-slate-500 dark:text-slate-400 font-medium">Загрузка теста...</p>
       </div>
     )
   }
@@ -276,13 +251,13 @@ export default function StudentAutonomousTestPage() {
   if (errorMsg && questions.length === 0) {
     return (
       <div className="max-w-md mx-auto py-12 px-4 fade-in">
-        <Card className="p-8 text-center space-y-6 shadow-md border-amber-100">
-          <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+        <Card className="p-8 text-center space-y-6 shadow-md border-amber-100 dark:border-amber-900">
+          <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
             <HelpCircle className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">{testTitle}</h2>
-            <p className="text-sm text-slate-600">{errorMsg}</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{testTitle}</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{errorMsg}</p>
           </div>
           <div className="flex flex-col gap-3 pt-2">
             <Button onClick={() => router.back()} variant="outline" className="gap-2 w-full">
@@ -298,8 +273,8 @@ export default function StudentAutonomousTestPage() {
   if (finishing) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
-        <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
-        <p className="text-slate-500 font-medium">Завершение теста и подсчет результатов...</p>
+        <Loader2 className="w-8 h-8 text-sky-600 dark:text-sky-400 animate-spin" />
+        <p className="text-slate-500 dark:text-slate-400 font-medium">Завершение теста и подсчет результатов...</p>
       </div>
     )
   }
@@ -314,29 +289,28 @@ export default function StudentAutonomousTestPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6 fade-in py-6 px-4">
       {/* Top Status Header */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
-          <span className="font-semibold text-slate-800 text-sm sm:text-base">
+          <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm sm:text-base">
             Вопрос {currentIndex + 1} из {questions.length}
           </span>
         </div>
 
-        {/* Local Timer Bar */}
         {!currentAnswered && (
           <div
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono font-bold text-sm transition-colors ${
-              timeLeft <= 3 ? "bg-red-100 text-red-700 animate-pulse" : "bg-slate-100 text-slate-700"
+              timeLeft <= 3 ? "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 animate-pulse" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
             }`}
           >
-            <Clock className="w-4 h-4 text-slate-500" />
+            <Clock className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             <span>{timeLeft}s</span>
           </div>
         )}
       </div>
 
       {/* Progress Line */}
-      <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+      <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
         <div
           className="h-full bg-sky-500 transition-all duration-300 ease-out"
           style={{ width: `${progressPercentage}%` }}
@@ -344,28 +318,28 @@ export default function StudentAutonomousTestPage() {
       </div>
 
       {/* Question Card */}
-      <Card className="p-6 sm:p-8 shadow-md border-sky-100 space-y-4">
-        <div className="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+      <Card className="p-6 sm:p-8 shadow-md border-sky-100 dark:border-sky-900 space-y-4">
+        <div className="flex items-center justify-between text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
           <span>Баллы: {currentQuestion?.points || 20}</span>
           <span>Время: {currentQuestion?.time_limit_seconds || 15} сек</span>
         </div>
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-snug">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 leading-snug">
           {currentQuestion?.question_text || currentQuestion?.text}
         </h2>
       </Card>
 
       {/* Feedback Alert */}
       {currentAnswered && (
-        <div className="p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center justify-between font-medium slide-up">
+        <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-xl flex items-center justify-between font-medium slide-up">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
             <span>Ответ сохранён</span>
           </div>
           {currentIndex < questions.length - 1 ? (
             <Button
               onClick={() => setCurrentIndex((prev) => prev + 1)}
               variant="outline"
-              className="gap-1 bg-white text-green-800 border-green-300 hover:bg-green-100 text-sm py-1.5 px-3"
+              className="gap-1 bg-white dark:bg-slate-800 text-green-800 dark:text-green-200 border-green-300 dark:border-green-700 hover:bg-green-100 dark:hover:bg-green-900 text-sm py-1.5 px-3"
             >
               <span>Следующий</span>
               <ArrowRight className="w-4 h-4" />
@@ -400,32 +374,32 @@ export default function StudentAutonomousTestPage() {
               disabled={isDisabled}
               className={`flex items-center gap-4 p-5 rounded-2xl border-2 text-left transition-all duration-200 shadow-sm ${
                 isSelected
-                  ? "border-sky-500 bg-sky-50 ring-2 ring-sky-300"
+                  ? "border-sky-500 bg-sky-50 dark:bg-sky-950 ring-2 ring-sky-300 dark:ring-sky-700"
                   : isDisabled
-                  ? "border-slate-200 bg-slate-50 opacity-70 cursor-not-allowed"
-                  : "border-slate-200 bg-white hover:border-sky-400 hover:bg-sky-50/50 active:scale-[0.98]"
+                  ? "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 opacity-70 cursor-not-allowed"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-sky-400 dark:hover:border-sky-600 hover:bg-sky-50/50 dark:hover:bg-sky-950/50 active:scale-[0.98]"
               }`}
             >
               <span
                 className={`w-10 h-10 flex items-center justify-center rounded-xl font-mono font-bold text-base transition-colors shrink-0 ${
-                  isSelected ? "bg-sky-600 text-white shadow-sm" : "bg-slate-100 text-slate-700"
+                  isSelected ? "bg-sky-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 {letter}
               </span>
 
-              <span className="font-semibold text-slate-800 text-base sm:text-lg flex-1 leading-snug">
+              <span className="font-semibold text-slate-800 dark:text-slate-200 text-base sm:text-lg flex-1 leading-snug">
                 {opt.option_text || (opt as any).text}
               </span>
 
-              {isSelected && submitting && <Loader2 className="w-5 h-5 text-sky-600 animate-spin shrink-0" />}
+              {isSelected && submitting && <Loader2 className="w-5 h-5 text-sky-600 dark:text-sky-400 animate-spin shrink-0" />}
             </button>
           )
         })}
       </div>
 
       {/* Bottom Navigation */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+      <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
         <Button
           onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
           disabled={currentIndex === 0 || submitting}

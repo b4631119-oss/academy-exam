@@ -64,29 +64,29 @@ export default function StudentSessionMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-700"
+        className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
         aria-label="Меню сессии"
       >
         <MoreVertical className="w-5 h-5" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 fade-in">
+        <div className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-1.5 z-50 fade-in">
           <button
             onClick={() => handleAction("enter")}
             disabled={loggingOut}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
           >
-            <DoorOpen className="w-4 h-4 text-sky-500 shrink-0" />
+            <DoorOpen className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />
             <span>Сменить комнату</span>
           </button>
 
-          <div className="my-1 border-t border-slate-100" />
+          <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
 
           <button
             onClick={() => handleAction("home")}
             disabled={loggingOut}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors disabled:opacity-50"
           >
             <LogOut className="w-4 h-4 shrink-0" />
             <span>Выйти</span>

@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Users, LogIn } from "lucide-react"
+import Link from "next/link"
+import { Users, LogIn, ArrowLeft } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -23,12 +24,8 @@ export default function StudentEnter() {
     setError("")
 
     try {
-      // 1. Validate room
       const formattedCode = code.trim().toUpperCase()
-      console.log("Validating room code:", formattedCode)
-      
       const room = await validateRoomCode(formattedCode)
-      console.log("Room validation result:", room)
       
       if (!room) {
         throw new Error(t.invalidRoom)
@@ -51,10 +48,7 @@ export default function StudentEnter() {
         }
       }
 
-      // 2. Create student & save cookie
       await createStudent(finalName, room.id)
-      
-      // 3. Redirect to room's exam list
       router.push(`/student/rooms/${room.id}`)
     } catch (err: any) {
       setError(err.message)
@@ -65,13 +59,23 @@ export default function StudentEnter() {
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center fade-in">
+      <div className="w-full max-w-md">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          На главную
+        </Link>
+      </div>
+
       <Card className="w-full max-w-md p-8 shadow-lg">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-sky-100 rounded-2xl mb-4 text-sky-600">
+          <div className="inline-flex items-center justify-center p-3 bg-sky-100 dark:bg-sky-900 rounded-2xl mb-4 text-sky-600 dark:text-sky-400">
             <Users className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">{t.joinRoom}</h1>
-          <p className="text-slate-500 mt-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t.joinRoom}</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">
             {t.joinRoomDesc}
           </p>
         </div>
@@ -101,7 +105,7 @@ export default function StudentEnter() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+          {error && <p className="text-red-500 dark:text-red-400 text-sm font-medium">{error}</p>}
 
           <Button type="submit" className="w-full gap-2 text-lg h-14 mt-4" disabled={loading || !name || code.length < 3}>
             {loading ? t.joining : (

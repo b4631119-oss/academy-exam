@@ -5,15 +5,13 @@ import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { getStudent, getQuestions, saveAnswer, getStudentAnswersForExam, completeExam, saveAllAnswers } from "@/lib/actions"
-import { createClient } from "@/lib/supabase/client"
+import { getStudent, getQuestions, getExam, saveAnswer, getStudentAnswersForExam, completeExam, saveAllAnswers } from "@/lib/actions"
 import { initAntiCheat } from "@/lib/anti-cheat"
 import { t } from "@/lib/translations"
 
 export default function TakeExam() {
   const params = useParams()
   const router = useRouter()
-  const supabase = createClient()
   const examId = params.id as string
 
   const [student, setStudent] = useState<any>(null)
@@ -54,16 +52,11 @@ export default function TakeExam() {
         }
         setStudent(studentData)
 
-        // Get Exam info
-        const { data: examData } = await supabase
-          .from("exams")
-          .select("*")
-          .eq("id", examId)
-          .single()
-        
+        // Get Exam info via server action (uses admin client, bypasses RLS)
+        const examData = await getExam(examId)
         if (examData) setExam(examData)
 
-        // Get questions
+        // Get questions via server action (uses admin client, bypasses RLS)
         const qData = await getQuestions(examId)
         setQuestions(qData || [])
 
@@ -89,7 +82,7 @@ export default function TakeExam() {
     return () => {
       cleanupAntiCheat?.();
     }
-  }, [examId, router, supabase])
+  }, [examId, router])
 
   const handleAnswerChange = (questionId: string, text: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: text }))

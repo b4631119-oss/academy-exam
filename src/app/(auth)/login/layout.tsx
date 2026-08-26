@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Вход для преподавателей | PROlab Academy Exam",
-  description: "Авторизация для преподавателей. Войдите в систему для управления классами и экзаменами.",
+  title: "Вход | PROlab Academy",
+  description: "Выберите способ входа: ученик или преподаватель.",
   alternates: {
     canonical: "/login",
   },

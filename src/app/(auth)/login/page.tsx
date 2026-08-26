@@ -1,102 +1,70 @@
-"use client"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Users, GraduationCap, ArrowRight, ArrowLeft } from "lucide-react"
 import { Card } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { createClient } from "@/lib/supabase/client"
-import { t } from "@/lib/translations"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  
-  const router = useRouter()
-  const supabase = createClient()
-
-  const [attempts, setAttempts] = useState(0)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (attempts >= 5) {
-      setError("Слишком много неудачных попыток. Пожалуйста, подождите немного перед следующей попыткой.")
-      return
-    }
-
-    setLoading(true)
-    setError("")
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
-
-      router.push("/teacher/dashboard")
-      router.refresh()
-    } catch (err: any) {
-      setAttempts(prev => prev + 1)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md slide-up p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">
-            {t.teacherLogin}
+      <div className="w-full max-w-lg space-y-8 fade-in">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          На главную
+        </Link>
+
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Вход в PROlab Academy
           </h1>
-          <p className="text-slate-500 mt-2">
-            {t.loginWelcome}
+          <p className="text-base text-slate-500 dark:text-slate-400">
+            Выберите, как вы хотите войти
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="email">{t.email}</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="teacher@school.com"
-            />
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link href="/student/enter" className="group">
+            <Card className="h-full flex flex-col items-center gap-4 p-7 text-center transition-all hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-lg hover:shadow-sky-50 dark:hover:shadow-sky-950/50">
+              <div className="p-3.5 rounded-2xl bg-sky-50 dark:bg-sky-950 transition-colors group-hover:bg-sky-100 dark:group-hover:bg-sky-900">
+                <Users className="w-7 h-7 text-sky-600 dark:text-sky-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Я ученик
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                  Войти в комнату и пройти тесты и экзамены
+                </p>
+              </div>
+              <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-sky-600 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 transition-colors">
+                Продолжить
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Card>
+          </Link>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">{t.password}</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? t.signingIn : t.signIn}
-          </Button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <Link
-            href="/register"
-            className="text-sm text-sky-600 hover:underline"
-          >
-            {t.noAccount}
+          <Link href="/teacher/login" className="group">
+            <Card className="h-full flex flex-col items-center gap-4 p-7 text-center transition-all hover:border-amber-200 dark:hover:border-amber-700 hover:shadow-lg hover:shadow-amber-50 dark:hover:shadow-amber-950/50">
+              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950 transition-colors group-hover:bg-amber-100 dark:group-hover:bg-amber-900">
+                <GraduationCap className="w-7 h-7 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Я преподаватель
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                  Управлять комнатами, тестами и экзаменами
+                </p>
+              </div>
+              <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-amber-600 dark:text-amber-400 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
+                Продолжить
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Card>
           </Link>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

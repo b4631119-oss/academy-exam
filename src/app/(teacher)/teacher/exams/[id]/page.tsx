@@ -25,7 +25,7 @@ export default function ManageExamQuestions() {
     async function loadData() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        router.push("/login")
+        router.push("/teacher/login")
         return
       }
 

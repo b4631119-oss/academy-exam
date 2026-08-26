@@ -1,102 +1,70 @@
 import Link from "next/link"
-import Image from "next/image"
-import { BookOpen, GraduationCap, Users } from "lucide-react"
+import { BookOpen, LogIn } from "lucide-react"
 import { Card } from "@/components/ui/Card"
+import { PublicHeader } from "@/components/PublicHeader"
 
 export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "PROlab Academy",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "Any",
-    "description": "Платформа для создания, проведения и автоматической оценки онлайн-экзаменов от PROlab Academy.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
+    "@type": "WebSite",
+    name: "PROlab Academy",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site",
+    description: "Образовательная платформа для изучения основ веб-разработки и проведения экзаменов.",
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Schema.org JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <>
+      <PublicHeader />
 
-      {/* SEO-блок (виден только поисковым роботам) */}
-      <div className="sr-only">
-        <h1>Платформа онлайн-тестирования PROlab Academy Exam</h1>
-        <p>
-          Добро пожаловать в систему проведения экзаменов. Здесь студенты могут пройти тестирование по ИТ-направлениям, используя индивидуальный код доступа, а преподаватели — оценить результаты обучения.
-        </p>
-      </div>
+      <main className="flex-1">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
 
-      {/* Decorative background elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-      
-      <div className="z-10 text-center max-w-4xl mx-auto space-y-8 fade-in w-full">
-        <div className="space-y-6 flex flex-col items-center">
-          {/* Герой-изображение (с обрезанным лого Gemini) */}
-          <div className="w-full max-w-2xl mx-auto relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/60 mb-6 group">
-            <Image 
-              src="/hero-image.png" 
-              alt="Платформа онлайн-тестирования PROlab Academy Exam" 
-              width={1400} 
-              height={700} 
-              className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-109"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-500/40 to-transparent"></div>
+          <div className="max-w-2xl mx-auto text-center space-y-6 fade-in">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              PROlab Academy
+            </h1>
+            <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed">
+              Изучай IT и развивай практические навыки
+            </p>
           </div>
 
-          
-          <p className="text-lg text-slate-600 md:text-xl max-w-lg mx-auto">
-            Современная платформа для удобного создания, проведения и оценки экзаменов.
-          </p>
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 max-w-xl mx-auto slide-up">
+            <Link href="/skills" className="group">
+              <Card className="h-full flex flex-col items-center gap-3 p-7 text-center transition-all hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-lg hover:shadow-sky-50 dark:hover:shadow-sky-950/50">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-950">
+                  <BookOpen className="w-6 h-6 text-slate-600 dark:text-slate-400 transition-colors group-hover:text-sky-500 dark:group-hover:text-sky-400" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Обучение</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">HTML и CSS — основы веб-разработки</p>
+                </div>
+              </Card>
+            </Link>
+
+            <Link href="/login" className="group">
+              <Card className="h-full flex flex-col items-center gap-3 p-7 text-center transition-all hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-lg hover:shadow-sky-50 dark:hover:shadow-sky-950/50">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-950">
+                  <LogIn className="w-6 h-6 text-slate-600 dark:text-slate-400 transition-colors group-hover:text-sky-500 dark:group-hover:text-sky-400" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Войти</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Для преподавателей и студентов</p>
+                </div>
+              </Card>
+            </Link>
+          </div>
         </div>
+      </main>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-12 max-w-3xl mx-auto slide-up">
-          <Link href="/skills" className="group md:col-span-2">
-            <Card className="h-full flex flex-col items-center justify-center p-8 space-y-4 transition-all hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100/50 cursor-pointer">
-              <div className="p-4 bg-slate-50 rounded-full group-hover:bg-sky-50 transition-colors">
-                <BookOpen className="w-8 h-8 text-slate-600 group-hover:text-sky-500 transition-colors" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-slate-900">Обучение</h3>
-                <p className="text-sm text-slate-500 mt-2">Изучай основы веб-разработки: HTML и CSS</p>
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/student/enter" className="group">
-            <Card className="h-full flex flex-col items-center justify-center p-8 space-y-4 transition-all hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100/50 cursor-pointer">
-              <div className="p-4 bg-slate-50 rounded-full group-hover:bg-sky-50 transition-colors">
-                <Users className="w-8 h-8 text-slate-600 group-hover:text-sky-500 transition-colors" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-slate-900">Я студент</h3>
-                <p className="text-sm text-slate-500 mt-2">Войти в аудиторию по коду доступа</p>
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/login" className="group">
-            <Card className="h-full flex flex-col items-center justify-center p-8 space-y-4 transition-all hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100/50 cursor-pointer">
-              <div className="p-4 bg-slate-50 rounded-full group-hover:bg-sky-50 transition-colors">
-                <GraduationCap className="w-8 h-8 text-slate-600 group-hover:text-sky-500 transition-colors" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-slate-900">Я преподаватель</h3>
-                <p className="text-sm text-slate-500 mt-2">Управление классами и экзаменами</p>
-              </div>
-            </Card>
-          </Link>
+      <footer className="border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+          PROlab Academy
         </div>
-      </div>
-    </main>
+      </footer>
+    </>
   )
 }
