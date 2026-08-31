@@ -20,6 +20,25 @@ const DATA_FILE = path.join(__dirname, 'test-data.json');
 const TEACHER_AUTH = path.join(__dirname, 'teacher-auth.json');
 const STUDENT_AUTH = path.join(__dirname, 'student-auth.json');
 
+async function withRetry<T>(fn: () => Promise<T>, label: string, maxRetries = 3): Promise<T> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const isTransient = msg.includes('over_request_rate_limit') || msg.includes('429') || msg.includes('Invalid Refresh Token');
+      if (isTransient && attempt < maxRetries) {
+        const delay = attempt * 2000;
+        console.log(`⏳ ${label}: transient error (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error(`${label}: all ${maxRetries} retries exhausted`);
+}
+
 export default async function globalSetup() {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
@@ -27,15 +46,17 @@ export default async function globalSetup() {
 
   const browser = await chromium.launch();
 
-  // ── Teacher login ──────────────────────────────────
+  // ── Teacher login (with retry for transient rate limits) ──
   const teacherCtx = await browser.newContext();
   const teacherPage = await teacherCtx.newPage();
-  await teacherPage.goto(`${BASE_URL}/teacher/login`);
-  await teacherPage.waitForLoadState('domcontentloaded');
-  await teacherPage.fill('#email', TEACHER_EMAIL);
-  await teacherPage.fill('#password', TEACHER_PASSWORD);
-  await teacherPage.click('button[type="submit"]');
-  await teacherPage.waitForURL(/\/teacher\/dashboard/, { timeout: 30000 });
+  await withRetry(async () => {
+    await teacherPage.goto(`${BASE_URL}/teacher/login`);
+    await teacherPage.waitForLoadState('domcontentloaded');
+    await teacherPage.fill('#email', TEACHER_EMAIL);
+    await teacherPage.fill('#password', TEACHER_PASSWORD);
+    await teacherPage.click('button[type="submit"]');
+    await teacherPage.waitForURL(/\/teacher\/dashboard/, { timeout: 30000 });
+  }, 'Teacher login');
 
   const { data: teacherAuth } = await admin.auth.admin.listUsers();
   const teacherUser = teacherAuth?.users?.find((u) => u.email === TEACHER_EMAIL);
@@ -161,11 +182,12 @@ export default async function globalSetup() {
   await studentPage.goto(`${BASE_URL}/student/enter`);
   await studentPage.waitForLoadState('domcontentloaded');
 
-  // Set the cookie
+  // Set the cookie — derive domain from BASE_URL
+  const cookieDomain = new URL(BASE_URL).hostname;
   await studentCtx.addCookies([{
     name: 'studentToken',
     value: studentToken,
-    domain: 'localhost',
+    domain: cookieDomain,
     path: '/',
     httpOnly: true,
     sameSite: 'Lax',
@@ -244,6 +266,8 @@ export default async function globalSetup() {
   await admin.from('test_participants').insert([{
     session_id: session.id,
     student_id: actualStudentId,
+    first_name: 'Test',
+    last_name: 'Student',
   }]);
   console.log('✅ Test session + participant created');
 

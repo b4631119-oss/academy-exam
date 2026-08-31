@@ -48,36 +48,22 @@ test.describe('1. LAST-ANSWER REGRESSION', () => {
   });
 
   test('1a. Last answer is saved before Finish', async () => {
-    // Answer question 1
+    // Answer question 1 — app auto-advances to next question after selection
     await studentPage.locator('button:has-text("Paris")').click();
-    await expect(studentPage.locator('text=Ответ сохранён')).toBeVisible({ timeout: 10000 });
-
-    // Go to question 2
-    await studentPage.locator('button:has-text("Следующий")').click();
     await expect(studentPage.locator('text=Q2: What is 5*5')).toBeVisible({ timeout: 10000 });
 
-    // Answer question 2
+    // Answer question 2 — app auto-advances
     await studentPage.locator('button:has-text("25")').click();
-    await expect(studentPage.locator('text=Ответ сохранён')).toBeVisible({ timeout: 10000 });
-
-    // Go to question 3 (last)
-    await studentPage.locator('button:has-text("Следующий")').click();
     await expect(studentPage.locator('text=Q3: Choose the correct')).toBeVisible({ timeout: 10000 });
 
-    // Answer LAST question
+    // Answer LAST question — app auto-advances and auto-finishes
     await studentPage.locator('button:has-text("Water boils at 100°C")').click();
-    await expect(studentPage.locator('text=Ответ сохранён')).toBeVisible({ timeout: 10000 });
 
-    // Click "Завершить тест"
-    const finishBtn = studentPage.locator('button:has-text("Завершить тест")');
-    await expect(finishBtn).toBeVisible({ timeout: 5000 });
-    await finishBtn.click();
-
-    // Should redirect to result page
-    await studentPage.waitForURL(/\/student\/test\/result\//, { timeout: 15000 });
+    // App auto-finishes on last question → wait for redirect to result page
+    await studentPage.waitForURL(/\/student\/test\/result\//, { timeout: 30000 });
 
     // Verify result shows correct score (3/3 correct = 100%)
-    await expect(studentPage.locator('text=100%').or(studentPage.locator('text=60 / 60'))).toBeVisible({ timeout: 10000 });
+    await expect(studentPage.locator('text=100%').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('1b. Result persists after refresh', async () => {
@@ -86,10 +72,10 @@ test.describe('1. LAST-ANSWER REGRESSION', () => {
     await studentPage.waitForLoadState('domcontentloaded');
 
     // Verify result is still there
-    await expect(studentPage.locator('text=100%').or(studentPage.locator('text=60 / 60'))).toBeVisible({ timeout: 10000 });
+    await expect(studentPage.locator('text=100%').first()).toBeVisible({ timeout: 10000 });
   });
 
-  test('1c. Teacher sees correct results', async () => {
+  test('1c. Teacher sees correct results', async ({ browser }) => {
     // Teacher checks results
     teacherCtx = await browser.newContext({ storageState: TEACHER_AUTH });
     teacherPage = await teacherCtx.newPage();
@@ -158,20 +144,21 @@ test.describe('3. EXAM PERSISTENCE', () => {
     // Wait for questions to load
     await expect(page.locator('textarea')).toBeVisible({ timeout: 15000 });
 
-    // Answer first question
+    // Answer first question using pressSequentially for reliable React controlled input
     const textarea = page.locator('textarea');
-    await textarea.fill('Answer for Q1');
+    await textarea.click();
+    await textarea.pressSequentially('Answer for Q1', { delay: 10 });
+    // Verify the fill took effect in the DOM
+    await expect(textarea).toHaveValue('Answer for Q1', { timeout: 5000 });
 
-    // Save by clicking Next
+    // Save by clicking Next — wait for saving indicator to appear then disappear
     await page.locator('button:has-text("Далее")').click();
-    await page.waitForLoadState('domcontentloaded');
-
-    // Verify we're on question 2
-    await expect(page.locator('textarea')).toBeVisible({ timeout: 10000 });
+    // Wait until saving is done and we see the next question
+    await expect(page.locator('text=Вопрос 2 из')).toBeVisible({ timeout: 10000 });
 
     // Go back to question 1 via Previous
     await page.locator('button:has-text("Назад")').click();
-    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('text=Вопрос 1 из')).toBeVisible({ timeout: 10000 });
 
     // Verify answer persists
     await expect(page.locator('textarea')).toHaveValue('Answer for Q1', { timeout: 10000 });
@@ -183,7 +170,7 @@ test.describe('3. EXAM PERSISTENCE', () => {
     await page.waitForLoadState('domcontentloaded');
     await expect(page.locator('textarea')).toBeVisible({ timeout: 15000 });
 
-    // Answer should still be there
+    // Answer should still be there (loaded from DB)
     await expect(page.locator('textarea')).toHaveValue('Answer for Q1', { timeout: 10000 });
   });
 });

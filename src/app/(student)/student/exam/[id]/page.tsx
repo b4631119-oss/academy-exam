@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
 import { Card } from "@/components/ui/Card"
@@ -24,6 +24,7 @@ export default function TakeExam() {
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
+  const answersRef = useRef<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState("")
 
@@ -73,6 +74,7 @@ export default function TakeExam() {
               loadedAnswers[item.question.id] = item.answer.answer_text || "";
             }
           })
+          answersRef.current = loadedAnswers
           setAnswers(loadedAnswers)
         }
       } catch (err) {
@@ -89,12 +91,13 @@ export default function TakeExam() {
   }, [examId, router])
 
   const handleAnswerChange = (questionId: string, text: string) => {
+    answersRef.current = { ...answersRef.current, [questionId]: text }
     setAnswers(prev => ({ ...prev, [questionId]: text }))
   }
 
   const handleNext = async () => {
     const currentQ = questions[currentIndex]
-    const answerText = answers[currentQ.id] || ""
+    const answerText = answersRef.current[currentQ.id] || ""
 
     if (currentIndex === questions.length - 1) {
       const updatedAnswers: Record<string, string> = { ...answers, [currentQ.id]: answerText }
@@ -118,12 +121,12 @@ export default function TakeExam() {
     setSaveError("")
     try {
       if (currentIndex < questions.length - 1) {
-        // Save current answer and go next
-        await saveAnswer(student.id, currentQ.id, answerText)
+        // Navigate immediately, save best-effort
         setCurrentIndex(currentIndex + 1)
+        await saveAnswer(student.id, currentQ.id, answerText)
       } else {
         // Save all answers just to be sure, then finish
-        await saveAllAnswers(student.id, { ...answers, [currentQ.id]: answerText })
+        await saveAllAnswers(student.id, { ...answersRef.current, [currentQ.id]: answerText })
         await completeExam(student.id)
         router.push(`/student/result/${examId}`)
       }
@@ -196,9 +199,10 @@ export default function TakeExam() {
             onClick={async () => {
               setSaving(true);
               setSaveError("");
+              const prevIndex = Math.max(0, currentIndex - 1);
+              setCurrentIndex(prevIndex);
               try {
-                await saveAnswer(student.id, currentQ.id, answers[currentQ.id] || "");
-                setCurrentIndex(Math.max(0, currentIndex - 1));
+                await saveAnswer(student.id, currentQ.id, answersRef.current[currentQ.id] || "");
               } catch (err: unknown) {
                 console.error(err);
                 setSaveError((err as Error).message || t.saveError);
