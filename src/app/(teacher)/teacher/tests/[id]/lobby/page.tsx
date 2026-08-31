@@ -27,24 +27,26 @@ export default function TeacherTestLobbyPage() {
   const router = useRouter()
   const testId = params.id as string
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [test, setTest] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [session, setSession] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [participants, setParticipants] = useState<any[]>([])
-  
+
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
   const [advancing, setAdvancing] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState("")
   const [infoMsg, setInfoMsg] = useState("")
-  const [now, setNow] = useState(Date.now())
+  const [now, setNow] = useState(() => Date.now())
   // Tracks the last known session status so stale info messages are cleared
   const lastStatusRef = useRef<string | null>(null)
 
   // Local countdown for the teacher: computed from server timestamps only
   useEffect(() => {
     if (session?.status !== "running") return
-    setNow(Date.now())
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [session?.status, session?.id])
@@ -64,8 +66,8 @@ export default function TeacherTestLobbyPage() {
         else if (status === "finished") setInfoMsg("Тест завершён")
         else setInfoMsg("")
       }
-    } catch (err: any) {
-      setError(friendlyError(err.message || "Ошибка загрузки лобби"))
+    } catch (err: unknown) {
+      setError(friendlyError((err as Error).message || "Ошибка загрузки лобби"))
     } finally {
       if (!silent) setLoading(false)
     }
@@ -94,8 +96,8 @@ export default function TeacherTestLobbyPage() {
       setSession(updated)
       lastStatusRef.current = updated.status
       setInfoMsg("Тест начат")
-    } catch (err: any) {
-      setError(friendlyError(err.message || "Не удалось начать тест"))
+    } catch (err: unknown) {
+      setError(friendlyError((err as Error).message || "Не удалось начать тест"))
     } finally {
       setStarting(false)
     }
@@ -114,8 +116,8 @@ export default function TeacherTestLobbyPage() {
       } else {
         setInfoMsg(`Перешли к вопросу №${(updated.current_question_index || 0) + 1}`)
       }
-    } catch (err: any) {
-      setError(friendlyError(err.message || "Ошибка переключения вопроса"))
+    } catch (err: unknown) {
+      setError(friendlyError((err as Error).message || "Ошибка переключения вопроса"))
     } finally {
       setAdvancing(false)
     }

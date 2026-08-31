@@ -1,0 +1,166 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "multimedia",
+      "track": "html",
+      "order": 18,
+      "title": "Multimedia",
+      "summary": "Теги audio и video, source, track, субтитры, controls, autoplay, muted и доступность.",
+      "sourceTitle": "Multimedia",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Аудио и видео в HTML"
+        },
+        {
+          "type": "p",
+          "text": "HTML5 позволяет встраивать аудио и видео без плагинов. Для этого используются теги `<audio>` и `<video>`."
+        },
+        {
+          "type": "heading",
+          "text": "Аудио: audio и source"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<audio>` встраивает звуковой контент. Внутри можно указать один или несколько источников через `<source>`."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<audio controls>\n  <source src=\"music.mp3\" type=\"audio/mpeg\">\n  <source src=\"music.ogg\" type=\"audio/ogg\">\n  Ваш браузер не поддерживает аудио.\n</audio>"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`controls` — показывает плеер (пауза, громкость, перемотка).",
+            "`autoplay` — воспроизведение при загрузке (требует `muted`).",
+            "`loop` — повторять бесконечно.",
+            "`muted` — без звука по умолчанию.",
+            "`preload` — подсказка браузеру: `none`, `metadata`, `auto`."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Видео: video и source"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<video>` встраивает видео. Атрибуты аналогичны `<audio>`, плюс `poster` и `width`/`height`."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<video controls width=\"640\" height=\"360\" poster=\"preview.jpg\">\n  <source src=\"video.mp4\" type=\"video/mp4\">\n  <source src=\"video.webm\" type=\"video/webm\">\n  Ваш браузер не поддерживает видео.\n</video>"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`poster` — превью-изображение до начала воспроизведения.",
+            "`width` / `height` — размер плеера (предотвращает скачки макета).",
+            "`controls` — стандартный плеер браузера."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Почему autoplay требует muted?"
+        },
+        {
+          "type": "p",
+          "text": "Браузеры блокируют автоматическое воспроизведение звука — это раздражает пользователей. Поэтому `autoplay` работает только с `muted`. Пользователь потом включит звук сам."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<!-- Автовоспроизведение без звука -->\n<video autoplay muted loop playsinline>\n  <source src=\"background.mp4\" type=\"video/mp4\">\n</video>"
+        },
+        {
+          "type": "note",
+          "text": "Атрибут `playsinline` необходим для iOS — без него видео откроется на весь экран."
+        },
+        {
+          "type": "heading",
+          "text": "Несколько источников: source"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<source>` внутри `<audio>` или `<video>` указывает разные форматы. Браузер выберет подходящий."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<video controls>\n  <source src=\"video.mp4\" type=\"video/mp4\">\n  <source src=\"video.webm\" type=\"video/webm\">\n  <source src=\"video.ogv\" type=\"video/ogg\">\n  Видео не поддерживается.\n</video>"
+        },
+        {
+          "type": "p",
+          "text": "Порядок `<source>` важен — браузер проверяет сверху вниз и выбирает первый поддерживаемый формат."
+        },
+        {
+          "type": "heading",
+          "text": "Субтитры: track"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<track>` добавляет субтитры, подписи или описания к видео."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<video controls>\n  <source src=\"video.mp4\" type=\"video/mp4\">\n  <track kind=\"subtitles\" src=\"subs-ru.vtt\" srclang=\"ru\" label=\"Русский\" default>\n  <track kind=\"subtitles\" src=\"subs-en.vtt\" srclang=\"en\" label=\"English\">\n  <track kind=\"descriptions\" src=\"desc-ru.vtt\" srclang=\"ru\" label=\"Описание для незрячих\">\n</video>"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`kind=\"subtitles\"` — субтитры (перевод или транскрипция).",
+            "`kind=\"captions\"` — подписи для глухих (описание звуков).",
+            "`kind=\"descriptions\"` — описание визуального контента.",
+            "`srclang` — язык субтитров.",
+            "`label` — название в меню выбора субтитров.",
+            "`default` — субтитры включены по умолчанию."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Доступность мультимедиа"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Всегда добавляйте субтитры для видео с речью.",
+            "Для аудио добавляйте текстовую расшифровку (transcript).",
+            "Используйте `controls` — пользователь должен управлять воспроизведением.",
+            "Не запускайте звук автоматически."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Типичные ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Autoplay без muted.** Браузер заблокирует воспроизведение.",
+            "**Нет fallback-текста.** Между тегами `<video>` напишите сообщение для старых браузеров.",
+            "**Нет `poster`.** Без превью видео — чёрный прямоугольник до загрузки.",
+            "**Нет субтитров.** Видео без субтитров недоступно для глухих и людей с нарушением слуха."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`<audio>` — звук, `<video>` — видео.",
+            "`<source>` — несколько форматов, браузер выбирает подходящий.",
+            "`controls` — показывает плеер.",
+            "`autoplay` требует `muted`.",
+            "`<track>` — субтитры и описания.",
+            "Субтитры обязательны для доступности."
+          ]
+        }
+      ]
+    }
+  ]
+}

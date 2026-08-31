@@ -1,0 +1,175 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "prodvinutyy-box-model",
+      "track": "css",
+      "order": 48,
+      "title": "Продвинутый Box Model и размеры",
+      "summary": "Автоматические размеры, проценты, margin collapsing, min-content, max-content, fit-content.",
+      "sourceTitle": "Продвинутый Box Model и размеры",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Как реально рассчитывается размер?"
+        },
+        {
+          "type": "p",
+          "text": "В Level 1 вы узнали про `width`, `height`, `box-sizing`. Теперь посмотрим, как элемент **реально** определяет свой размер в разных ситуациях."
+        },
+        {
+          "type": "heading",
+          "text": "auto: значение по умолчанию"
+        },
+        {
+          "type": "p",
+          "text": "Значение `auto` ведёт себя по-разному для `width` и `height`:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`width: auto`** для блочного элемента = **занимает всю ширину** родителя.",
+            "**`height: auto`** = **подстраивается под контент**.",
+            "**`margin: auto`** по горизонтали = **центрирует** блок (с фиксированным `width`)."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Блочный элемент: auto = 100% ширины */\n.block {\n  width: auto; /* = 100% ширины родителя */\n}\n\n/* Центрирование через auto margin */\n.centered {\n  width: 300px;\n  margin: 0 auto;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Процентные размеры"
+        },
+        {
+          "type": "p",
+          "text": "Проценты считаются **от родительского элемента**, но не всегда одинаково:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`width: 50%` — от ширины **родителя**.",
+            "`height: 50%` — от высоты **родителя** (только если у родителя задана высота!).",
+            "`padding: 10%` — от ширины **родителя** (даже для вертикальных отступов!).",
+            "`margin: 10%` — от ширины **родителя** (даже для вертикальных margin!)."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".parent {\n  width: 600px;\n  height: 400px;\n}\n\n.child {\n  width: 50%;       /* 300px — половина ширины родителя */\n  height: 50%;      /* 200px — половина высоты родителя */\n  padding: 10%;     /* 60px — от ширины родителя (!) */\n  margin: 5%;       /* 30px — от ширины родителя (!) */\n}"
+        },
+        {
+          "type": "note",
+          "text": "Вертикальные `padding` и `margin` в процентах считаются от **ширины** родителя, а не от его высоты. Это частая причина неожиданного поведения."
+        },
+        {
+          "type": "heading",
+          "text": "Размеры относительно родителя"
+        },
+        {
+          "type": "p",
+          "text": "Некоторые свойства ведут себя неочевидно:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* img по умолчанию — inline, растягивается на всю строку */\nimg {\n  max-width: 100%;  /* не шире родителя */\n  height: auto;     /* сохраняет пропорции */\n}\n\n/* Абсолютно позиционированный элемент */\n.absolute {\n  position: absolute;\n  width: 100%;  /* от ближайшего позиционированного предка */\n  height: 100%; /* от ближайшего позиционированного предка */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "min/max constraints"
+        },
+        {
+          "type": "p",
+          "text": "`min-width`, `max-width`, `min-height`, `max-height` задают **ограничения**:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  width: 80%;           /* основной размер */\n  min-width: 300px;     /* не уже 300px */\n  max-width: 1200px;    /* не шире 1200px */\n}\n\n/* Приоритет: min/max перезаписывают width/height */\n.element {\n  width: 500px;\n  min-width: 600px; /* будет 600px, не 500px! */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Margin collapsing подробнее"
+        },
+        {
+          "type": "p",
+          "text": "В Level 1 мы кратко упомянули margin collapsing. Теперь детали:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Схлопываются **только вертикальные** margin соседних блочных элементов.",
+            "Берётся **больший** из двух (не сумма).",
+            "Не схлопываются: margin в контексте flex/grid, margin Absolutely positioned элементов, margin с `overflow: auto/hidden/scroll`."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Решение margin collapsing */\n.parent {\n  padding-top: 1px;  /* создаёт BFC */\n  /* или */\n  display: flex;     /* flex контейнер не схлопывает */\n  /* или */\n  overflow: hidden;  /* создаёт BFC */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Intrinsic sizing: min-content, max-content, fit-content"
+        },
+        {
+          "type": "p",
+          "text": "CSS предоставляет **внутренние** размеры, основанные на содержимом:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* min-content: минимальный размер без переноса */\n.text {\n  width: min-content;\n}\n\n/* max-content: максимальный размер без переноса */\n.text {\n  width: max-content;\n}\n\n/* fit-content: как max-content, но не шире родителя */\n.text {\n  width: fit-content(300px);\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`min-content`** — самый узкий размер без переноса слов.",
+            "**`max-content`** — самый широкий размер без переноса слов.",
+            "**`fit-content(max)`** — как `max-content`, но ограничено `max`."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Реальные случаи неочевидного поведения"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Проблема: flex-item не сжимается */\n.flex-item {\n  min-width: 0; /* разрешает сжатие ниже content size */\n}\n\n/* Проблема: overflow не работает без высоты */\n.scrollable {\n  height: 200px;    /* высота ОБЯЗАНА быть задана */\n  overflow-y: auto;\n}\n\n/* Проблема: img не центрируется */\nimg {\n  display: block;    /* убирает inline-пробелы */\n  margin: 0 auto;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Не знают, что padding/margin в % от ширины родителя.** Это вызывает «прыжки» вертикальных отступов.",
+            "**Задают `height: auto` и ждут фиксированную высоту.** `auto` подстраивается под контент.",
+            "**Забывают `min-width: 0` в flex/grid.** Элементы не сжимаются ниже `min-content` по умолчанию.",
+            "**Используют `height: 100%` без заданной высоты у родителя.** Процентная высота работает только если у родителя есть высота."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`width: auto` = 100% ширины для блочных элементов.",
+            "Padding/margin в `%` считаются от **ширины** родителя.",
+            "`min-width/max-width` перезаписывают `width`.",
+            "Margin collapsing работает для вертикальных margin блочных элементов.",
+            "`min-content`, `max-content`, `fit-content` — внутренние размеры.",
+            "Для `overflow` нужна заданная высота."
+          ]
+        }
+      ]
+    }
+  ]
+}

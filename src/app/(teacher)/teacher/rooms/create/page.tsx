@@ -32,18 +32,18 @@ export default function CreateRoom() {
 
       const code = generateRoomCode()
       const room = await createRoom(user.id, name, code)
-      
+
       router.push(`/teacher/rooms/${room.id}`)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
       setLoading(false)
     }
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 slide-up">
-      <Link 
-        href="/teacher/dashboard" 
+      <Link
+        href="/teacher/dashboard"
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />

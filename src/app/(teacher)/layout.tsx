@@ -29,16 +29,16 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
             <GraduationCap className="w-6 h-6" />
             <span className="font-bold text-lg hidden sm:inline">Academy Exam</span>
           </Link>
-          
+
           <div className="flex items-center space-x-2">
-            <Link 
-              href="/teacher/dashboard" 
+            <Link
+              href="/teacher/dashboard"
               className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
             >
               Dashboard
             </Link>
             <ThemeToggle />
-            <button 
+            <button
               onClick={handleLogout}
               className="flex items-center space-x-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
             >

@@ -1,0 +1,219 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "flexbox-osnovy",
+      "track": "css",
+      "order": 32,
+      "title": "Flexbox — основы",
+      "summary": "Гибкая раскладка: flex-контейнер, flex-элементы, оси, flex-direction и gap.",
+      "sourceTitle": "Flexbox — основы",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Что такое Flexbox?"
+        },
+        {
+          "type": "p",
+          "text": "`Flexbox` (Flexible Box Layout) — это система компоновки в CSS, которая позволяет **гибко управлять расположением** элементов внутри контейнера. Он решает задачи, которые раньше требовали сложных трюков: центрирование, выравнивание, распределение пространства."
+        },
+        {
+          "type": "p",
+          "text": "Простая аналогия: представьте коробку с пружинками. Вы кладёте вещи внутрь, и пружинки **автоматически распределяют пространство** между ними. Нужно больше места для одной вещи? Она «вытягивается». Нужно меньше — «сжимается»."
+        },
+        {
+          "type": "heading",
+          "text": "Зачем нужен Flexbox?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Центрирование элемента по горизонтали и вертикали.",
+            "Равномерное распределение пространства между элементами.",
+            "Выравнивание элементов по высоте.",
+            "Создание навигационных меню, карточек, форм.",
+            "Адаптивные макеты без медиа-запросов."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "До Flexbox верстальщики использовали `float`, `inline-block`, `position` — всё это было неудобно и хрупко. Flexbox появился как современное решение."
+        },
+        {
+          "type": "heading",
+          "text": "Flex-контейнер и flex-элементы"
+        },
+        {
+          "type": "p",
+          "text": "Чтобы использовать Flexbox, нужно **одному элементу** задать `display: flex`. Этот элемент становится **flex-контейнером**, а его прямые дети — **flex-элементами**."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<div class=\"container\">\n  <div class=\"item\">1</div>\n  <div class=\"item\">2</div>\n  <div class=\"item\">3</div>\n</div>"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex; /* превращаем в flex-контейнер */\n}\n\n.item {\n  background: #bbdefb;\n  padding: 20px;\n  margin: 5px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Без `display: flex` элементы шли друг под другом (как блоки). С `display: flex` они **встают в строку**:"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "Без flex (block):          С flex:\n┌────────────────┐         ┌──────┐ ┌──────┐ ┌──────┐\n│       1        │         │  1   │ │  2   │ │  3   │\n└────────────────┘         └──────┘ └──────┘ └──────┘\n┌────────────────┐\n│       2        │\n└────────────────┘\n┌────────────────┐\n│       3        │\n└────────────────┘"
+        },
+        {
+          "type": "heading",
+          "text": "Главная ось и поперечная ось"
+        },
+        {
+          "type": "p",
+          "text": "Flexbox работает с **двумя осями**: основной (main axis) и поперечной (cross axis)."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Главная ось (main axis)** — направление, вдоль которого выстраиваются элементы. По умолчанию — **горизонталь** (слева направо).",
+            "**Поперечная ось (cross axis)** — перпендикулярна основной. По умолчанию — **вертикаль** (сверху вниз)."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "По умолчанию (flex-direction: row):\n\n         main axis (→)\n    ┌──────┬──────┬──────┐\n    │  1   │  2   │  3   │\n    └──────┴──────┴──────┘\n         ↓\n      cross axis\n\nflex-direction: column:\n         ↓\n      cross axis\n    ┌──────────┐\n    │    1     │\n    ├──────────┤\n    │    2     │  → main axis\n    ├──────────┤\n    │    3     │\n    └──────────┘"
+        },
+        {
+          "type": "p",
+          "text": "Все свойства выравнивания работают **относительно этих осей**. Это ключевое понимание для работы с Flexbox."
+        },
+        {
+          "type": "heading",
+          "text": "flex-direction: направление"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `flex-direction` задаёт **направление основной оси**. Оно определяет, как элементы выстраиваются в контейнере."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".row {\n  display: flex;\n  flex-direction: row;          /* слева направо (по умолчанию) */\n}\n\n.row-reverse {\n  display: flex;\n  flex-direction: row-reverse;  /* справа налево */\n}\n\n.column {\n  display: flex;\n  flex-direction: column;       /* сверху вниз */\n}\n\n.column-reverse {\n  display: flex;\n  flex-direction: column-reverse; /* снизу вверх */\n}"
+        },
+        {
+          "type": "p",
+          "text": "`row` — элементы встают в строку. `column` — элементы встают в колонку. `reverse` — элементы разворачиваются в обратном порядке."
+        },
+        {
+          "type": "heading",
+          "text": "flex-wrap: перенос строк"
+        },
+        {
+          "type": "p",
+          "text": "По умолчанию flex-элементы **не переносятся** — они сжимаются, чтобы поместиться в одну строку. Свойство `flex-wrap` разрешает перенос."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  flex-wrap: wrap; /* разрешаем перенос */\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`nowrap` — элементы остаются в одной строке (по умолчанию).",
+            "`wrap` — элементы переносятся на следующую строку.",
+            "`wrap-reverse` — элементы переносятся, но в обратном порядке."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "`flex-wrap: wrap` особенно полезен для карточек — они переносятся на новую строку, когда ширина экрана уменьшается."
+        },
+        {
+          "type": "heading",
+          "text": "gap: расстояние между элементами"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `gap` задаёт **равномерное расстояние** между flex-элементами. Это современная замена margin между элементами."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  gap: 16px; /* 16px между каждыми элементами */\n}\n\n/* Разные gap для строк и колонок */\n.container {\n  display: flex;\n  flex-wrap: wrap;\n  row-gap: 16px;    /* расстояние между строками */\n  column-gap: 24px;  /* расстояние между колонками */\n}"
+        },
+        {
+          "type": "p",
+          "text": "`gap` задаёт промежутки **между** элементами, но не добавляет отступы у краёв контейнера. Это удобнее, чем использовать margin."
+        },
+        {
+          "type": "heading",
+          "text": "Пример: навигационное меню"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<nav class=\"menu\">\n  <a href=\"/\">Главная</a>\n  <a href=\"/about\">О нас</a>\n  <a href=\"/contacts\">Контакты</a>\n</nav>"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".menu {\n  display: flex;\n  gap: 20px;\n  padding: 16px;\n  background: #f5f5f5;\n}\n\n.menu a {\n  text-decoration: none;\n  color: #333;\n  padding: 8px 16px;\n  border-radius: 4px;\n}\n\n.menu a:hover {\n  background: #e0e0e0;\n}"
+        },
+        {
+          "type": "p",
+          "text": "С Flexbox мы получили горизонтальное меню с равными промежутками — без float, без position, без хаков."
+        },
+        {
+          "type": "heading",
+          "text": "Пример: карточки товаров"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<div class=\"product-grid\">\n  <div class=\"product-card\">Товар 1</div>\n  <div class=\"product-card\">Товар 2</div>\n  <div class=\"product-card\">Товар 3</div>\n  <div class=\"product-card\">Товар 4</div>\n</div>"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".product-grid {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 16px;\n}\n\n.product-card {\n  flex: 1 1 200px; /* растягивается, сжимается, мин. 200px */\n  padding: 20px;\n  background: white;\n  border: 1px solid #ddd;\n  border-radius: 8px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Карточки автоматически заполняют строку и переносятся на новую при нехватке места."
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `display: flex` у контейнера.** Без него flex-свойства не работают — элементы ведут себя как обычные блоки.",
+            "**Путают основную и поперечную оси.** Если `flex-direction: row`, основная — горизонталь. Если `column` — вертикаль.",
+            "**Не используют `gap` и мучаются с `margin`.** `gap` — проще и предсказуемее, чем margin у каждого элемента.",
+            "**Не используют `flex-wrap`.** Без переноса элементы сжимаются в одну строку и могут стать слишком мелкими."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`display: flex` на контейнере превращает его в flex-контейнер.",
+            "Прямые дети контейнера становятся flex-элементами.",
+            "Основная ось — по умолчанию горизонталь. Поперечная — вертикаль.",
+            "`flex-direction` задаёт направление основной оси: `row`, `column`, `row-reverse`, `column-reverse`.",
+            "`flex-wrap: wrap` разрешает перенос элементов на новую строку.",
+            "`gap` задаёт равномерное расстояние между элементами."
+          ]
+        }
+      ]
+    }
+  ]
+}

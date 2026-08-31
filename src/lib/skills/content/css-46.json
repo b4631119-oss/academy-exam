@@ -1,0 +1,172 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "transitions-animations",
+      "track": "css",
+      "order": 46,
+      "title": "Transitions и базовые CSS-анимации",
+      "summary": "transition, @keyframes, animation, timing-function, prefers-reduced-motion.",
+      "sourceTitle": "Transitions и базовые CSS-анимации",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Transition vs Animation: в чём разница?"
+        },
+        {
+          "type": "p",
+          "text": "CSS предоставляет два способа создавать движение:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Transition** — плавный переход **из одного состояния в другое**. Запускается при изменении свойства (hover, focus, класс). Нет начала и конца — только «от» и «до».",
+            "**Animation** — полноценная анимация **с этапами** через `@keyframes`. Имеет начало, конец, может повторяться, задержки, направление."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Transition: плавный переход"
+        },
+        {
+          "type": "p",
+          "text": "`transition` — короткое свойство, которое задаёт **какие свойства** и **как быстро** меняются:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".btn {\n  background: #0066cc;\n  color: white;\n  padding: 12px 24px;\n  border: none;\n  border-radius: 8px;\n  cursor: pointer;\n\n  /* Плавный переход для всех свойств */\n  transition: all 0.3s ease;\n}\n\n.btn:hover {\n  background: #0052a3;\n  transform: translateY(-2px);\n  box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Свойства transition"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".element {\n  /* transition: property duration timing-function delay; */\n  transition: background 0.3s ease 0s;\n\n  /* Или отдельно: */\n  transition-property: background, transform;\n  transition-duration: 0.3s;\n  transition-timing-function: ease;\n  transition-delay: 0s;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`transition-property`** — какое свойство анимировать (`all` или конкретное).",
+            "**`transition-duration`** — длительность (`0.3s`, `300ms`).",
+            "**`transition-timing-function`** — форма кривой (`ease`, `linear`, `ease-in-out`).",
+            "**`transition-delay`** — задержка перед началом."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Timing functions"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "transition-timing-function: ease;          /* по умолчанию */\ntransition-timing-function: linear;        /* равномерно */\ntransition-timing-function: ease-in;       /* медленное начало */\ntransition-timing-function: ease-out;      /* медленный конец */\ntransition-timing-function: ease-in-out;   /* медленное начало и конец */\ntransition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* кастомная */"
+        },
+        {
+          "type": "heading",
+          "text": "@keyframes: ключевые кадры"
+        },
+        {
+          "type": "p",
+          "text": "`@keyframes` определяет **этапы анимации** — от начального до конечного состояния:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "@keyframes fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(20px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}"
+        },
+        {
+          "type": "p",
+          "text": "Можно задать промежуточные этапы:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "@keyframes bounce {\n  0%   { transform: translateY(0); }\n  40%  { transform: translateY(-30px); }\n  60%  { transform: translateY(-15px); }\n  80%  { transform: translateY(-5px); }\n  100% { transform: translateY(0); }\n}"
+        },
+        {
+          "type": "heading",
+          "text": "animation: применение keyframes"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".fade-in {\n  animation: fadeIn 0.5s ease forwards;\n}\n\n.bounce {\n  animation: bounce 0.6s ease-in-out;\n}\n\n/* Полная запись */\n.animated {\n  animation-name: fadeIn;\n  animation-duration: 0.5s;\n  animation-timing-function: ease;\n  animation-delay: 0s;\n  animation-iteration-count: 1;\n  animation-direction: normal;\n  animation-fill-mode: forwards;\n  animation-play-state: running;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`animation-name`** — имя `@keyframes`.",
+            "**`animation-duration`** — длительность.",
+            "**`animation-timing-function`** — форма кривой.",
+            "**`animation-delay`** — задержка.",
+            "**`animation-iteration-count`** — количество повторов (`1`, `infinite`).",
+            "**`animation-direction`** — направление (`normal`, `reverse`, `alternate`).",
+            "**`animation-fill-mode`** — что после анимации (`none`, `forwards`, `backwards`).",
+            "**`animation-play-state`** — запуск/пауза (`running`, `paused`)."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Когда использовать transition, а когда animation?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Transition** — когда есть два состояния (до/после): hover, focus, добавление класса.",
+            "**Animation** — когда нужна автозапускающаяся анимация, цикл, несколько этапов."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Transition: hover эффект */\n.card {\n  transition: transform 0.2s ease;\n}\n.card:hover {\n  transform: scale(1.02);\n}\n\n/* Animation: автозагрузка */\n@keyframes spin {\n  to { transform: rotate(360deg); }\n}\n.loader {\n  animation: spin 1s linear infinite;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "prefers-reduced-motion"
+        },
+        {
+          "type": "p",
+          "text": "**Важно для доступности.** Некоторые пользователи плохо переносят анимации. CSS позволяет отключить их:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Обычная анимация */\n.fade-in {\n  animation: fadeIn 0.5s ease;\n}\n\n/* Если пользователь просит уменьшить движение */\n@media (prefers-reduced-motion: reduce) {\n  .fade-in {\n    animation: none;\n  }\n  * {\n    transition-duration: 0.01ms !important;\n    animation-duration: 0.01ms !important;\n  }\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Анимируют `width`/`height`.** Эти свойства вызывают **reflow** (пересчёт макета) — анимация тормозит. Используйте `transform: scale()`.",
+            "**Забывают `forwards`.** Без `animation-fill-mode: forwards` элемент возвращается в начальное состояние.",
+            "**Не учитывают `prefers-reduced-motion`.** Анимации должны быть опциональными.",
+            "**Анимируют `all`.** Это может привести к нежелательным побочным эффектам."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Transition** — плавный переход между двумя состояниями (hover, focus).",
+            "**Animation** — полноценная анимация с `@keyframes` (этапы, циклы).",
+            "`transition: property duration timing delay;` — сокращённая запись.",
+            "`@keyframes name { from {} to {} }` — определение анимации.",
+            "`animation: name duration timing delay count direction fill-mode;` — применение.",
+            "**Анимируйте `transform` и `opacity`** — они не вызывают reflow.",
+            "**Всегда учитывайте `prefers-reduced-motion`** для доступности."
+          ]
+        }
+      ]
+    }
+  ]
+}

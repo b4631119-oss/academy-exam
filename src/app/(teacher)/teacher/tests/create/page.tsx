@@ -36,8 +36,8 @@ function CreateTestForm() {
     try {
       const newTest = await createTest(roomId, title, description)
       router.push(`/teacher/tests/${newTest.id}`)
-    } catch (err: any) {
-      setError(err.message || "Ошибка при создании теста")
+    } catch (err: unknown) {
+      setError((err as Error).message || "Ошибка при создании теста")
     } finally {
       setLoading(false)
     }

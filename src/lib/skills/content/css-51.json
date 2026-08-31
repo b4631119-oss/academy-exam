@@ -1,0 +1,159 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "css-backgrounds-gradients",
+      "track": "css",
+      "order": 51,
+      "title": "CSS Backgrounds и градиенты",
+      "summary": "background, background-image, size, position, repeat, clip, несколько слоёв, градиенты.",
+      "sourceTitle": "CSS Backgrounds и градиенты",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Свойства фона"
+        },
+        {
+          "type": "p",
+          "text": "CSS предоставляет **8 свойств** для управления фоном элемента:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".element {\n  background-color: #f0f0f0;   /* цвет фона */\n  background-image: url(bg.jpg); /* изображение */\n  background-size: cover;        /* размер */\n  background-position: center;   /* позиция */\n  background-repeat: no-repeat;  /* повторение */\n  background-attachment: fixed;   /* прикрепление */\n  background-origin: padding-box; /* начало координат */\n  background-clip: border-box;    /* область отрисовки */\n}\n\n/* Сокращённое свойство */\n.element {\n  background: #f0f0f0 url(bg.jpg) center/cover no-repeat;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "background-size"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* cover: заполнить весь элемент, обрезать лишнее */\n.hero {\n  background-size: cover;\n}\n\n/* contain: вписать целиком, могут быть полосы */\n.logo {\n  background-size: contain;\n}\n\n/* Конкретные размеры */\n.icon {\n  background-size: 32px 32px;\n}\n\n/* Проценты */\n.pattern {\n  background-size: 50% auto;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "background-position"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Ключевые слова */\n.bg { background-position: center top; }\n.bg { background-position: right bottom; }\n\n/* Проценты */\n.bg { background-position: 50% 50%; }\n\n/* Пиксели */\n.bg { background-position: 20px 40px; }\n\n/* Комбинация */\n.bg { background-position: right 20px bottom 10px; }"
+        },
+        {
+          "type": "heading",
+          "text": "Несколько фоновых слоёв"
+        },
+        {
+          "type": "p",
+          "text": "Можно задать **несколько** фонов через запятую. Первый — сверху, последний — снизу:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".overlay {\n  background:\n    linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),\n    url('/images/hero.jpg') center/cover no-repeat;\n}\n\n/* Градиент + паттерн */\n.pattern {\n  background:\n    repeating-linear-gradient(\n      45deg,\n      #fff,\n      #fff 10px,\n      #f0f0f0 10px,\n      #f0f0f0 20px\n    ),\n    #fff;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "background-clip"
+        },
+        {
+          "type": "p",
+          "text": "`background-clip` определяет, **до куда** рисуется фон:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Фон обрезается по border-box (по умолчанию) */\n.border-bg { background-clip: border-box; }\n\n/* Фон обрезается по padding-box */\n.padding-bg { background-clip: padding-box; }\n\n/* Фон обрезается по content-box */\n.content-bg { background-clip: content-box; }\n\n/* Текст поверх градиента */\n.gradient-text {\n  background: linear-gradient(to right, #667eea, #764ba2);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n  color: transparent;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Линейные градиенты"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Простой градиент */\n.simple {\n  background: linear-gradient(to right, #667eea, #764ba2);\n}\n\n/* С углом */\n.angled {\n  background: linear-gradient(135deg, #667eea, #764ba2);\n}\n\n/* Несколько цветов */\n.rainbow {\n  background: linear-gradient(to right, red, orange, yellow, green, blue);\n}\n\n/* Остановки */\n.stop {\n  background: linear-gradient(to right, #667eea 0%, #764ba2 50%, #f093fb 100%);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Радиальные градиенты"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Простой */\n.simple {\n  background: radial-gradient(circle, #667eea, #764ba2);\n}\n\n/* Эллипс (по умолчанию) */\n.ellipse {\n  background: radial-gradient(ellipse, #667eea, #764ba2);\n}\n\n/* Размер */\n.sized {\n  background: radial-gradient(circle 100px, #667eea, #764ba2);\n}\n\n/* Позиция */\n.positioned {\n  background: radial-gradient(circle at top left, #667eea, #764ba2);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Конические градиенты"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Простой conic */\n.simple {\n  background: conic-gradient(red, orange, yellow, green, blue);\n}\n\n/* С позицией */\n.positioned {\n  background: conic-gradient(from 0deg at 50% 50%, red, blue);\n}\n\n/* Повторяющийся */\n.repeating {\n  background: repeating-conic-gradient(\n    #eee 0% 25%, white 0% 50%\n  ) 50% / 20px 20px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Реальные UI-примеры"
+        },
+        {
+          "type": "heading",
+          "text": "Hero секция"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".hero {\n  background:\n    linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.3)),\n    url('/images/hero.jpg') center/cover no-repeat fixed;\n  color: white;\n  padding: 100px 20px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Gradient button"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".btn-primary {\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n  color: white;\n  border: none;\n  padding: 12px 24px;\n  border-radius: 8px;\n  cursor: pointer;\n}\n\n.btn-primary:hover {\n  background: linear-gradient(135deg, #5a6fd6 0%, #6b4c9a 100%);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Текст с градиентом"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".gradient-text {\n  background: linear-gradient(135deg, #667eea, #764ba2);\n  -webkit-background-clip: text;\n  background-clip: text;\n  -webkit-text-fill-color: transparent;\n  color: transparent;\n  font-size: 48px;\n  font-weight: bold;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `background-clip: text`.** Градиент не обрезается по тексту.",
+            "**Не используют `no-repeat`.** Фон повторяется и выглядит некрасиво.",
+            "**Путают `cover` и `contain`.** `cover` обрезает, `contain` вписывает.",
+            "**Забывают `-webkit-` префикс.** Некоторые свойства требуют его для совместимости."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`background-size: cover` — заполнить элемент, обрезать лишнее.",
+            "`background-size: contain` — вписать целиком.",
+            "`background-position` — позиция фона (ключевые слова, %, px).",
+            "Несколько фонов через запятую: первый — сверху.",
+            "`linear-gradient()` — линейный градиент.",
+            "`radial-gradient()` — радиальный градиент.",
+            "`background-clip: text` — градиент обрезается по тексту."
+          ]
+        }
+      ]
+    }
+  ]
+}

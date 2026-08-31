@@ -1,0 +1,171 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "prodvinutyy-grid",
+      "track": "css",
+      "order": 50,
+      "title": "Продвинутый Grid",
+      "summary": "grid-template-areas, named lines, auto-fit/auto-fill, implicit grid, alignment.",
+      "sourceTitle": "Продвинутый Grid",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "grid-template-areas: именованные области"
+        },
+        {
+          "type": "p",
+          "text": "`grid-template-areas` позволяет **визуально** задать макет сетки, используя имена:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".layout {\n  display: grid;\n  grid-template-areas:\n    \"header header header\"\n    \"sidebar main   main\"\n    \"footer footer footer\";\n  grid-template-columns: 200px 1fr 1fr;\n  grid-template-rows: auto 1fr auto;\n  min-height: 100vh;\n}\n\n.header  { grid-area: header; }\n.sidebar { grid-area: sidebar; }\n.main    { grid-area: main; }\n.footer  { grid-area: footer; }"
+        },
+        {
+          "type": "p",
+          "text": "Каждое слово в `grid-template-areas` — это **имя области**. Символ `.` обозначает пустую ячейку."
+        },
+        {
+          "type": "heading",
+          "text": "grid-area: размещение по именам"
+        },
+        {
+          "type": "p",
+          "text": "`grid-area` — сокращение для `grid-column` + `grid-row`. Принимает **имя области** из `grid-template-areas`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Через имя */\n.header { grid-area: header; }\n\n/* Через линии: grid-row / grid-column */\n.item { grid-area: 1 / 1 / 2 / 3; }\n/* строка 1-2, колонка 1-3 */"
+        },
+        {
+          "type": "heading",
+          "text": "Auto-fit и auto-fill"
+        },
+        {
+          "type": "p",
+          "text": "`auto-fit` и `auto-fill` создают **автоматическое количество** колонок:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* auto-fill: создаёт столько колонок, сколько помещается */\n.grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));\n  gap: 16px;\n}\n\n/* auto-fit: то же, но пустые колонки сжимаются до 0 */\n.grid {\n  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n  gap: 16px;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`auto-fill`** — создаёт колонки, даже если они пустые.",
+            "**`auto-fit`** — пустые колонки **схлопываются**, элементы растягиваются."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Implicit vs Explicit Grid"
+        },
+        {
+          "type": "p",
+          "text": "**Explicit grid** — то, что вы задали через `grid-template-rows/columns`. **Implicit grid** — автоматически созданные строки/колонки, когда контента больше:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Явная сетка: 3 колонки */\n.grid {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n}\n\n/* Неявные строки будут auto-высоты */\n/* Контролируйте через grid-auto-rows */\n.grid {\n  grid-auto-rows: minmax(100px, auto);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Named lines"
+        },
+        {
+          "type": "p",
+          "text": "Можно задать **имена** для линий сетки:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".layout {\n  display: grid;\n  grid-template-columns: [start] 200px [main] 1fr [end];\n  grid-template-rows: [header] auto [content] 1fr [footer] auto;\n}\n\n.header {\n  grid-column: start / end;\n  grid-row: header;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Выравнивание в Grid"
+        },
+        {
+          "type": "p",
+          "text": "Grid предоставляет **два уровня** выравнивания:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Контейнер**: `justify-items`, `align-items`, `place-items` — выравнивание **всех** элементов.",
+            "**Элемент**: `justify-self`, `align-self`, `place-self` — выравнивание **одного** элемента.",
+            "**Все оси**: `justify-content`, `align-content` — выравнивание **сетки** в контейнере."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".grid {\n  display: grid;\n  place-items: center; /* все элементы по центру */\n}\n\n.special {\n  place-self: end start; /* этот элемент внизу слева */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Реальные примеры"
+        },
+        {
+          "type": "heading",
+          "text": "Dashboard layout"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".dashboard {\n  display: grid;\n  grid-template-areas:\n    \"nav    nav    nav\"\n    \"sidebar stats  stats\"\n    \"sidebar chart  chart\"\n    \"sidebar table  table\";\n  grid-template-columns: 250px 1fr 1fr;\n  grid-template-rows: 60px 1fr 1fr 1fr;\n  gap: 16px;\n  min-height: 100vh;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Адаптивные карточки"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".cards {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));\n  gap: 20px;\n  padding: 20px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "CSS-таблица (таблица на Grid)"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".table {\n  display: grid;\n  grid-template-columns: 2fr 1fr 1fr;\n  gap: 1px;\n  background: #ddd;\n}\n\n.table > * {\n  background: white;\n  padding: 12px 16px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Путают `auto-fit` и `auto-fill`.** `auto-fit` схлопывает пустые колонки, `auto-fill` — нет.",
+            "**Забывают `gap`.** Без `gap` элементы слипаются.",
+            "**Не используют `minmax()`.** Без него `auto-fit/auto-fill` не адаптируются.",
+            "**Забывают про implicit grid.** Без `grid-auto-rows` строки могут быть слишком маленькими."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`grid-template-areas` — визуальная запись макета.",
+            "`grid-area: name` — размещение по имени области.",
+            "`auto-fit` схлопывает пустые колонки, `auto-fill` — нет.",
+            "`repeat(auto-fit, minmax(250px, 1fr))` — адаптивная сетка.",
+            "`grid-auto-rows` — размер неявных строк.",
+            "`place-items: center` — центрирование всех элементов."
+          ]
+        }
+      ]
+    }
+  ]
+}

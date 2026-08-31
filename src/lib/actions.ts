@@ -23,13 +23,13 @@ export async function createRoom(teacherId: string, name: string, code: string) 
     .insert([{ teacher_id: currentTeacherId, name: name.trim(), code: code.trim().toUpperCase() }])
     .select()
     .single()
-  
-  if (error) throw new Error(error.message)
+
+  if (error) throw new Error("Не удалось создать аудиторию")
   logAction("CREATE_ROOM", currentTeacherId, { roomId: data.id, code })
   return data
 }
 
-export async function getRooms(teacherId: string) {
+export async function getRooms(_teacherId: string) {
   const currentTeacherId = await getCurrentTeacherId()
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -37,8 +37,8 @@ export async function getRooms(teacherId: string) {
     .select("*")
     .eq("teacher_id", currentTeacherId)
     .order("created_at", { ascending: false })
-  
-  if (error) throw new Error(error.message)
+
+  if (error) throw new Error("Не удалось загрузить аудитории")
   return data
 }
 
@@ -56,7 +56,7 @@ export async function createExam(roomId: string, title: string) {
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось создать экзамен")
   logAction("CREATE_EXAM", currentTeacherId, { examId: data.id, roomId })
   return data
 }
@@ -71,8 +71,8 @@ export async function getExams(roomId: string) {
     .select("*")
     .eq("room_id", roomId)
     .order("created_at", { ascending: false })
-  
-  if (error) throw new Error(error.message)
+
+  if (error) throw new Error("Не удалось загрузить экзамены")
   return data
 }
 
@@ -90,7 +90,7 @@ export async function createQuestion(examId: string, text: string) {
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось создать вопрос")
   logAction("CREATE_QUESTION", currentTeacherId, { questionId: data.id, examId })
   return data
 }
@@ -105,8 +105,8 @@ export async function getExamResults(examId: string) {
     .select("id")
     .eq("exam_id", examId)
 
-  if (qError) throw new Error(qError.message)
-  
+  if (qError) throw new Error("Не удалось загрузить вопросы")
+
   const questionIds = questions.map(q => q.id)
 
   if (questionIds.length === 0) {
@@ -118,14 +118,14 @@ export async function getExamResults(examId: string) {
     .select("id, is_correct, student_id, students(name)")
     .in("question_id", questionIds)
 
-  if (aError) throw new Error(aError.message)
+  if (aError) throw new Error("Не удалось загрузить ответы")
 
   const studentMap = new Map()
-  answers.forEach((ans: any) => {
+  answers.forEach((ans: Record<string, unknown>) => {
     if (!studentMap.has(ans.student_id)) {
       studentMap.set(ans.student_id, {
         id: ans.student_id,
-        name: ans.students ? ans.students.name : "Ученик",
+        name: (ans.students as Record<string, unknown>)?.name || "Ученик",
         total: questionIds.length,
         answered: 0,
         correct: 0,
@@ -166,17 +166,17 @@ export async function getStudentAnswersForExam(studentId: string, examId: string
   }
 
   const supabase = createAdminClient()
-  
+
   const { data: questions, error: qError } = await supabase
     .from("questions")
     .select("*")
     .eq("exam_id", examId)
     .order("created_at", { ascending: true })
 
-  if (qError) throw new Error(qError.message)
-  
+  if (qError) throw new Error("Не удалось загрузить вопросы")
+
   const questionIds = questions.map(q => q.id)
-  
+
   if (questionIds.length === 0) return []
 
   const { data: answers, error: aError } = await supabase
@@ -184,8 +184,8 @@ export async function getStudentAnswersForExam(studentId: string, examId: string
     .select("*")
     .eq("student_id", targetStudentId)
     .in("question_id", questionIds)
-    
-  if (aError) throw new Error(aError.message)
+
+  if (aError) throw new Error("Не удалось загрузить ответы")
 
   const result = questions.map(q => {
     const ans = answers.find(a => a.question_id === q.id)
@@ -210,12 +210,12 @@ export async function approveAnswer(answerId: string, isCorrect: boolean) {
     .eq("id", answerId)
     .maybeSingle()
 
-  if (fetchErr) throw new Error(fetchErr.message)
+  if (fetchErr) throw new Error("Не удалось найти ответ")
   if (!answerRow) throw new Error("NOT_FOUND: Ответ не найден")
 
   try {
     await verifyQuestionOwnership(answerRow.question_id, currentTeacherId)
-  } catch (e) {
+  } catch {
     throw new Error("AUTHORIZATION_ERROR: Нет доступа к этому ответу")
   }
 
@@ -226,7 +226,7 @@ export async function approveAnswer(answerId: string, isCorrect: boolean) {
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось обновить статус ответа")
   logAction("APPROVE_ANSWER", currentTeacherId, { answerId, isCorrect })
   return data
 }
@@ -265,7 +265,7 @@ export async function validateRoomCode(code: string) {
 
     if (error || !data) return null
     return data
-  } catch (err) {
+  } catch (_err) {
     return null
   }
 }
@@ -288,8 +288,8 @@ export async function createStudent(name: string, roomId: string) {
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
-  
+  if (error) throw new Error("Не удалось создать запись студента")
+
   const token = await signStudentToken(data.id, roomId)
   const cookieStore = await cookies()
   cookieStore.set("studentToken", token, {
@@ -299,7 +299,7 @@ export async function createStudent(name: string, roomId: string) {
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7 // 7 days max age
   })
-  
+
   logAction("STUDENT_JOINED", data.id, { name, roomId })
   return data
 }
@@ -334,7 +334,7 @@ export async function getStudent() {
 
   const payload = await verifyStudentToken(token)
   if (!payload) return null
-  
+
   const studentId = payload.studentId
 
   // Use admin client: students authenticate via custom JWT (not Supabase Auth),
@@ -365,12 +365,10 @@ export async function getStudentRoomAssignments(roomId: string) {
     .maybeSingle()
 
   if (studentError || !student) {
-    console.error("[TEST DEBUG] getStudentRoomAssignments student lookup failed", { studentId, studentError: studentError?.message })
     throw new Error("Студент не найден")
   }
 
   if (student.room_id !== roomId) {
-    console.error("[TEST DEBUG] getStudentRoomAssignments room mismatch", { studentId, studentRoomId: student.room_id, requestedRoomId: roomId })
     throw new Error("Доступ к этой аудитории запрещён")
   }
 
@@ -387,24 +385,17 @@ export async function getStudentRoomAssignments(roomId: string) {
       .order("created_at", { ascending: false })
   ])
 
-  if (examsRes.error) throw new Error(examsRes.error.message)
-  if (testsRes.error) throw new Error(testsRes.error.message)
-
-  console.error("[TEST DEBUG] getStudentRoomAssignments", {
-    studentId,
-    roomId,
-    testsFound: testsRes.data?.length ?? 0,
-    examsFound: examsRes.data?.length ?? 0
-  })
+  if (examsRes.error) throw new Error("Не удалось загрузить экзамены")
+  if (testsRes.error) throw new Error("Не удалось загрузить тесты")
 
   return {
-    exams: (examsRes.data || []).map((exam: any) => ({
+    exams: (examsRes.data || []).map((exam: Record<string, unknown>) => ({
       ...exam,
       type: "exam",
       question_count: exam.question_count ?? 0,
       description: exam.description || ""
     })),
-    tests: (testsRes.data || []).map((test: any) => ({
+    tests: (testsRes.data || []).map((test: Record<string, unknown>) => ({
       ...test,
       type: "test",
       title: test.title || "Тест",
@@ -435,7 +426,7 @@ export async function getQuestions(examId: string) {
     .eq("exam_id", examId)
     .order("created_at", { ascending: true })
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось загрузить вопросы")
   return data
 }
 
@@ -447,7 +438,7 @@ export async function getExam(examId: string) {
     .eq("id", examId)
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось загрузить экзамен")
   return data
 }
 
@@ -477,7 +468,7 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
   }
 
   const supabase = createAdminClient()
-  
+
   const { data: existing, error: existError } = await supabase
     .from("answers")
     .select("id")
@@ -485,12 +476,12 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
     .eq("question_id", questionId)
     .maybeSingle()
 
-  if (existError) throw new Error(existError.message)
+  if (existError) throw new Error("Не удалось проверить наличие ответа")
 
   if (existing) {
     const { data, error } = await supabase
       .from("answers")
-      .update({ 
+      .update({
         answer_text: answerText || "",
         is_correct: null
       })
@@ -498,14 +489,14 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
+    if (error) throw new Error("Не удалось сохранить ответ")
     return data
   } else {
     const { data, error } = await supabase
       .from("answers")
-      .insert([{ 
-        student_id: verifiedStudentId, 
-        question_id: questionId, 
+      .insert([{
+        student_id: verifiedStudentId,
+        question_id: questionId,
         answer_text: answerText || "",
         is_correct: null
       }])
@@ -529,11 +520,11 @@ export async function saveAnswer(studentId: string, questionId: string, answerTe
             .eq("id", existing.id)
             .select()
             .single()
-          if (updErr) throw new Error(updErr.message)
+          if (updErr) throw new Error("Не удалось сохранить ответ")
           return updated
         }
       }
-      throw new Error(error.message)
+      throw new Error("Не удалось сохранить ответ")
     }
     return data
   }
@@ -554,7 +545,7 @@ export async function saveAllAnswers(studentId: string, answers: Record<string, 
   if (entries.length === 0) return []
 
   // For each answer, upsert (insert or update)
-  const results: any[] = []
+  const results: Record<string, unknown>[] = []
   for (const [questionId, answerText] of entries) {
     // Check existing
     const { data: existing } = await supabase
@@ -571,7 +562,7 @@ export async function saveAllAnswers(studentId: string, answers: Record<string, 
         .eq("id", existing.id)
         .select()
         .single()
-      if (error) throw new Error(error.message)
+      if (error) throw new Error("Не удалось сохранить ответы")
       results.push(data)
     } else {
       const { data, error } = await supabase
@@ -600,12 +591,12 @@ export async function saveAllAnswers(studentId: string, answers: Record<string, 
               .eq("id", retryExisting.id)
               .select()
               .single()
-            if (updErr) throw new Error(updErr.message)
+            if (updErr) throw new Error("Не удалось сохранить ответы")
             results.push(updated)
             continue
           }
         }
-        throw new Error(error.message)
+        throw new Error("Не удалось сохранить ответы")
       }
       results.push(data)
     }
@@ -623,7 +614,7 @@ export async function checkStudentExists(name: string, roomId: string) {
     .eq("room_id", roomId)
     .maybeSingle()
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось проверить наличие студента")
   return !!data
 }
 
@@ -676,7 +667,7 @@ export async function deleteRoom(roomId: string) {
   await verifyRoomOwnership(roomId, teacherId)
   const supabase = await createClient()
   const { error } = await supabase.from("rooms").delete().eq("id", roomId)
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось удалить аудиторию")
   logAction("DELETE_ROOM", teacherId, { roomId })
   return true
 }
@@ -692,7 +683,7 @@ export async function updateRoom(roomId: string, name: string) {
     .eq("id", roomId)
     .select()
     .single()
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось обновить аудиторию")
   logAction("UPDATE_ROOM", teacherId, { roomId, name })
   return data
 }
@@ -702,7 +693,7 @@ export async function deleteExam(examId: string) {
   await verifyExamOwnership(examId, teacherId)
   const supabase = await createClient()
   const { error } = await supabase.from("exams").delete().eq("id", examId)
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось удалить экзамен")
   logAction("DELETE_EXAM", teacherId, { examId })
   return true
 }
@@ -718,7 +709,7 @@ export async function updateExam(examId: string, title: string) {
     .eq("id", examId)
     .select()
     .single()
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось обновить экзамен")
   logAction("UPDATE_EXAM", teacherId, { examId, title })
   return data
 }
@@ -728,7 +719,7 @@ export async function deleteQuestion(questionId: string) {
   await verifyQuestionOwnership(questionId, teacherId)
   const supabase = await createClient()
   const { error } = await supabase.from("questions").delete().eq("id", questionId)
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось удалить вопрос")
   logAction("DELETE_QUESTION", teacherId, { questionId })
   return true
 }
@@ -744,7 +735,7 @@ export async function updateQuestion(questionId: string, text: string) {
     .eq("id", questionId)
     .select()
     .single()
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("Не удалось обновить вопрос")
   logAction("UPDATE_QUESTION", teacherId, { questionId })
   return data
 }

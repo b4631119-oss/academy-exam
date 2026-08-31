@@ -12,6 +12,7 @@ export default function StudentTestResultPage() {
   const router = useRouter()
   const sessionId = params.sessionId as string
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -21,8 +22,8 @@ export default function StudentTestResultPage() {
       try {
         const data = await getMyTestResultAction(sessionId)
         setResult(data)
-      } catch (err: any) {
-        setError(err.message || "Ошибка загрузки результатов теста")
+      } catch (err: unknown) {
+        setError((err as Error).message || "Ошибка загрузки результатов теста")
       } finally {
         setLoading(false)
       }

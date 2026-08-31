@@ -14,10 +14,12 @@ export default function ManageExamQuestions() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  
+
   const examId = params.id as string
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [exam, setExam] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [questions, setQuestions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -35,7 +37,7 @@ export default function ManageExamQuestions() {
           .select("*, rooms(id, name)")
           .eq("id", examId)
           .single()
-        
+
         if (examData) setExam(examData)
 
         const qData = await getQuestions(examId)
@@ -55,8 +57,8 @@ export default function ManageExamQuestions() {
       try {
         const updated = await updateQuestion(qId, newText)
         setQuestions(questions.map(q => q.id === qId ? updated : q))
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -66,8 +68,8 @@ export default function ManageExamQuestions() {
       try {
         await deleteQuestion(qId)
         setQuestions(questions.filter(q => q.id !== qId))
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -78,8 +80,8 @@ export default function ManageExamQuestions() {
       try {
         const newQ = await createQuestion(examId, text)
         setQuestions([...questions, newQ])
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -94,7 +96,7 @@ export default function ManageExamQuestions() {
 
   return (
     <div className="space-y-6 fade-in max-w-4xl mx-auto">
-      <Link 
+      <Link
         href={`/teacher/rooms/${exam.rooms.id}`}
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >

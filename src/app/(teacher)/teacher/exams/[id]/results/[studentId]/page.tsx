@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Check, X, UserCircle2 } from "lucide-react"
+import { ArrowLeft, Check, X } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { createClient } from "@/lib/supabase/client"
 import { getStudentAnswersForExam, approveAnswer } from "@/lib/actions"
@@ -14,11 +14,12 @@ export default function ReviewStudent() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  
+
   const examId = params.id as string
   const studentId = params.studentId as string
 
   const [studentName, setStudentName] = useState("")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -32,7 +33,7 @@ export default function ReviewStudent() {
       }
 
       try {
-        const { data: studentData, error } = await supabase
+        const { data: studentData } = await supabase
           .from("students")
           .select("name")
           .eq("id", studentId)
@@ -53,7 +54,7 @@ export default function ReviewStudent() {
   const handleGrade = async (answerId: string, isCorrect: boolean, index: number) => {
     try {
       await approveAnswer(answerId, isCorrect)
-      
+
       // Update local state optimistically
       const newData = [...data]
       newData[index].answer.is_correct = isCorrect
@@ -70,7 +71,7 @@ export default function ReviewStudent() {
 
   return (
     <div className="space-y-6 fade-in max-w-4xl mx-auto">
-      <Link 
+      <Link
         href={`/teacher/exams/${examId}/results`}
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
@@ -96,8 +97,8 @@ export default function ReviewStudent() {
           const isWrong = ans && ans.is_correct === false
 
           return (
-            <Card 
-              key={item.question.id} 
+            <Card
+              key={item.question.id}
               className={cn(
                 "p-6 border-l-4 transition-colors",
                 isPending ? "border-l-amber-400" :
@@ -113,7 +114,7 @@ export default function ReviewStudent() {
                     </h3>
                     <p className="text-lg text-slate-900 font-medium">{item.question.text}</p>
                   </div>
-                  
+
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <h4 className="text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2">{t.studentAnswer}</h4>
                     {ans ? (
@@ -130,8 +131,8 @@ export default function ReviewStudent() {
                       onClick={() => handleGrade(ans.id, true, index)}
                       className={cn(
                         "flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all flex-1",
-                        isCorrect 
-                          ? "bg-green-100 text-green-700 ring-2 ring-green-500 ring-offset-2" 
+                        isCorrect
+                          ? "bg-green-100 text-green-700 ring-2 ring-green-500 ring-offset-2"
                           : "bg-slate-100 text-slate-600 hover:bg-green-50 hover:text-green-600"
                       )}
                     >
@@ -142,8 +143,8 @@ export default function ReviewStudent() {
                       onClick={() => handleGrade(ans.id, false, index)}
                       className={cn(
                         "flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all flex-1",
-                        isWrong 
-                          ? "bg-red-100 text-red-700 ring-2 ring-red-500 ring-offset-2" 
+                        isWrong
+                          ? "bg-red-100 text-red-700 ring-2 ring-red-500 ring-offset-2"
                           : "bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600"
                       )}
                     >

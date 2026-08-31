@@ -1,8 +1,9 @@
 /**
  * Action Logger for tracking user actions and security violations.
  */
+import type { LogMetadata } from "./types"
 
-export function logAction(action: string, userId: string = 'ANONYMOUS', data?: any) {
+export function logAction(action: string, userId: string = 'ANONYMOUS', data?: LogMetadata) {
   const timestamp = new Date().toISOString();
   const logPayload = {
     timestamp,

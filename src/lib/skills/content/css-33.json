@@ -1,0 +1,281 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "flexbox-alignment",
+      "track": "css",
+      "order": 33,
+      "title": "Flexbox — выравнивание и основные свойства",
+      "summary": "justify-content, align-items, gap, order, flex-grow, flex-shrink, flex-basis, flex.",
+      "sourceTitle": "Flexbox — выравнивание и основные свойства",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Выравнивание в Flexbox"
+        },
+        {
+          "type": "p",
+          "text": "Flexbox даёт мощные инструменты выравнивания. Ключевой момент: **justify-content** работает вдоль основной оси, **align-items** — вдоль поперечной."
+        },
+        {
+          "type": "heading",
+          "text": "justify-content: выравнивание по основной оси"
+        },
+        {
+          "type": "p",
+          "text": "`justify-content` распределяет пространство **вдоль основной оси** (по умолчанию — горизонтально)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  justify-content: flex-start;  /* по умолчанию: элементы в начале */\n  justify-content: flex-end;    /* элементы в конце */\n  justify-content: center;      /* по центру */\n  justify-content: space-between; /* равномерно, без отступов по краям */\n  justify-content: space-around;  /* равномерно, с отступами по краям */\n  justify-content: space-evenly;  /* абсолютно равномерно */\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "flex-start:     [1] [2] [3] . . .\nflex-end:       . . . [1] [2] [3]\ncenter:         . . [1] [2] [3] .\nspace-between:  [1] . . . [2] . . . [3]\nspace-around:   . [1] . . [2] . . [3] .\nspace-evenly:   . [1] . [2] . [3] ."
+        },
+        {
+          "type": "heading",
+          "text": "align-items: выравнивание по поперечной оси"
+        },
+        {
+          "type": "p",
+          "text": "`align-items` выравнивает элементы **вдоль поперечной оси** (по умолчанию — вертикально)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  height: 200px; /* задаём высоту контейнера */\n  align-items: stretch;    /* по умолчанию: растягиваются на всю высоту */\n  align-items: flex-start; /* к верхнему краю */\n  align-items: flex-end;   /* к нижнему краю */\n  align-items: center;     /* по центру */\n}"
+        },
+        {
+          "type": "p",
+          "text": "Частый пример: **центрирование элемента** по обеим осям:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".center-container {\n  display: flex;\n  justify-content: center; /* по центру горизонтально */\n  align-items: center;      /* по центру вертикально */\n  height: 300px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "align-self: выравнивание одного элемента"
+        },
+        {
+          "type": "p",
+          "text": "`align-self` позволяет **одному элементу** иметь своё значение `align-items`, отличное от контейнера."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  align-items: flex-start; /* все элементы наверху */\n}\n\n.container .highlight {\n  align-self: flex-end; /* только этот элемент внизу */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "align-content: выравнивание строк"
+        },
+        {
+          "type": "p",
+          "text": "`align-content` управляет расположением **строк** при `flex-wrap: wrap`. Работает только когда элементов несколько."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  flex-wrap: wrap;\n  height: 300px;\n  align-content: center; /* строки по центру */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частая ошибка: путаница justify-content и align-items"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**justify-content** → основная ось (по умолчанию **горизонталь**).",
+            "**align-items** → поперечная ось (по умолчанию **вертикаль**)."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Если `flex-direction: column`, роли меняются: `justify-content` станет вертикальным, а `align-items` — горизонтальным!"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* row: justify = горизонталь, align = вертикаль */\n.row {\n  display: flex;\n  justify-content: center; /* горизонтально по центру */\n  align-items: center;      /* вертикально по центру */\n}\n\n/* column: justify = вертикаль, align = горизонталь */\n.column {\n  display: flex;\n  flex-direction: column;\n  justify-content: center; /* вертикально по центру */\n  align-items: center;      /* горизонтально по центру */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "gap: расстояние между элементами"
+        },
+        {
+          "type": "p",
+          "text": "`gap` задаёт расстояние между элементами. Мы встречали его в базовом уроке — теперь закрепим."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  display: flex;\n  gap: 16px;              /* одинаковый gap и по горизонтали, и по вертикали */\n  row-gap: 12px;           /* только между строками */\n  column-gap: 24px;        /* только между колонками */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Свойства flex-элементов"
+        },
+        {
+          "type": "p",
+          "text": "Помимо свойств контейнера, у каждого flex-элемента есть **свои** свойства, которые управляют его поведением."
+        },
+        {
+          "type": "heading",
+          "text": "order: порядок элементов"
+        },
+        {
+          "type": "p",
+          "text": "`order` меняет **визуальный порядок** элементов в контейнере. По умолчанию все элементы имеют `order: 0`."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".item-1 { order: 3; } /* будет последним */\n.item-2 { order: 1; } /* будет первым */\n.item-3 { order: 2; } /* будет вторым */"
+        },
+        {
+          "type": "p",
+          "text": "Элементы с меньшим `order` идут раньше. HTML-порядок сохраняется — меняется только визуальное расположение."
+        },
+        {
+          "type": "heading",
+          "text": "flex-grow: растяжение"
+        },
+        {
+          "type": "p",
+          "text": "`flex-grow` определяет, **как элемент растягивается** чтобы занять свободное место. По умолчанию: `0` (не растягивается)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".item-1 { flex-grow: 1; }  /* занимает 1 «порцию» свободного места */\n.item-2 { flex-grow: 2; }  /* занимает 2 «порции» — вдвое больше */\n.item-3 { flex-grow: 0; }  /* не растягивается (по умолчанию) */"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "flex-grow: 1, 2, 0\n\n[  1  ][    2    ][3]\n ↑ 1ч   ↑ 2ч     ↑ 0ч"
+        },
+        {
+          "type": "heading",
+          "text": "flex-shrink: сжатие"
+        },
+        {
+          "type": "p",
+          "text": "`flex-shrink` определяет, **как элемент сжимается**, когда места не хватает. По умолчанию: `1` (все сжимаются одинаково)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".item-1 { flex-shrink: 1; }  /* сжимается (по умолчанию) */\n.item-2 { flex-shrink: 0; }  /* не сжимается */\n.item-3 { flex-shrink: 2; }  /* сжимается вдвое сильнее */"
+        },
+        {
+          "type": "heading",
+          "text": "flex-basis: начальный размер"
+        },
+        {
+          "type": "p",
+          "text": "`flex-basis` задаёт **начальный размер** элемента перед распределением свободного места. Работает как `width`, но в контексте Flexbox."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".item-1 { flex-basis: 200px; } /* начальный размер 200px */\n.item-2 { flex-basis: 50%; }    /* начальный размер 50% контейнера */\n.item-3 { flex-basis: auto; }   /* размер определяется содержимым */"
+        },
+        {
+          "type": "heading",
+          "text": "flex: сокращённая запись"
+        },
+        {
+          "type": "p",
+          "text": "`flex` — сокращённое свойство для `flex-grow`, `flex-shrink` и `flex-basis`."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".item {\n  flex: 1 1 200px;\n  /* flex-grow: 1  */\n  /* flex-shrink: 1 */\n  /* flex-basis: 200px */\n}\n\n/* Частые комбинации: */\n.item-a { flex: 1; }     /* flex: 1 1 0% — занимает равную долю */\n.item-b { flex: 0 0 200px; } /* фиксированный размер 200px */\n.item-c { flex: 0 1 auto; }  /* не растягивается, сжимается, от содержимого */"
+        },
+        {
+          "type": "p",
+          "text": "Наиболее используемое значение — `flex: 1`. Оно заставляет элемент **растягиваться и занимать равную долю** свободного места."
+        },
+        {
+          "type": "heading",
+          "text": "Реальные примеры"
+        },
+        {
+          "type": "heading",
+          "text": "1. Горизонтальное меню"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".menu {\n  display: flex;\n  justify-content: space-between; /* логотип слева, меню справа */\n  align-items: center;\n  padding: 16px 24px;\n}\n\n.nav-links {\n  display: flex;\n  gap: 24px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "2. Центрирование элемента"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".hero {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}\n\n.hero-content {\n  text-align: center;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "3. Карточки с одинаковой высотой"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".cards {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 16px;\n  align-items: stretch; /* все карточки одной высоты */\n}\n\n.card {\n  flex: 1 1 250px; /* мин. 250px, растягивается */\n  padding: 20px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "4. Распределение пространства (sidebar + main)"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".layout {\n  display: flex;\n  gap: 20px;\n  min-height: 100vh;\n}\n\n.sidebar {\n  flex: 0 0 250px; /* фиксированная ширина 250px */\n}\n\n.main {\n  flex: 1; /* занимает всё оставшееся место */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Путают justify-content и align-items.** `justify` = основная ось (обычно горизонталь), `align` = поперечная (обычно вертикаль).",
+            "**Забывают `display: flex` у контейнера.** Без него flex-свойства элементов не работают.",
+            "**Не учитывают `flex-direction`.** При `column` роли justify и align меняются местами.",
+            "**Используют `width` вместо `flex-basis`.** `flex-basis` — более правильный способ задать начальный размер в Flexbox.",
+            "**Не используют `flex: 1`.** Это самое полезное свойство для заполнения свободного пространства."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`justify-content` — выравнивание по основной оси (обычно горизонтально).",
+            "`align-items` — выравнивание по поперечной оси (обычно вертикально).",
+            "`align-self` — индивидуальное выравнивание одного элемента.",
+            "`align-content` — выравнивание строк при `flex-wrap`.",
+            "`gap` — расстояние между элементами.",
+            "`order` — порядок элементов (меняет визуальный порядок).",
+            "`flex-grow` — растяжение (занять свободное место).",
+            "`flex-shrink` — сжатие (уменьшиться при нехватке места).",
+            "`flex-basis` — начальный размер.",
+            "`flex: grow shrink basis` — сокращённая запись. `flex: 1` = `flex: 1 1 0%`."
+          ]
+        }
+      ]
+    }
+  ]
+}

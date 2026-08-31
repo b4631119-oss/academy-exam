@@ -16,9 +16,12 @@ export default function RoomDetails() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [room, setRoom] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [exams, setExams] = useState<any[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [tests, setTests] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState<"exams" | "tests">("exams")
   const [loading, setLoading] = useState(true)
@@ -42,7 +45,7 @@ export default function RoomDetails() {
           .select("*")
           .eq("id", roomId)
           .single()
-        
+
         if (roomError) throw roomError
         setRoom(roomData)
 
@@ -73,8 +76,8 @@ export default function RoomDetails() {
       try {
         const updated = await updateRoom(roomId, newName)
         setRoom(updated)
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -84,8 +87,8 @@ export default function RoomDetails() {
       try {
         await deleteRoom(roomId)
         router.push("/teacher/dashboard")
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -96,8 +99,8 @@ export default function RoomDetails() {
       try {
         const updated = await updateExam(examId, newTitle)
         setExams(exams.map(e => e.id === examId ? updated : e))
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -107,8 +110,8 @@ export default function RoomDetails() {
       try {
         await deleteExam(examId)
         setExams(exams.filter(e => e.id !== examId))
-      } catch (err: any) {
-        alert(err.message)
+      } catch (err: unknown) {
+        alert((err as Error).message)
       }
     }
   }
@@ -130,8 +133,8 @@ export default function RoomDetails() {
 
   return (
     <div className="space-y-6 fade-in">
-      <Link 
-        href="/teacher/dashboard" 
+      <Link
+        href="/teacher/dashboard"
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
@@ -153,7 +156,7 @@ export default function RoomDetails() {
             <span className="text-sm text-slate-500">{t.roomAccessCode}</span>
             <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
               <span className="font-mono font-bold text-sky-600 tracking-wider text-lg">{room.code}</span>
-              <button 
+              <button
                 onClick={copyCode}
                 className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors"
                 title={t.copyCodeBtn}

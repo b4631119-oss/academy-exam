@@ -1,0 +1,194 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "margin-i-padding",
+      "track": "css",
+      "order": 30,
+      "title": "Margin и Padding",
+      "summary": "Внутренние и внешние отступы: как управлять пространством вокруг элемента.",
+      "sourceTitle": "Margin и Padding",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Margin и Padding: в чём разница?"
+        },
+        {
+          "type": "p",
+          "text": "Вы уже знаете, что каждый элемент — это прямоугольник с блочной моделью: content → padding → border → margin. Теперь разберём **margin** и **padding** подробнее."
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "┌──────── margin ────────────┐\n│ ┌──────── border ────────┐ │\n│ │ ┌──── padding ───────┐ │ │\n│ │ │     content         │ │ │\n│ │ └────────────────────┘ │ │\n│ └────────────────────────┘ │\n└────────────────────────────┘"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Padding** — внутренний отступ: расстояние между содержимым и рамкой.",
+            "**Margin** — внешний отступ: расстояние между элементом и его соседями."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Простая аналогия: padding — это **воздух внутри коробки** вокруг предмета. Margin — это **расстояние между коробками**."
+        },
+        {
+          "type": "heading",
+          "text": "Четыре стороны"
+        },
+        {
+          "type": "p",
+          "text": "У margin и padding есть четыре стороны: top (верх), right (право), bottom (низ), left (лево)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  margin-top: 10px;\n  margin-right: 20px;\n  margin-bottom: 10px;\n  margin-left: 20px;\n\n  padding-top: 5px;\n  padding-right: 10px;\n  padding-bottom: 5px;\n  padding-left: 10px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Писать каждую сторону отдельно — долго. Поэтому в CSS есть **сокращённая запись**."
+        },
+        {
+          "type": "heading",
+          "text": "Сокращённая запись"
+        },
+        {
+          "type": "p",
+          "text": "Свойства `margin` и `padding` можно задать одной строкой. Есть несколько вариантов:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Все стороны одинаковые */\nmargin: 10px;\npadding: 10px;\n\n/* Верх/Низ Право/Лево */\nmargin: 10px 20px;\npadding: 10px 20px;\n\n/* Верх Право Низ Лево (по часовой стрелке) */\nmargin: 10px 20px 15px 5px;\npadding: 5px 10px 15px 20px;\n\n/* Верх Право/Лево Низ */\nmargin: 10px 20px 15px;\npadding: 5px 10px 15px;"
+        },
+        {
+          "type": "p",
+          "text": "Правило запоминания: значения задаются **по часовой стрелке** — сверху, справа, снизу, слева."
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "        top (10px)\n         ↓\nleft ←         → right (20px)\n(5px)          ↑\n       bottom (15px)"
+        },
+        {
+          "type": "heading",
+          "text": "Влияние на пространство"
+        },
+        {
+          "type": "p",
+          "text": "Padding и margin **увеличивают пространство**, которое занимает элемент на странице, но по-разному:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Без отступов: блок 200px */\n.box-no-spacing {\n  width: 200px;\n  height: 100px;\n  background: #e0e0e0;\n}\n\n/* С padding: блок 200px контент + 20px padding = 240px итого */\n.box-padding {\n  width: 200px;\n  height: 100px;\n  padding: 20px;\n  background: #c8e6c9;\n}\n\n/* С margin: блок 200px + 30px margin с каждой стороны */\n.box-margin {\n  width: 200px;\n  height: 100px;\n  margin: 30px;\n  background: #bbdefb;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Padding** прибавляется к размерам элемента (при `content-box`). С `border-box` padding входит в заданный `width`.",
+            "**Margin** не входит в размер элемента, но «отталкивает» соседние элементы."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Связь с box-sizing"
+        },
+        {
+          "type": "p",
+          "text": "Как мы говорили в уроке «Box Model», `box-sizing` влияет на то, как padding и border влияют на итоговый размер:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* content-box: width = контент, padding СНАРУЖИ */\n.content-box {\n  box-sizing: content-box;\n  width: 200px;\n  padding: 20px;\n}\n/* Итого: 200 + 20 + 20 = 240px */\n\n/* border-box: width = контент + padding + border */\n.border-box {\n  box-sizing: border-box;\n  width: 200px;\n  padding: 20px;\n}\n/* Итого: ровно 200px */"
+        },
+        {
+          "type": "p",
+          "text": "Практический совет: **всегда используйте `box-sizing: border-box`**. Тогда `width` всегда будет итоговым размером, и padding не сюрпризит."
+        },
+        {
+          "type": "heading",
+          "text": "auto на базовом уровне"
+        },
+        {
+          "type": "p",
+          "text": "Значение `auto` для margin — особый случай. Браузер вычисляет отступ **автоматически**."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Центрирование блока по горизонтали */\n.centered {\n  width: 300px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n/* Или сокращённо */\n.centered {\n  width: 300px;\n  margin: 0 auto;\n}"
+        },
+        {
+          "type": "p",
+          "text": "`margin: 0 auto` — классический способ центрировать блочный элемент с фиксированной шириной. Браузер делит оставшееся пространство поровну между левым и правым margin."
+        },
+        {
+          "type": "heading",
+          "text": "Margin collapsing: простыми словами"
+        },
+        {
+          "type": "p",
+          "text": "Есть важная особенность, которую нужно знать: **margin collapsing** (схлопывание вертикальных отступов)."
+        },
+        {
+          "type": "p",
+          "text": "Когда два блочных элемента стоят друг над другом, их **вертикальные margin объединяются**. Не складываются, а берётся **больший** из двух."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<p class=\"first\">Первый абзац</p>\n<p class=\"second\">Второй абзац</p>"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".first {\n  margin-bottom: 30px;  /* 30px снизу */\n}\n.second {\n  margin-top: 20px;     /* 20px сверху */\n}\n/* Расстояние между ними: 30px, а НЕ 50px! */"
+        },
+        {
+          "type": "p",
+          "text": "Это может быть неожиданным. Margin collapsing работает только с **вертикальными** margin и только между **блокочными** элементами. Гorizontalные margin складываются как обычно."
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "Миф: 30px + 20px = 50px\nРеальность: берётся max(30px, 20px) = 30px\n\n┌─────────────────┐\n│  Первый абзац   │\n│  margin-bottom:  │\n│      30px        │\n└─────────────────┘\n    ↕ 30px (не 50!)\n┌─────────────────┐\n│  Второй абзац   │\n│  margin-top:     │\n│      20px        │\n└─────────────────┘"
+        },
+        {
+          "type": "note",
+          "text": "Margin collapsing — тема для углублённого изучения. Для начала просто знайте, что вертикальные margin между блоками могут «схлопываться»."
+        },
+        {
+          "type": "heading",
+          "text": "Типичные ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Путают padding и margin.** Нужен отступ **внутри** элемента? Это padding. Нужно отодвинуть **от соседа**? Это margin.",
+            "**Задают width и не учитывают padding.** Без `border-box` padding увеличивает итоговый размер. Используйте `border-box`.",
+            "**Не знают про margin collapsing.** Два абзаца с margin-bottom: 20px и margin-top: 30px создадут отступ 30px, а не 50px.",
+            "**Используют margin для отступов внутри элемента.** Margin задаёт отступ **снаружи**. Для внутренних отступов — padding."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Padding — **внутренний** отступ, margin — **внешний**.",
+            "Сокращённая запись: `margin: 10px 20px` (вер/гор) или `margin: 10px 20px 15px 5px` (по часовой).",
+            "`margin: 0 auto` центрирует блок по горизонтали.",
+            "С `border-box` padding входит в `width`, без `border-box` — прибавляется.",
+            "Вертикальные margin между блоками **схлопываются** — берётся больший."
+          ]
+        }
+      ]
+    }
+  ]
+}

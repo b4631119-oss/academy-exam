@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Award, CheckCircle2, Trophy, Loader2 } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Trophy, Loader2 } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { getTestSessionResults } from "@/lib/test-actions"
@@ -15,6 +15,7 @@ export default function TeacherTestResultsPage() {
   const testId = params.id as string
   const sessionId = params.sessionId as string
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase session results data
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -24,8 +25,8 @@ export default function TeacherTestResultsPage() {
       try {
         const res = await getTestSessionResults(sessionId)
         setData(res)
-      } catch (err: any) {
-        setError(friendlyError(err.message || "Ошибка загрузки результатов"))
+      } catch (err: unknown) {
+        setError(friendlyError((err as Error).message || "Ошибка загрузки результатов"))
       } finally {
         setLoading(false)
       }
@@ -90,6 +91,7 @@ export default function TeacherTestResultsPage() {
           </div>
         ) : (
           <div className="space-y-3">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase result row */}
             {data?.results?.map((r: any, i: number) => (
               <div
                 key={r.student_id}

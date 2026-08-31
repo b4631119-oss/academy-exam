@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from "jose"
+import type { StudentJwtPayload } from "./types"
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET
@@ -19,12 +20,12 @@ export async function signStudentToken(studentId: string, roomId: string) {
     .sign(secret)
 }
 
-export async function verifyStudentToken(token: string) {
+export async function verifyStudentToken(token: string): Promise<StudentJwtPayload | null> {
   try {
     const secret = getJwtSecret()
     const { payload } = await jwtVerify(token, secret)
-    return payload as { studentId: string; roomId: string; [key: string]: any }
-  } catch (error) {
+    return { studentId: payload.studentId as string, roomId: payload.roomId as string }
+  } catch {
     return null
   }
 }

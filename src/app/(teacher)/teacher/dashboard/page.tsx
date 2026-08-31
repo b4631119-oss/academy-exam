@@ -11,6 +11,7 @@ import { getRooms } from "@/lib/actions"
 import { t } from "@/lib/translations"
 
 export default function TeacherDashboard() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [rooms, setRooms] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()

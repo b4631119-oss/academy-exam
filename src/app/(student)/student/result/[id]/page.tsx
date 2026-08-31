@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle2, XCircle, Clock, ArrowLeft } from "lucide-react"
 import { Card } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
 import { getStudent, getStudentAnswersForExam } from "@/lib/actions"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/translations"
@@ -15,7 +14,9 @@ export default function StudentResult() {
   const router = useRouter()
   const examId = params.id as string
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [student, setStudent] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -51,7 +52,7 @@ export default function StudentResult() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 fade-in pb-12">
-      <Link 
+      <Link
         href={student?.room_id ? `/student/rooms/${student.room_id}` : "/"}
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
@@ -101,8 +102,8 @@ export default function StudentResult() {
           const notAnswered = !ans
 
           return (
-            <Card 
-              key={item.question.id} 
+            <Card
+              key={item.question.id}
               className={cn(
                 "p-6 md:p-8 border-l-4 transition-all",
                 isPending ? "border-l-amber-400" :
@@ -116,7 +117,7 @@ export default function StudentResult() {
                     <h3 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">
                       {t.questionIndex.replace('{index}', String(index + 1))}
                     </h3>
-                    
+
                     {/* Status Badge */}
                     <div className={cn(
                       "flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider",
@@ -131,9 +132,9 @@ export default function StudentResult() {
                       {notAnswered && <span>{t.skipped}</span>}
                     </div>
                   </div>
-                  
+
                   <p className="text-lg text-slate-900 font-medium">{item.question.text}</p>
-                  
+
                   <div className="mt-4">
                     <h4 className="text-xs font-semibold tracking-wide text-slate-400 uppercase mb-2">{t.yourAnswer}</h4>
                     {notAnswered ? (

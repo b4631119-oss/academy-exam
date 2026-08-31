@@ -1,0 +1,175 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "psevdoelementy",
+      "track": "css",
+      "order": 44,
+      "title": "Псевдоэлементы",
+      "summary": "::before, ::after, ::first-letter, ::first-line, ::marker, ::selection, ::placeholder.",
+      "sourceTitle": "Псевдоэлементы",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Что такое псевдоэлемент?"
+        },
+        {
+          "type": "p",
+          "text": "`Псевдоэлемент` — это ключевое слово с двойным двоеточием `::`, которое создаёт **виртуальный элемент** внутри реального HTML-элемента. Этот элемент не существует в HTML, но отображается браузером."
+        },
+        {
+          "type": "p",
+          "text": "Отличие от псевдокласса: псевдокласс `:hover` выбирает **существующий** элемент в состоянии. Псевдоэлемент `::before` **создаёт новый** виртуальный элемент."
+        },
+        {
+          "type": "heading",
+          "text": "::before и ::after — декоративные элементы"
+        },
+        {
+          "type": "p",
+          "text": "Самые используемые псевдоэлементы. Они вставляют контент **до** и **после** содержимого элемента."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Иконка перед ссылкой */\n.external-link::before {\n  content: \"🔗 \";\n}\n\n/* Декоративная линия после заголовка */\nh2::after {\n  content: \"\";\n  display: block;\n  width: 60px;\n  height: 3px;\n  background: skyblue;\n  margin-top: 8px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "**Обязательное свойство `content`** — без него псевдоэлемент не отображается."
+        },
+        {
+          "type": "heading",
+          "text": "Свойство content"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Текст */\n.quote::before { content: \"«\"; }\n.quote::after  { content: \"»\"; }\n\n/* Пустое (для декоративных линий) */\nh2::after { content: \"\"; }\n\n/* Атрибут HTML */\n.link::after { content: attr(href); }\n\n/* Счётчик */\nol { counter-reset: item; }\nli::before {\n  counter-increment: item;\n  content: counter(item) \". \";\n  font-weight: bold;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "::first-letter — первая буква"
+        },
+        {
+          "type": "p",
+          "text": "Стилизует **первую букву** блочного элемента:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "p::first-letter {\n  font-size: 2em;\n  font-weight: bold;\n  color: navy;\n  float: left;\n  margin-right: 8px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "::first-line — первая строка"
+        },
+        {
+          "type": "p",
+          "text": "Стилизует **первую строку** текста (изменяется при изменении ширины окна):"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "p::first-line {\n  font-weight: bold;\n  text-transform: uppercase;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "::marker — маркер списка"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "li::marker {\n  color: skyblue;\n  font-size: 1.2em;\n}\n\n/* Кастомный маркер */\nul.checklist li::marker {\n  content: \"✅ \";\n}"
+        },
+        {
+          "type": "heading",
+          "text": "::selection — выделение текста"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "::selection {\n  background: skyblue;\n  color: white;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "::placeholder — плейсхолдер"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "input::placeholder {\n  color: #999;\n  font-style: italic;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "::backdrop (знакомство)"
+        },
+        {
+          "type": "p",
+          "text": "`::backdrop` стилизует **оверлей** за модальным окном (`<dialog>` или Fullscreen API):"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "dialog::backdrop {\n  background: rgba(0, 0, 0, 0.5);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Псевдокласс vs псевдоэлемент"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Псевдокласс** (`:hover`, `:focus`, `:nth-child`) — выбирает элемент **в состоянии**. Одно двоеточие.",
+            "**Псевдоэлемент** (`::before`, `::after`, `::first-letter`) — создаёт **виртуальный элемент**. Двойное двоеточие."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Когда НЕ использовать псевдоэлементы"
+        },
+        {
+          "type": "p",
+          "text": "Псевдоэлементы — для **декоративного** контента. Не используйте их для важной информации:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Не** для текста, который пользователь должен прочитать.",
+            "**Не** для ссылок или кнопок.",
+            "**Не** для контента, важного для скринридеров.",
+            "**Да** для иконок, декоративных линий, кавычек, визуальных эффектов."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `content`.** Без него `::before` и `::after` не отображаются.",
+            "**Используют псевдоэлементы для важного контента.** Скринридеры не видят `::before`/`::after`.",
+            "**Путают одинарное `:` и двойное `::`.** Современный стандарт — двойное `::` для псевдоэлементов."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`::before` / `::after` — декоративные виртуальные элементы (обязателен `content`).",
+            "`::first-letter` — первая буква блочного элемента.",
+            "`::first-line` — первая строка (динамическая).",
+            "`::marker` — маркер списка.",
+            "`::selection` — выделение текста пользователем.",
+            "`::placeholder` — текст-подсказка в поле ввода.",
+            "Псевдоэлементы — для декорации, не для важного контента."
+          ]
+        }
+      ]
+    }
+  ]
+}

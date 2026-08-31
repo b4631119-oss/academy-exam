@@ -1,0 +1,170 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "psevdoklassy",
+      "track": "css",
+      "order": 43,
+      "title": "Псевдоклассы",
+      "summary": "Состояния элементов: :hover, :focus, :checked, :valid, :nth-child() и другие.",
+      "sourceTitle": "Псевдоклассы",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Что такое псевдокласс?"
+        },
+        {
+          "type": "p",
+          "text": "`Псевдокласс` — это ключевое слово с двоеточием `:`, которое выбирает элементы **в определённом состоянии**. Состояние определяется не классом в HTML, а поведением элемента: наведён ли курсор, заполнено ли поле, активен ли элемент."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Обычный класс — задаётся в HTML */\n.active { color: red; }\n\n/* Псевдокласс — состояние определяется браузером */\na:hover { color: red; }"
+        },
+        {
+          "type": "heading",
+          "text": "Интерактивные состояния"
+        },
+        {
+          "type": "heading",
+          "text": ":hover — при наведении"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".btn:hover {\n  background: #1d49aa;\n  transform: translateY(-1px);\n  box-shadow: 0 4px 8px rgba(0,0,0,0.15);\n}"
+        },
+        {
+          "type": "heading",
+          "text": ":focus и :focus-visible — фокус"
+        },
+        {
+          "type": "p",
+          "text": "`:focus` срабатывает при фокусе (клик или Tab). `:focus-visible` — только при навигации клавиатурой (не при клике)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Обычный фокус */\ninput:focus {\n  border-color: blue;\n}\n\n/* Фокус только от клавиатуры */\nbutton:focus-visible {\n  outline: 2px solid blue;\n  outline-offset: 2px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": ":focus-within — фокус внутри"
+        },
+        {
+          "type": "p",
+          "text": "`:focus-within` выбирает родителя, если **любой** его дочерний элемент в фокусе:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".form-group:focus-within {\n  background: #f0f7ff;\n  border-color: blue;\n}"
+        },
+        {
+          "type": "heading",
+          "text": ":active — при нажатии"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".btn:active {\n  transform: scale(0.98);\n  background: #153c7a;\n}"
+        },
+        {
+          "type": "heading",
+          "text": ":target — якорь"
+        },
+        {
+          "type": "p",
+          "text": "`:target` выбирает элемент, на который ведёт URL-якорь (`#id`):"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Подсветка секции при переходе по якорю */\n:target {\n  background: #fffde7;\n  border-left: 4px solid gold;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Псевдоклассы форм"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Выбранный чекбокс/радио */\ninput:checked { accent-color: blue; }\n\n/* Заблокированные поля */\ninput:disabled {\n  background: #f5f5f5;\n  cursor: not-allowed;\n}\n\n/* Обязательное поле */\ninput:required { border-left: 3px solid orange; }\n\n/* Поле с валидным значением */\ninput:valid { border-color: green; }\n\n/* Поле с невалидным значением */\ninput:invalid { border-color: red; }\n\n/* Пустое поле с placeholder */\ninput:placeholder-shown { color: #999; }"
+        },
+        {
+          "type": "heading",
+          "text": "Псевдоклассы позиции"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Первый элемент */\nli:first-child { font-weight: bold; }\n\n/* Последний элемент */\nli:last-child { border-bottom: none; }\n\n/* Нечётные элементы */\ntr:nth-child(odd) { background: #f5f5f5; }\n\n/* Чётные элементы */\ntr:nth-child(even) { background: white; }\n\n/* Каждый 3-й элемент */\nli:nth-child(3n) { color: red; }\n\n/* Первый из своего типа */\np:first-of-type { font-size: 1.2em; }"
+        },
+        {
+          "type": "heading",
+          "text": "Разница между :nth-child и :nth-of-type"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`:nth-child(n)`** — считает **все** соседние элементы, неважно какого тега.",
+            "**`:nth-of-type(n)`** — считает только элементы **того же тега**."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<div>\n  <p>Текст</p>    <!-- :nth-child(1), :nth-of-type(1) -->\n  <span>Элемент</span>\n  <p>Ещё</p>      <!-- :nth-child(3), :nth-of-type(2) -->\n</div>"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Выберет ТРЕТИЙ элемент среди всех соседей (span) */\n:nth-child(3) { color: red; }\n\n/* Выберет ВТОРОЙ <p> среди <p> */\n:nth-of-type(2) { color: blue; }"
+        },
+        {
+          "type": "heading",
+          "text": "Когда какой псевдокласс использовать?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`:hover`** — кнопки, ссылки, карточки (эффект при наведении).",
+            "**`:focus-visible`** — доступность: показ фокуса для клавиатурной навигации.",
+            "**`:checked`** — стилизация чекбоксов и радиокнопок.",
+            "**`:valid` / `:invalid`** — визуальная обратная связь при заполнении форм.",
+            "**`:nth-child(odd)`** — чередование строк таблицы (zebra-striping).",
+            "**`:empty`** — скрытие пустых блоков."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `:focus-visible`.** Обычный `:focus` показывает outline при клике — это лишний визуальный шум.",
+            "**Путают `:nth-child` и `:nth-of-type`.** Они считают по-разному!",
+            "**Используют `:invalid` без `required`.** Без `required` все пустые поля невалидны."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Псевдоклассы выбирают элементы **в определённом состоянии**.",
+            "`:hover`, `:focus`, `:active` — интерактивные состояния.",
+            "`:focus-visible` — фокус только от клавиатуры (для доступности).",
+            "`:checked`, `:disabled`, `:valid`, `:invalid` — состояние форм.",
+            "`:nth-child()`, `:first-child`, `:last-child` — позиция среди соседей.",
+            "`:nth-child` считает все элементы, `:nth-of-type` — только одного тега."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -30,25 +30,31 @@ function resolve(theme: Theme): Resolved {
   return theme === "system" ? getSystemTheme() : theme
 }
 
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "system"
+  return (localStorage.getItem("theme") as Theme) || "system"
+}
+
+function getInitialResolved(): Resolved {
+  if (typeof window === "undefined") return "light"
+  const stored = localStorage.getItem("theme") as Theme | null
+  return resolve(stored || "system")
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system")
-  const [resolved, setResolved] = useState<Resolved>("light")
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+  const [resolved, setResolved] = useState<Resolved>(getInitialResolved)
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null
-    const initial = stored || "system"
-    setThemeState(initial)
-    setResolved(resolve(initial))
-
     const mq = window.matchMedia("(prefers-color-scheme: dark)")
     const onChange = () => {
-      if ((stored || "system") === "system") {
+      if (theme === "system") {
         setResolved(getSystemTheme())
       }
     }
     mq.addEventListener("change", onChange)
     return () => mq.removeEventListener("change", onChange)
-  }, [])
+  }, [theme])
 
   useEffect(() => {
     const root = document.documentElement

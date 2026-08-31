@@ -9,13 +9,6 @@ import { createClient as createSupabaseClient, type SupabaseClient } from "@supa
 let cachedAdminClient: SupabaseClient | null = null
 
 export function createAdminClient(): SupabaseClient {
-  console.error("[ENV RUNTIME CHECK]", {
-    hasSupabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
-    hasServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
-    hasJwtSecret: Boolean(process.env.JWT_SECRET),
-    nodeEnv: process.env.NODE_ENV
-  })
-
   if (cachedAdminClient) return cachedAdminClient
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") || ""

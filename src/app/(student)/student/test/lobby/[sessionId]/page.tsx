@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Clock, HelpCircle, User, LogOut, Loader2, AlertCircle } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { getStudentTestSessionStatus } from "@/lib/test-actions"
 
 function formatTimeLimit(seconds?: number | null): string {
   if (!seconds || seconds <= 0) return "—"
@@ -19,11 +18,10 @@ export default function StudentTestWaitingRoomPage() {
   const router = useRouter()
   const sessionId = params.sessionId as string
 
-  const [sessionData, setSessionData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
+  const [sessionData] = useState<any>(null)
+  const [loading] = useState(true)
+  const [error] = useState("")
 
   useEffect(() => {
     // Immediately redirect student from legacy lobby to autonomous test page

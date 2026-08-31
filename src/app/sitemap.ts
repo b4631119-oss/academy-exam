@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getAllLessonParams, getLesson, isTrackId, TRACKS, type TrackId } from '@/lib/skills/catalog'
+import { getAllLessonParams, isTrackId, TRACKS, type TrackId } from '@/lib/skills/catalog'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
@@ -58,7 +58,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const allLessons = getAllLessonParams()
   for (const { track, slug } of allLessons) {
     if (!isTrackId(track)) continue
-    const lesson = getLesson(track, slug)
     entries.push({
       url: `${baseUrl}/skills/${track}/${slug}`,
       lastModified: new Date(),

@@ -1,0 +1,184 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "css-functions",
+      "track": "css",
+      "order": 45,
+      "title": "CSS-функции",
+      "summary": "calc(), min(), max(), clamp(), var(), attr(), url(), базовые градиенты.",
+      "sourceTitle": "CSS-функции",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем нужны CSS-функции?"
+        },
+        {
+          "type": "p",
+          "text": "CSS-функции позволяют **вычислять значения**, использовать **переменные** и создавать **динамические** стили. Вместо фиксированных значений (`200px`) вы можете писать `calc(100% - 40px)` — и браузер сам вычислит результат."
+        },
+        {
+          "type": "heading",
+          "text": "calc() — вычисления"
+        },
+        {
+          "type": "p",
+          "text": "`calc()` позволяет смешивать **разные единицы** в одном выражении:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Ширина = 100% минус 40px отступов */\n.container {\n  width: calc(100% - 40px);\n  padding: 20px;\n}\n\n/* Комбинируем rem и px */\n.element {\n  font-size: calc(1rem + 2px);\n}\n\n/* Центрирование с учётом ширины */\n.centered {\n  width: 300px;\n  margin-left: calc(50% - 150px);\n}"
+        },
+        {
+          "type": "p",
+          "text": "`calc()` поддерживает: `+`, `-`, `*`, `/`. Пробелы **обязательны** вокруг `+` и `-`."
+        },
+        {
+          "type": "heading",
+          "text": "min() и max() — ограничения"
+        },
+        {
+          "type": "p",
+          "text": "`min()` возвращает **меньшее** значение, `max()` — **большее**:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Ширина: 100%, но не шире 600px */\n.container {\n  width: min(100%, 600px);\n}\n\n/* Ширина: 100%, но не уже 300px */\n.container {\n  width: max(100%, 300px);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "clamp() — значение в диапазоне"
+        },
+        {
+          "type": "p",
+          "text": "`clamp(минимум, предпочтительное, максимум)` — выбирает значение **в пределах диапазона**. Это короткая запись для `max(minimum, min(preferred, maximum))`."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Шрифт: мин 16px, preferred 2vw, макс 24px */\nh1 {\n  font-size: clamp(16px, 2vw, 24px);\n}\n\n/* Ширина: мин 300px, preferred 80%, макс 1200px */\n.container {\n  width: clamp(300px, 80%, 1200px);\n}\n\n/* Padding: мин 1rem, preferred 5vw, макс 3rem */\n.section {\n  padding: clamp(1rem, 5vw, 3rem);\n}"
+        },
+        {
+          "type": "p",
+          "text": "`clamp()` — основа **fluid typography** и адаптивных отступов. Значение плавно растёт от минимума к максимуму."
+        },
+        {
+          "type": "heading",
+          "text": "var() — CSS-переменные"
+        },
+        {
+          "type": "p",
+          "text": "`var()` использует значение CSS-переменной. Переменные объявляются через `--имя` и считываются через `var(--имя)`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Объявление переменных */\n:root {\n  --primary: #0066cc;\n  --spacing: 16px;\n  --radius: 8px;\n}\n\n/* Использование */\n.btn {\n  background: var(--primary);\n  padding: var(--spacing);\n  border-radius: var(--radius);\n}\n\n/* Значение по умолчанию */\n.element {\n  color: var(--text-color, #333);\n}"
+        },
+        {
+          "type": "p",
+          "text": "Переменные **наследуются**. Объявите в `:root` — и они доступны везде. Переопределите в конкретном элементе — и только он изменится."
+        },
+        {
+          "type": "heading",
+          "text": "attr() — значение атрибута"
+        },
+        {
+          "type": "p",
+          "text": "`attr()` читает значение HTML-атрибута элемента:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".tooltip::after {\n  content: attr(data-label);\n  position: absolute;\n  background: black;\n  color: white;\n  padding: 4px 8px;\n  border-radius: 4px;\n}"
+        },
+        {
+          "type": "note",
+          "text": "`attr()` в CSS ограничен — работает только с `content`. Для других свойств используйте JavaScript или CSS-переменные."
+        },
+        {
+          "type": "heading",
+          "text": "url() — ссылка на ресурс"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".hero {\n  background: url('/images/hero.jpg') center/cover no-repeat;\n}\n\n@font-face {\n  font-family: 'CustomFont';\n  src: url('/fonts/custom.woff2') format('woff2');\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Базовые градиенты"
+        },
+        {
+          "type": "p",
+          "text": "`linear-gradient()` и `radial-gradient()` создают плавные переходы цвета:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Линейный градиент */\n.gradient {\n  background: linear-gradient(to right, #667eea, #764ba2);\n}\n\n/* Радиальный градиент */\n.gradient {\n  background: radial-gradient(circle, #667eea, #764ba2);\n}\n\n/* Градиент как фон кнопки */\n.btn {\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Реальные задачи"
+        },
+        {
+          "type": "heading",
+          "text": "Fluid Typography"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "h1 {\n  font-size: clamp(1.5rem, 4vw, 3rem);\n  line-height: 1.2;\n}\n\np {\n  font-size: clamp(1rem, 2vw, 1.25rem);\n  line-height: 1.6;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Адаптивный layout"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  width: min(100% - 2rem, 1200px);\n  margin: 0 auto;\n  padding: clamp(1rem, 3vw, 2rem);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Тема через переменные"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ":root {\n  --bg: white;\n  --text: #333;\n  --border: #ddd;\n}\n\n@media (prefers-color-scheme: dark) {\n  :root {\n    --bg: #1a1a2e;\n    --text: #e0e0e0;\n    --border: #333;\n  }\n}\n\nbody {\n  background: var(--bg);\n  color: var(--text);\n}\n\n.card {\n  border: 1px solid var(--border);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают пробелы в `calc()`.** `calc(100%-40px)` не работает. Нужно `calc(100% - 40px)`.",
+            "**Не объявляют `:root` для переменных.** Без `:root` переменные не наследуются.",
+            "**Используют `calc()` там, где проще `min()`/`max()`.** `min(100%, 600px)` проще."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`calc()` — вычисления с разными единицами (обязательны пробелы вокруг `+`/`-`).",
+            "`min()` / `max()` — выбрать меньшее/большее из значений.",
+            "`clamp(min, preferred, max)` — значение в диапазоне (основа fluid typography).",
+            "`var(--name)` — CSS-переменные (объявляются в `:root`).",
+            "`attr()` — чтение HTML-атрибута (ограничено `content`).",
+            "`url()` — ссылка на ресурс (изображение, шрифт)."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -76,11 +76,11 @@ export async function proxy(request: NextRequest) {
   // 6. Protect student routes (excluding entry page)
   if (pathname.startsWith('/student/') && pathname !== '/student/enter') {
     const token = request.cookies.get('studentToken')?.value
-    
+
     if (!token) {
       return NextResponse.redirect(new URL('/student/enter', request.url))
     }
-    
+
     const payload = await verifyStudentToken(token)
     if (!payload) {
       return NextResponse.redirect(new URL('/student/enter', request.url))

@@ -1,0 +1,188 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "media-queries",
+      "track": "css",
+      "order": 37,
+      "title": "Media Queries",
+      "summary": "@media, min-width, max-width, breakpoint, mobile-first media queries, prefers-color-scheme.",
+      "sourceTitle": "Media Queries",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Что такое Media Query?"
+        },
+        {
+          "type": "p",
+          "text": "`Media Query` (медиа-запрос) — это CSS-конструкция, которая **применяет стили только при определённых условиях**. Например: «если ширина экрана меньше 768px — сделай колонку в одну строку»."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Базовые стили (для всех экранов) */\n.container {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 16px;\n}\n\n/* Если экран узкий (меньше 768px) */\n@media (max-width: 767px) {\n  .container {\n    grid-template-columns: 1fr;\n  }\n}"
+        },
+        {
+          "type": "p",
+          "text": "На экранах шире 767px — три колонки. На 767px и уже — одна колонка."
+        },
+        {
+          "type": "heading",
+          "text": "Базовый синтаксис"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "@media (условие) {\n  /* стили, которые применяются при выполнении условия */\n}"
+        },
+        {
+          "type": "p",
+          "text": "Media query **не делает сайт адаптивным автоматически**. Она лишь **задаёт условия**, при которых применяются определённые CSS-стили. Вся адаптация — в ваших CSS-правилах."
+        },
+        {
+          "type": "heading",
+          "text": "min-width и max-width"
+        },
+        {
+          "type": "p",
+          "text": "Два основных условия:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`min-width`** — «если ширина **минимум** X пикселей» (используется в mobile-first).",
+            "**`max-width`** — «если ширина **максимум** X пикселей» (используется в desktop-first)."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Mobile-first: стили для мобильных, потом добавляем для больших */\n.sidebar {\n  display: none;\n}\n\n@media (min-width: 768px) {\n  .sidebar {\n    display: block;\n    width: 250px;\n  }\n}\n\n/* Desktop-first: стили для десктопа, потом «обрезаем» для мобильных */\n.sidebar {\n  display: block;\n  width: 250px;\n}\n\n@media (max-width: 767px) {\n  .sidebar {\n    display: none;\n  }\n}"
+        },
+        {
+          "type": "p",
+          "text": "Оба подхода делают одно и то же, но **mobile-first** считается современным стандартом."
+        },
+        {
+          "type": "heading",
+          "text": "Breakpoint (точка останова)"
+        },
+        {
+          "type": "p",
+          "text": "`Breakpoint` — это ширина экрана, при которой макет **меняется**. Это «точка останова», где дизайн переключается с одной раскладки на другую."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Типичные breakpoints */\n/* Мобильные: < 640px */\n/* Планшеты: 640px — 1024px */\n/* Десктопы: > 1024px */\n\n.container {\n  padding: 1rem;        /* mobile */\n}\n\n@media (min-width: 640px) {\n  .container {\n    padding: 1.5rem;    /* планшет */\n  }\n}\n\n@media (min-width: 1024px) {\n  .container {\n    padding: 2rem;      /* десктоп */\n  }\n}"
+        },
+        {
+          "type": "p",
+          "text": "Типичные breakpoints (но они **не являются стандартом** — выбирайте под свой дизайн):"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**480px** — маленькие смартфоны.",
+            "**640px** — большие смартфоны / горизонтальная ориентация.",
+            "**768px** — планшеты.",
+            "**1024px** —небольшие ноутбуки / планшеты в ландшафте.",
+            "**1280px** — десктопы."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Мобильные медиа-запросы (mobile-first)"
+        },
+        {
+          "type": "p",
+          "text": "Mobile-first подход: **базовые стили** для мобильных, потом **добавляем** для больших через `min-width`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* === Базовый (мобильный) === */\n.grid {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 12px;\n}\n\n/* === Планшеты === */\n@media (min-width: 640px) {\n  .grid {\n    grid-template-columns: repeat(2, 1fr);\n    gap: 16px;\n  }\n}\n\n/* === Десктопы === */\n@media (min-width: 1024px) {\n  .grid {\n    grid-template-columns: repeat(4, 1fr);\n    gap: 20px;\n  }\n}"
+        },
+        {
+          "type": "p",
+          "text": "Порядок: мобильный (1 колонка) → планшет (2 колонки) → десктоп (4 колонки)."
+        },
+        {
+          "type": "heading",
+          "text": "Несколько breakpoint"
+        },
+        {
+          "type": "p",
+          "text": "Можно задать несколько breakpoints для плавного перехода:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Мобильные: 1 колонка */\n.grid {\n  grid-template-columns: 1fr;\n}\n\n/* Планшет: 2 колонки */\n@media (min-width: 640px) {\n  .grid { grid-template-columns: repeat(2, 1fr); }\n}\n\n/* Маленький десктоп: 3 колонки */\n@media (min-width: 1024px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n\n/* Большой десктоп: 4 колонки */\n@media (min-width: 1280px) {\n  .grid { grid-template-columns: repeat(4, 1fr); }\n}"
+        },
+        {
+          "type": "heading",
+          "text": "prefers-color-scheme: тёмная тема"
+        },
+        {
+          "type": "p",
+          "text": "`prefers-color-scheme` определяет, какую тему предпочитает пользователь — светлую или тёмную."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Светлая тема (по умолчанию) */\nbody {\n  background: white;\n  color: #333;\n}\n\n/* Тёмная тема */\n@media (prefers-color-scheme: dark) {\n  body {\n    background: #1a1a2e;\n    color: #e0e0e0;\n  }\n}"
+        },
+        {
+          "type": "p",
+          "text": "Браузер определяет настройки ОС пользователя и применяет соответствующие стили."
+        },
+        {
+          "type": "heading",
+          "text": "prefers-reduced-motion (знакомство)"
+        },
+        {
+          "type": "p",
+          "text": "`prefers-reduced-motion` определяет, хочет ли пользователь **уменьшить анимации** (например, из-за головокружения)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Обычная анимация */\n.fade-in {\n  animation: fadeIn 0.5s ease-in;\n}\n\n/* Если пользователь просит уменьшить движение */\n@media (prefers-reduced-motion: reduce) {\n  .fade-in {\n    animation: none;\n  }\n}"
+        },
+        {
+          "type": "note",
+          "text": "Это не только вежливость — это **важно для доступности**. Некоторые люди физически плохо переносят анимации."
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `@media`.** Пишут `min-width: 768px { ... }` вместо `@media (min-width: 768px) { ... }`.",
+            "**Используют `max-width` вместо `min-width` (desktop-first).** Mobile-first проще поддерживать.",
+            "**Один breakpoint на всё.** Лучше несколько: для телефонов, планшетов и десктопов.",
+            "**Media query не делает сайт адаптивным.** Она лишь задаёт условия — адаптивностьзависит от ваших CSS-правил."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`@media (условие) { ... }` — применяет стили при выполнении условия.",
+            "**`min-width`** — «минимум X» (mobile-first). **`max-width`** — «максимум X» (desktop-first).",
+            "**Breakpoint** — точка, где меняется макет (обычно 640px, 768px, 1024px).",
+            "**Mobile-first**: базовые стили для мобильных, потом `min-width` для больших экранов.",
+            "`prefers-color-scheme` — определяет светлую/тёмную тему ОС.",
+            "`prefers-reduced-motion` — уменьшает анимации (важно для доступности)."
+          ]
+        }
+      ]
+    }
+  ]
+}

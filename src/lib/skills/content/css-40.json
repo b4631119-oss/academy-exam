@@ -1,0 +1,136 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "stilizatsiya-button",
+      "track": "css",
+      "order": 40,
+      "title": "Стилизация button",
+      "summary": "Кнопки: состояния, отступы, фокус и внешний вид.",
+      "sourceTitle": "Урок 14. Стилизация button.",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Что такое стилизация кнопок?"
+        },
+        {
+          "type": "p",
+          "text": "Кнопки `<button>` и `<input type=\"button\">` имеют собственные стили по умолчанию. Чтобы создать красивую и единообразную кнопку, нужно сбросить эти стили и задать свои."
+        },
+        {
+          "type": "p",
+          "text": "Рассмотрим базовую структуру кнопки в HTML:"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<body>\n  <section class=\"main-section\">\n    <p>base info</p>\n    <p>description</p>\n    <button class=\"main-button\">Submit</button>\n  </section>\n</body>"
+        },
+        {
+          "type": "heading",
+          "text": "Стили кнопок по умолчанию"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".main-button {\n  -webkit-writing-mode: horizontal-tb !important;\n  -webkit-appearance: button;\n  border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186);\n  border-style: solid;\n  border-width: 1px;\n  padding: 1px 7px 2px;\n  text-rendering: auto;\n  color: initial;\n  display: inline-block;\n  text-align: start;\n  margin: 0em;\n  font: 400 11px system-ui;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Сброс свойств `-webkit-appearance`, `-moz-appearance`, `appearance`:",
+            "Сброс свойств `border`, `border-radius`, `background`:"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Базовая стилизация кнопки"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".main-button {\n  appearance: none;\n  border: 0;\n  border-radius: 5px;\n  background: #4676d7;\n  color: #fff;\n  padding: 8px 16px;\n  font-size: 16px;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Базовый пример стилизации."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Стилизация hover и focus"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".main-button:hover {\n  background: #1d49aa;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Стилизация при наведении:",
+            "Стилизация при фокусе:",
+            "Правильный порядок стилизации:"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Минимальная ширина кнопки"
+        },
+        {
+          "type": "p",
+          "text": "Для того чтобы кнопка хорошо выглядела, она должна иметь `определённую ширину`. Важно заранее об этом подумать и принять во внимание длинные и короткие надписи, которые могут содержаться на кнопках. Благодаря свойству `min-width` можно установить минимальную ширину кнопки."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".main-button {\n  min-width: 200px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Внутренние отступы"
+        },
+        {
+          "type": "p",
+          "text": "Если кнопке не назначены внутренние отступы, надпись, расположенная на ней, может очень близко подходить к краям. Даже в том случае, если у кнопки есть свойство `min-width`. Использование свойства `padding + min-width` даёт больше уверенности в том, что кнопка будет хорошо выглядеть в ситуации, когда заранее неизвестна длина выводимой на ней надписи."
+        },
+        {
+          "type": "heading",
+          "text": "Шрифты для кнопок"
+        },
+        {
+          "type": "p",
+          "text": "Элементы форм, по умолчанию, не наследуют семейство шрифта, назначенное элементам `<html>` или `<body>`. Для решения этой проблемы свойство `font-family` должно быть установлено в значение `inherit`. Если для кнопки нужен особый шрифт, то можно установить и его."
+        },
+        {
+          "type": "heading",
+          "text": "Стилизация отключённых кнопок"
+        },
+        {
+          "type": "p",
+          "text": "Для того чтобы указать пользователю на то, что кнопка отключена, к ней можно добавить атрибут `disabled`."
+        },
+        {
+          "type": "heading",
+          "text": "Курсор кнопки"
+        },
+        {
+          "type": "p",
+          "text": "Стандартный указатель мыши, наведённый на кнопку, выглядит как стрелка. Для того чтобы переопределить обычное поведение указателя, рекомендовано поменять стандартный курсор-стрелку на курсор в виде руки."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Для активной кнопки:",
+            "Для неактивной кнопки:"
+          ]
+        },
+        {
+          "type": "note",
+          "text": "В исходном курсе после этой темы есть практическое задание. Сначала разбери теорию и примеры, затем повтори код у себя в редакторе."
+        }
+      ]
+    }
+  ]
+}

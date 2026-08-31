@@ -31,8 +31,7 @@ export default function StudentAutonomousTestPage() {
   const sessionId = params.sessionId as string
 
   const [testTitle, setTestTitle] = useState<string>("Тест")
-  const [testDescription, setTestDescription] = useState<string>("")
-  const [questions, setQuestions] = useState<QuestionItem[]>([])
+    const [questions, setQuestions] = useState<QuestionItem[]>([])
   const [currentIndex, setCurrentIndex] = useState<number>(0)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({})
 
@@ -55,9 +54,9 @@ export default function StudentAutonomousTestPage() {
     try {
       await finishStudentTest(sessionId)
       router.push(`/student/test/result/${sessionId}`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("finishStudentTest failed:", err)
-      setErrorMsg(err.message || "Ошибка завершения теста")
+      setErrorMsg((err as Error).message || "Ошибка завершения теста")
       finishingRef.current = false
       setFinishing(false)
     }
@@ -104,8 +103,7 @@ export default function StudentAutonomousTestPage() {
         }
 
         setTestTitle(data.test_title || "Тест")
-        setTestDescription(data.test_description || "")
-        setQuestions(qList)
+                setQuestions(qList)
 
         const initialAnswers: Record<string, string> = {}
         qList.forEach((q) => {
@@ -123,9 +121,9 @@ export default function StudentAutonomousTestPage() {
           finishTestAtomic()
           return
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!isMounted) return
-        setErrorMsg(err.message || "Ошибка загрузки вопросов теста")
+        setErrorMsg((err as Error).message || "Ошибка загрузки вопросов теста")
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -185,6 +183,7 @@ export default function StudentAutonomousTestPage() {
         setSubmitting(true)
         try {
           const result = await submitStudentAnswer(sessionId, currentQuestionId, selectedOptionId)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (result && !(result as any).already_answered) {
             setQuestions((prev) =>
               prev.map((q) =>
@@ -192,9 +191,9 @@ export default function StudentAutonomousTestPage() {
               )
             )
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           setSubmitting(false)
-          setErrorMsg(err.message || "Ошибка сохранения ответа")
+          setErrorMsg((err as Error).message || "Ошибка сохранения ответа")
           return
         }
         setSubmitting(false)
@@ -231,9 +230,9 @@ export default function StudentAutonomousTestPage() {
         return
       }
       setCurrentIndex((prev) => prev + 1)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Answer submission error:", err)
-      setErrorMsg(err.message || "Ошибка сохранения ответа")
+      setErrorMsg((err as Error).message || "Ошибка сохранения ответа")
     } finally {
       setSubmitting(false)
     }
@@ -282,9 +281,7 @@ export default function StudentAutonomousTestPage() {
   const optionLetters = ["A", "B", "C", "D", "E", "F"]
   const currentAnswered = !!currentQuestion?.has_answered || !!selectedAnswers[currentQuestion?.id || ""]
   const selectedOptId = selectedAnswers[currentQuestion?.id || ""] || currentQuestion?.selected_option_id || null
-  const questionTimeLimit = currentQuestion?.time_limit_seconds || 15
-  const timerPercentage = Math.max(0, (timeLeft / questionTimeLimit) * 100)
-  const progressPercentage = Math.round(((currentIndex + 1) / questions.length) * 100)
+      const progressPercentage = Math.round(((currentIndex + 1) / questions.length) * 100)
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 fade-in py-6 px-4">
@@ -389,6 +386,7 @@ export default function StudentAutonomousTestPage() {
               </span>
 
               <span className="font-semibold text-slate-800 dark:text-slate-200 text-base sm:text-lg flex-1 leading-snug">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase option text fallback */}
                 {opt.option_text || (opt as any).text}
               </span>
 

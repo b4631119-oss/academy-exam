@@ -1,0 +1,210 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "metadannye-dokumenta",
+      "track": "html",
+      "order": 19,
+      "title": "Метаданные HTML-документа",
+      "summary": "Head, meta, link, favicon, description, viewport, canonical — что нужно браузеру и поисковикам.",
+      "sourceTitle": "Метаданные HTML-документа",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем нужны метаданные?"
+        },
+        {
+          "type": "p",
+          "text": "В Level 1 мы узнали, что `<head>` содержит мета-информацию. Теперь разберём, какие метаданные бывают и зачем они нужны."
+        },
+        {
+          "type": "p",
+          "text": "Метаданные делятся на две категории: для **браузера** (как отображать страницу) и для **поисковых систем** (как индексировать)."
+        },
+        {
+          "type": "heading",
+          "text": "Метаданные для браузера"
+        },
+        {
+          "type": "heading",
+          "text": "Кодировка: meta charset"
+        },
+        {
+          "type": "p",
+          "text": "`<meta charset=\"UTF-8\">` — обязательная строка. Задаёт кодировку символов. Без неё кириллица и спецсимволы могут отображаться некорректно."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<head>\n  <meta charset=\"UTF-8\">\n</head>"
+        },
+        {
+          "type": "note",
+          "text": "`<meta charset>` должен быть первым тегом внутри `<head>` — до `<title>` и любых `<script>`."
+        },
+        {
+          "type": "heading",
+          "text": "Масштабирование: viewport"
+        },
+        {
+          "type": "p",
+          "text": "`<meta name=\"viewport\">` настраивает отображение на мобильных устройствах."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`width=device-width` — ширина = ширина экрана.",
+            "`initial-scale=1.0` — начальный масштаб 100%."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Без этой строки сайт будет отображаться мелко на телефонах — браузер «сожмёт» его до ширины ~980px."
+        },
+        {
+          "type": "heading",
+          "text": "Favicon: link rel=\"icon\""
+        },
+        {
+          "type": "p",
+          "text": "Favicon — иконка на вкладке браузера. Подключается через `<link>`."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<link rel=\"icon\" href=\"/favicon.ico\" type=\"image/x-icon\">\n<link rel=\"icon\" href=\"/icon.png\" type=\"image/png\" sizes=\"32x32\">\n<link rel=\"apple-touch-icon\" href=\"/apple-icon.png\">"
+        },
+        {
+          "type": "heading",
+          "text": "Подключение стилей: link rel=\"stylesheet\""
+        },
+        {
+          "type": "p",
+          "text": "CSS-файлы подключаются через `<link>` с атрибутом `rel=\"stylesheet\"`."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<link rel=\"stylesheet\" href=\"/styles.css\">"
+        },
+        {
+          "type": "heading",
+          "text": "Метаданные для поисковых систем"
+        },
+        {
+          "type": "heading",
+          "text": "Заголовок страницы: title"
+        },
+        {
+          "type": "p",
+          "text": "`<title>` — заголовок на вкладке и в результатах поиска. Должен быть уникальным для каждой страницы."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<title>Купить iPhone — Интернет-магазин TechShop</title>"
+        },
+        {
+          "type": "p",
+          "text": "Хороший `<title>` = человек понимает страницу до клика. Плохой `<title>` = «Страница 1» или «Главная»."
+        },
+        {
+          "type": "heading",
+          "text": "Описание: meta description"
+        },
+        {
+          "type": "p",
+          "text": "`<meta name=\"description\">` — краткое описание страницы. Поисковики показывают его в результатах поиска."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<meta name=\"description\" content=\"Купить iPhone с доставкой по всей России. Гарантия, лучшие цены, рейтинг моделей.\">"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Длина: 120–160 символов.",
+            "Уникален для каждой страницы.",
+            "Содержит ключевые слова естественно.",
+            "Не дублирует `<title>`."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Канонический URL: canonical"
+        },
+        {
+          "type": "p",
+          "text": "`<link rel=\"canonical\">` указывает основной URL страницы. Это помогает поисковикам понять, какую версию страницы индексировать."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<link rel=\"canonical\" href=\"https://example.com/products/iphone\">"
+        },
+        {
+          "type": "p",
+          "text": "Нужен, когда одна и та же страница доступна по нескольким URL (с `/` и без, с `www` и без, с параметрами)."
+        },
+        {
+          "type": "heading",
+          "text": "Тема: theme-color"
+        },
+        {
+          "type": "p",
+          "text": "`<meta name=\"theme-color\">` задаёт цвет строки браузера на мобильных устройствах."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<meta name=\"theme-color\" content=\"#4285f4\">"
+        },
+        {
+          "type": "heading",
+          "text": "Полный пример head"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>PROLab Academy — Курсы по веб-разработке</title>\n  <meta name=\"description\" content=\"Изучайте HTML, CSS и JavaScript с нуля. Практические курсы с проверкой знаний.\">\n  <link rel=\"canonical\" href=\"https://prolab.dev\">\n  <link rel=\"icon\" href=\"/favicon.ico\">\n  <link rel=\"stylesheet\" href=\"/styles.css\">\n  <meta name=\"theme-color\" content=\"#4285f4\">\n</head>"
+        },
+        {
+          "type": "heading",
+          "text": "Типичные ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Нет `<meta charset>`.** Кириллица отображается как «ââêîðò».",
+            "**Нет viewport.** Сайт мелко на телефонах.",
+            "**Одинаковый `<title>` на всех страницах.** Каждая страница должна иметь уникальный заголовок.",
+            "**Нет `<meta description>`.** Поисковик сам выберет текст со страницы — может быть неудачно.",
+            "**Description длиннее 160 символов.** Поисковик обрежет."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`<meta charset=\"UTF-8\">` — первым в `<head>`, обязательна.",
+            "`<meta viewport>` — для мобильных устройств.",
+            "`<title>` — уникальный заголовок каждой страницы.",
+            "`<meta description>` — описание для поисковиков (120–160 символов).",
+            "`<link rel=\"canonical\">` — основной URL страницы.",
+            "`<link rel=\"icon\">` — favicon.",
+            "Метаданные не видны на странице, но влияют на отображение и индексацию."
+          ]
+        }
+      ]
+    }
+  ]
+}

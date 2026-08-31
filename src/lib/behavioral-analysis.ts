@@ -50,7 +50,7 @@ export function analyzeBehavior(studentId: string, answerLength: number): { isSu
     const recent = metrics.answerTimestamps.slice(-4);
     const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
     const variance = recent.reduce((sum, val) => sum + Math.abs(val - avg), 0) / recent.length;
-    
+
     if (variance < 200) {
       metrics.suspiciousPatterns += 1;
       return {

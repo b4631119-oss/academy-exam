@@ -16,7 +16,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     // Disable inspect console methods
     const consoleMethods = ['log', 'dir', 'table', 'debug', 'trace', 'info'];
     consoleMethods.forEach(method => {
-      if ((console as any)[method]) {
+      if ((console as unknown as Record<string, unknown>)[method]) {
         Object.defineProperty(console, method, {
           value: noop,
           writable: false,
@@ -35,7 +35,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     });
 
     Object.freeze(console);
-  } catch (e) {
+  } catch {
     // Console frozen
   }
 
@@ -45,18 +45,14 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
   const rawSetInterval = window.setInterval;
   const rawSetTimeout = window.setTimeout;
   const rawClearInterval = window.clearInterval;
-  const rawClearTimeout = window.clearTimeout;
   const rawRequestAnimationFrame = window.requestAnimationFrame;
   const rawCancelAnimationFrame = window.cancelAnimationFrame;
 
   const rawPerfNow = performance.now.bind(performance);
-  const rawDateNow = Date.now.bind(Date);
   const rawFuncConstructor = Function.prototype.constructor;
-  const rawFuncApply = Function.prototype.apply;
   const rawFuncCall = Function.prototype.call;
 
   const rawAddEventListener = EventTarget.prototype.addEventListener;
-  const rawRemoveEventListener = EventTarget.prototype.removeEventListener;
 
   const visStateDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState');
   const hiddenDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
@@ -66,14 +62,6 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
   const rawHidden = () => hiddenDesc?.get ? rawFuncCall.call(hiddenDesc.get, document) : document.hidden;
   const rawHasFocus = () => hasFocusDesc?.value ? rawFuncCall.call(hasFocusDesc.value, document) : document.hasFocus();
 
-  const securityCore = Object.freeze({
-    rawSetInterval,
-    rawSetTimeout,
-    rawPerfNow,
-    rawDateNow,
-    rawAddEventListener,
-    rawFuncConstructor
-  });
 
   let isTriggered = false;
 
@@ -104,7 +92,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
       if (!window.setInterval.toString().includes('[native code]')) {
         triggerViolation('Подмена метода setInterval');
       }
-    } catch (e) {
+    } catch {
       triggerViolation('Сбой проверки целостности методов');
     }
   };
@@ -116,7 +104,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
       set: () => { triggerViolation('Ловушка: Запись __bypassAntiCheat'); },
       configurable: false
     });
-  } catch (e) {}
+  } catch {}
 
   // =========================================================
   // 4. BREAKPOINT & DEVTOOLS DETECTOR
@@ -162,7 +150,7 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
     const start = rawPerfNow();
     try {
       rawFuncCall.call(rawFuncConstructor, 'debugger')();
-    } catch (e) {}
+    } catch {}
     const elapsed = rawPerfNow() - start;
 
     if (elapsed > 100) {
@@ -175,8 +163,8 @@ export function initAntiCheat(onViolation?: (reason: string) => void) {
   // =========================================================
   const preventClipboard = (e: Event) => {
     e.preventDefault();
-    if (typeof (e as any).stopImmediatePropagation === 'function') {
-      (e as any).stopImmediatePropagation();
+    if (typeof (e as unknown as { stopImmediatePropagation?: unknown }).stopImmediatePropagation === 'function') {
+      (e as unknown as { stopImmediatePropagation: () => void }).stopImmediatePropagation();
     }
     triggerViolation('Операция с буфером обмена запрещена');
   };

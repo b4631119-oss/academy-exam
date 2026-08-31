@@ -20,12 +20,10 @@ export default function StudentSessionMenu() {
   const [open, setOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-
   // Hide on enter page — no session to manage
   const isEnterPage = pathname === "/student/enter"
-  if (isEnterPage) return null
 
-  // Close on outside click
+  // Close on outside click (hooks must be called unconditionally)
   useEffect(() => {
     if (!open) return
 
@@ -46,6 +44,8 @@ export default function StudentSessionMenu() {
       document.removeEventListener("keydown", handleKey)
     }
   }, [open])
+
+  if (isEnterPage) return null
 
   const handleAction = async (mode: "enter" | "home") => {
     if (loggingOut) return

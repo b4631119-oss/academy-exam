@@ -1,0 +1,220 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "formy-osnovy",
+      "track": "html",
+      "order": 10,
+      "title": "Формы — основы",
+      "summary": "Тег <form>, поля ввода <input>, <textarea>, <button>, основные типы полей и атрибуты.",
+      "sourceTitle": "Урок 10. Формы — основы",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем нужны формы?"
+        },
+        {
+          "type": "p",
+          "text": "Формы — это способ получить информацию от пользователя: имя, email, пароль, комментарий, файл. Без форм невозможна регистрация, поиск, обратная связь и любое взаимодействие с сайтом."
+        },
+        {
+          "type": "p",
+          "text": "В HTML форма создаётся тегом `<form>`, внутри которого расположены поля ввода."
+        },
+        {
+          "type": "heading",
+          "text": "Основа формы: <form>"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<form action=\"/submit\" method=\"POST\">\n  <!-- Поля ввода находятся здесь -->\n</form>"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`action`** — адрес, куда отправляются данные формы (URL на сервере).",
+            "**`method`** — способ отправки: `GET` (данные в URL) или `POST` (данные в теле запроса)."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "На данном этапе не углубляйтесь в `action` и `method` — важно понять структуру формы."
+        },
+        {
+          "type": "heading",
+          "text": "Метки: <label>"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<label>` связывает текст с полем ввода. Это важно для доступности: клик по подписи активирует поле, а скринридер знает, что подпись относится к полю."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<label for=\"name\">Ваше имя:</label>\n<input type=\"text\" id=\"name\" name=\"name\">"
+        },
+        {
+          "type": "p",
+          "text": "Атрибут `for` у `<label>` должен совпадать с `id` у `<input>`. Это связывает их."
+        },
+        {
+          "type": "note",
+          "text": "Всегда используйте `<label>` для полей ввода. Без него пользователь не понимает, что вводить, а скринридер не может прочитать подпись."
+        },
+        {
+          "type": "heading",
+          "text": "Поля ввода: <input>"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<input>` — основной элемент формы. Атрибут `type` определяет, какое поле отображается:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`text`** — однострочное текстовое поле (по умолчанию).",
+            "**`email`** — поле для email (браузер проверяет формат).",
+            "**`password`** — поле для пароля (символы скрыты).",
+            "**`number`** — числовое поле (с кнопками +/-).",
+            "**`checkbox`** — флажок (можно выбрать несколько).",
+            "**`radio`** — радиокнопка (можно выбрать одну из группы).",
+            "**`submit`** — кнопка отправки формы."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<input type=\"text\" name=\"username\" placeholder=\"Имя пользователя\">\n<input type=\"email\" name=\"email\" placeholder=\"email@example.com\">\n<input type=\"password\" name=\"password\" placeholder=\"Пароль\">"
+        },
+        {
+          "type": "heading",
+          "text": "Атрибуты полей ввода"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`name`** — имя поля. Отправляется на сервер как ключ: `username=Аня`.",
+            "**`value`** — начальное значение поля.",
+            "**`placeholder`** — подсказка внутри поля (исчезает при вводе).",
+            "**`required`** — поле обязательно для заполнения. Браузер не отправит форму, если поле пустое.",
+            "**`id`** — уникальный идентификатор для связи с `<label>`."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<input type=\"text\" name=\"city\" value=\"Москва\" required>\n<input type=\"email\" name=\"email\" placeholder=\"Введите email\" required>"
+        },
+        {
+          "type": "heading",
+          "text": "Текстовая область: <textarea>"
+        },
+        {
+          "type": "p",
+          "text": "Для многострочного текста (комментарий, сообщение) используется `<textarea>`. В отличие от `<input>`, он имеет закрывающий тег и видимый размер."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<label for=\"message\">Сообщение:</label>\n<textarea id=\"message\" name=\"message\" rows=\"5\" cols=\"40\" placeholder=\"Напишите сообщение...\"></textarea>"
+        },
+        {
+          "type": "p",
+          "text": "Атрибуты `rows` и `cols` задают размер области (количество строк и символов в строке)."
+        },
+        {
+          "type": "heading",
+          "text": "Кнопка: <button>"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<button>` создаёт кнопку. Внутри может быть текст или HTML-содержимое."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<button type=\"submit\">Отправить</button>\n<button type=\"reset\">Очистить</button>"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`type=\"submit\"`** — отправляет форму (по умолчанию).",
+            "**`type=\"reset\"`** — очищает все поля формы.",
+            "**`type=\"button\"`** — обычная кнопка без действия (для JavaScript)."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "`<button>` универсальнее, чем `<input type=\"submit\">`: внутри можно разместить HTML, например, иконку."
+        },
+        {
+          "type": "heading",
+          "text": "Пример: простая форма регистрации"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<form action=\"/register\" method=\"POST\">\n  <h2>Регистрация</h2>\n\n  <label for=\"name\">Имя:</label>\n  <input type=\"text\" id=\"name\" name=\"name\" required>\n\n  <label for=\"email\">Email:</label>\n  <input type=\"email\" id=\"email\" name=\"email\" required>\n\n  <label for=\"password\">Пароль:</label>\n  <input type=\"password\" id=\"password\" name=\"password\" required>\n\n  <label>\n    <input type=\"checkbox\" name=\"agree\" required>\n    Я согласен с условиями\n  </label>\n\n  <button type=\"submit\">Зарегистрироваться</button>\n</form>"
+        },
+        {
+          "type": "p",
+          "text": "Эта форма собирает имя, email, пароль и согласие с условиями. Поля `required` не дадут отправить пустую форму."
+        },
+        {
+          "type": "heading",
+          "text": "Чекбоксы и радиокнопки"
+        },
+        {
+          "type": "p",
+          "text": "**Чекбоксы** (`checkbox`) — можно выбрать несколько вариантов:"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<p>Какие языки вы знаете?</p>\n<label><input type=\"checkbox\" name=\"lang\" value=\"html\"> HTML</label>\n<label><input type=\"checkbox\" name=\"lang\" value=\"css\"> CSS</label>\n<label><input type=\"checkbox\" name=\"lang\" value=\"js\"> JavaScript</label>"
+        },
+        {
+          "type": "p",
+          "text": "**Радиокнопки** (`radio`) — можно выбрать только один вариант из группы. Все радиокнопки одной группы должны иметь одинаковый `name`:"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<p>Ваш уровень?</p>\n<label><input type=\"radio\" name=\"level\" value=\"beginner\"> Начинающий</label>\n<label><input type=\"radio\" name=\"level\" value=\"intermediate\"> Средний</label>\n<label><input type=\"radio\" name=\"level\" value=\"advanced\"> Продвинутый</label>"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Нет `<label>`.** Без метки пользователь не понимает, что вводить, а скринридер не может прочитать подпись.",
+            "**Нет атрибута `name`.** Без `name` данные поля не отправляются на сервер.",
+            "**Используют `<input>` вместо `<button>`.** `<button>` гибче и позволяет HTML-содержимое.",
+            "**Забывают `required`.** Без него форма отправляется с пустыми полями.",
+            "**Одна радиокнопка без `name`.** Все радиокнопки одной группы должны иметь одинаковый `name`."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`<form>` — обёртка формы с `action` и `method`.",
+            "`<label>` связывает текст с полем ввода (важно для доступности).",
+            "`<input type=\"...\">` — универсальное поле ввода, `type` определяет вид.",
+            "`name` — ключ, по которому данные отправляются на сервер.",
+            "`required` — обязательное поле.",
+            "`<textarea>` — многострочный текст.",
+            "`<button>` — кнопка (submit, reset, button).",
+            "Чекбоксы — несколько вариантов, радиокнопки — один из группы."
+          ]
+        }
+      ]
+    }
+  ]
+}

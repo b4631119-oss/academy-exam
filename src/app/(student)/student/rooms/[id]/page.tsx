@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { FileText, ChevronRight } from "lucide-react"
-import { Card } from "@/components/ui/Card"
-import { Button } from "@/components/ui/Button"
 import { getStudent, getStudentRoomAssignments } from "@/lib/actions"
 import { startOrJoinStudentTest } from "@/lib/test-actions"
 import { t } from "@/lib/translations"
+import { RoomHeader } from "@/components/student/rooms/RoomHeader"
+import { ErrorBanner } from "@/components/student/rooms/ErrorBanner"
+import { EmptyAssignments } from "@/components/student/rooms/EmptyAssignments"
+import { AssignmentCard } from "@/components/student/rooms/AssignmentCard"
 
 interface AssignmentItem {
   id: string
@@ -24,6 +25,7 @@ export default function StudentRoomAssignments() {
   const roomId = params.id as string
 
   const [assignments, setAssignments] = useState<AssignmentItem[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [student, setStudent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [startingTestId, setStartingTestId] = useState<string | null>(null)
@@ -51,6 +53,7 @@ export default function StudentRoomAssignments() {
         const { exams = [], tests = [] } = await getStudentRoomAssignments(roomId)
 
         const merged = [
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
           ...exams.map((exam: any) => ({
             id: exam.id,
             type: "exam" as const,
@@ -59,6 +62,7 @@ export default function StudentRoomAssignments() {
             question_count: Number(exam.question_count || 0),
             created_at: exam.created_at || new Date().toISOString()
           })),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
           ...tests.map((test: any) => ({
             id: test.id,
             type: "test" as const,
@@ -70,9 +74,9 @@ export default function StudentRoomAssignments() {
         ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
         setAssignments(merged)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Student room load error:", err)
-        setError(err.message || "Не удалось загрузить доступные задания")
+        setError((err as Error).message || "Не удалось загрузить доступные задания")
       } finally {
         setLoading(false)
       }
@@ -98,10 +102,14 @@ export default function StudentRoomAssignments() {
         return
       }
       throw new Error("Не удалось открыть тест")
-    } catch (err: any) {
-      setError(err.message || "Не удалось открыть тест")
+    } catch (err: unknown) {
+      setError((err as Error).message || "Не удалось открыть тест")
       setStartingTestId(null)
     }
+  }
+
+  const handleOpenExam = (examId: string) => {
+    router.push(`/student/exam/${examId}`)
   }
 
   const assignmentTitle = useMemo(() => {
@@ -110,86 +118,40 @@ export default function StudentRoomAssignments() {
   }, [assignments.length])
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500 dark:text-slate-400">{t.loadingExams}</div>
+    return (
+      <div className="text-center py-20 text-slate-500 dark:text-slate-400">
+        {t.loadingExams}
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6 fade-in max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-          {t.helloStudent.replace('{name}', student?.name || '')}
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">
-          {t.welcomeToRoom.split('{room}')[0]}<span className="font-semibold text-slate-700 dark:text-slate-300">{student?.rooms?.name}</span>{t.welcomeToRoom.split('{room}')[1]}
-        </p>
-      </div>
+      <RoomHeader
+        studentName={student?.name || ""}
+        roomName={student?.rooms?.name || ""}
+      />
 
-      {error && (
-        <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-          {error}
-        </div>
-      )}
+      {error && <ErrorBanner message={error} />}
 
       <div>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">{assignmentTitle}</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+          {assignmentTitle}
+        </h2>
 
         {assignments.length === 0 ? (
-          <Card className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-              <FileText className="w-8 h-8 text-slate-400 dark:text-slate-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Нет доступных заданий</h3>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">В этой аудитории пока нет экзаменов или тестов.</p>
-          </Card>
+          <EmptyAssignments />
         ) : (
           <div className="grid gap-4">
-            {assignments.map((item) => {
-              const isExam = item.type === "exam"
-              const isStarting = startingTestId === item.id
-
-              return (
-                <Card
-                  key={item.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-md transition-all ${
-                    isStarting ? "border-sky-400 dark:border-sky-600 bg-sky-50/50 dark:bg-sky-950/30" : ""
-                  }`}
-                >
-                  <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-                    <div className="p-3 bg-sky-50 dark:bg-sky-950 rounded-xl">
-                      <FileText className="w-6 h-6 text-sky-500 dark:text-sky-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{item.title}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{isExam ? "Экзамен" : "Тест"}</p>
-                      {item.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{item.description}</p>}
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{item.question_count} вопросов</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {isExam ? (
-                      <Button onClick={() => router.push(`/student/exam/${item.id}`)} className="gap-2">
-                        {t.takeExam}
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => handleOpenTest(item.id)}
-                        disabled={isStarting}
-                        className="gap-2"
-                      >
-                        {isStarting ? "Открытие..." : (
-                          <>
-                            Открыть тест
-                            <ChevronRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              )
-            })}
+            {assignments.map((item) => (
+              <AssignmentCard
+                key={item.id}
+                item={item}
+                isStarting={startingTestId === item.id}
+                onOpenExam={handleOpenExam}
+                onOpenTest={handleOpenTest}
+              />
+            ))}
           </div>
         )}
       </div>

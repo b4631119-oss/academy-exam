@@ -1,0 +1,186 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "razmery-elementov",
+      "track": "css",
+      "order": 28,
+      "title": "Размеры элементов",
+      "summary": "width, height, min/max-width/height и базовое overflow.",
+      "sourceTitle": "Урок 10. Размеры элементов",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем управлять размерами?"
+        },
+        {
+          "type": "p",
+          "text": "Браузер сам решает, какой ширины и высоты будет элемент. Но часто нужно задать конкретный размер или ограничить его. CSS позволяет это сделать."
+        },
+        {
+          "type": "heading",
+          "text": "width и height"
+        },
+        {
+          "type": "p",
+          "text": "Свойства `width` и `height` задают ширину и высоту элемента."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  width: 300px;\n  height: 200px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "По умолчанию блочные элементы (`display: block`) занимают **всю ширину** родителя. Свойство `width` позволяет задать конкретную ширину."
+        },
+        {
+          "type": "p",
+          "text": "Высота по умолчанию подстраивается под контент. Если контента мало — блок будет низким, если много — вырастет."
+        },
+        {
+          "type": "heading",
+          "text": "Размеры в разных единицах"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".fixed    { width: 300px; }\n.relative { width: 50%; }\n.viewport { width: 80vw; }"
+        },
+        {
+          "type": "p",
+          "text": "Про разницу между `px`, `%` и `vw` мы говорили в предыдущем уроке."
+        },
+        {
+          "type": "heading",
+          "text": "min-width и max-width"
+        },
+        {
+          "type": "p",
+          "text": "Свойства `min-width` и `max-width` задают **ограничения** на размер элемента."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  width: 50%;\n  min-width: 300px;\n  max-width: 1200px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Как это работает:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Элемент будет занимать 50% ширины родителя.",
+            "Но не уже 300px (`min-width`).",
+            "И не шире 1200px (`max-width`)."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Это один из основных приёмов адаптивной вёрстки — элемент подстраивается, но в разумных пределах."
+        },
+        {
+          "type": "heading",
+          "text": "min-height и max-height"
+        },
+        {
+          "type": "p",
+          "text": "Аналогично работают свойства для высоты."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".sidebar {\n  min-height: 100vh;  /* минимум — на весь экран */\n}\n\n.card {\n  max-height: 400px;  /* максимум — 400px */\n}"
+        },
+        {
+          "type": "p",
+          "text": "`min-height: 100vh` часто используют для боковых панелей, которые должны занимать хотя бы всю высоту экрана."
+        },
+        {
+          "type": "heading",
+          "text": "auto: значение по умолчанию"
+        },
+        {
+          "type": "p",
+          "text": "Значение `auto` — это поведение по умолчанию для большинства размерных свойств."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".block {\n  width: auto;   /* занимает всю ширину родителя */\n  height: auto;  /* подстраивается под контент */\n}"
+        },
+        {
+          "type": "p",
+          "text": "Если элемент — блочный и не задан `width`, он автоматически растягивается на всю ширину родителя. Высота подстраивается под содержимое."
+        },
+        {
+          "type": "heading",
+          "text": "Как размеры взаимодействуют с box model"
+        },
+        {
+          "type": "p",
+          "text": "Напомним: с `box-sizing: content-box` (по умолчанию) `width` задаёт размер **только контента**. Padding и border прибавляются сверху."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* content-box: width = 300px, итого = 300 + 20 + 20 = 340px */\n.box-content {\n  box-sizing: content-box;\n  width: 300px;\n  padding: 20px;\n}\n\n/* border-box: width = 300px, итого = ровно 300px */\n.box-border {\n  box-sizing: border-box;\n  width: 300px;\n  padding: 20px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Как мы говорили в уроке «Box Model», `border-box` делает размеры предсказуемыми."
+        },
+        {
+          "type": "heading",
+          "text": "Пример: карточка с ограничениями"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".card {\n  width: 100%;\n  max-width: 400px;\n  min-height: 200px;\n  padding: 24px;\n  box-sizing: border-box;\n  overflow: hidden;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Карточка:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Занимает всю ширину родителя, но не шире 400px.",
+            "Минимальная высота 200px, даже если контента мало.",
+            "Padding и border включены в размер (`border-box`).",
+            "Если контент не помещается — обрезается (`overflow: hidden`)."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Задают width без box-sizing.** Элемент «прыгает» из-за padding. Используйте `border-box`.",
+            "**Не используют min/max-width.** Без ограничений элемент может растянуться на весь экран на узких или широких мониторах.",
+            "**Задают height, который не учитывает контент.** Если контента больше — он вылезет за пределы. Используйте `min-height` или не фиксируйте высоту.",
+            "**Забывают про overflow.** Текст или картинка могут вылезти за пределы блока — добавьте `overflow: hidden` или `overflow: auto`."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`width`/`height` задают конкретный размер; `auto` — поведение по умолчанию.",
+            "`min-width`/`max-width` и `min-height`/`max-height` задают ограничения.",
+            "С `border-box` padding и border включены в `width`/`height`.",
+            "`overflow: auto` добавляет прокрутку, если контент не помещается.",
+            "Используйте `min-width`/`max-width` для адаптивных элементов."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "position",
+      "track": "css",
+      "order": 31,
+      "title": "Position",
+      "summary": "Позиционирование элементов: static, relative, absolute, fixed, sticky и z-index.",
+      "sourceTitle": "Position",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем нужно позиционирование?"
+        },
+        {
+          "type": "p",
+          "text": "В normal flow элементы располагаются по порядку: блоки — друг под другом, строчные — в строке. Но иногда нужно **вывести элемент из потока**: закрепить шапку, сделать всплывающую подсказку, разместить бейдж на картинке."
+        },
+        {
+          "type": "p",
+          "text": "Свойство `position` позволяет управлять тем, как элемент позиционируется на странице."
+        },
+        {
+          "type": "heading",
+          "text": "position: static — по умолчанию"
+        },
+        {
+          "type": "p",
+          "text": "`static` — значение по умолчанию. Элемент следует обычному потоку документа. Свойства `top`, `right`, `bottom`, `left` **не работают**."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".element {\n  position: static; /* по умолчанию */\n  top: 20px;        /* не работает! */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "position: relative — относительное"
+        },
+        {
+          "type": "p",
+          "text": "`relative` — элемент остаётся в потоке документа, но может быть **сдвинут** от своего обычного положения с помощью `top`, `right`, `bottom`, `left`."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".element {\n  position: relative;\n  top: 10px;    /* сдвиг вниз на 10px */\n  left: 20px;   /* сдвиг вправо на 20px */\n}"
+        },
+        {
+          "type": "p",
+          "text": "Важно: элемент **сдвигается**, но его **исходное место остаётся пустым** — соседи не «подтягиваются»."
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "Обычно:                    С relative + top: 10px:\n┌──────────────────┐       ┌──────────────────┐\n│    Блок 1        │       │    Блок 1        │ ← обычное место\n└──────────────────┘       └──────────────────┘\n┌──────────────────┐       ┌──────────────────┐\n│    Блок 2        │       │                  │ ← пусто (место Блока 2)\n└──────────────────┘       └──────────────────┘\n                           ┌──────────────────┐\n                           │    Блок 2        │ ← сдвинут вниз на 10px\n                           └──────────────────┘"
+        },
+        {
+          "type": "p",
+          "text": "Также `relative` используется как **контекст позиционирования** для дочерних `absolute`-элементов (об этом ниже)."
+        },
+        {
+          "type": "heading",
+          "text": "position: absolute — абсолютное"
+        },
+        {
+          "type": "p",
+          "text": "`absolute` — элемент **вырывается из потока** документа. Он позиционируется относительно **ближайшего позиционированного предка** (с `position` отличным от `static`)."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<div class=\"parent\">\n  <div class=\"child\">Бейдж</div>\n</div>"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".parent {\n  position: relative; /* контекст позиционирования */\n  width: 200px;\n  height: 150px;\n  background: #e0e0e0;\n}\n\n.child {\n  position: absolute;\n  top: 10px;\n  right: 10px;\n  background: red;\n  color: white;\n  padding: 4px 8px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Бейдж позиционируется **относительно `.parent`** (потому что у него `position: relative`). Если позиционированного предка нет — элемент позиционируется относительно `<body>`."
+        },
+        {
+          "type": "p",
+          "text": "Элемент с `absolute` **не занимает места** в потоке — соседние элементы ведут себя так, будто его нет."
+        },
+        {
+          "type": "heading",
+          "text": "position: fixed — фиксированное"
+        },
+        {
+          "type": "p",
+          "text": "`fixed` — элемент позиционируется **относительно окна браузера** (viewport) и **не двигается** при прокрутке."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".fixed-header {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  background: white;\n  padding: 10px 20px;\n  box-shadow: 0 2px 4px rgba(0,0,0,0.1);\n  z-index: 100;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Как и `absolute`, элемент вырывается из потока. Используйте для шапок, плавающих кнопок, всплывающих окон."
+        },
+        {
+          "type": "heading",
+          "text": "position: sticky — «прилипающее»"
+        },
+        {
+          "type": "p",
+          "text": "`sticky` — гибрид: элемент ведёт себя как `relative`, пока не достигнет определённого порога прокрутки, после чего становится `fixed`."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".sticky-header {\n  position: sticky;\n  top: 0;\n  background: white;\n  padding: 8px 16px;\n  border-bottom: 1px solid #ddd;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Пример: заголовок таблицы. Пока таблица видна — заголовок на месте. При прокрутке вниз — заголовок «прилипает» к верху экрана."
+        },
+        {
+          "type": "heading",
+          "text": "Сравнение: relative, absolute, fixed, sticky"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**relative** — остаётся в потоке, сдвигается от обычного места.",
+            "**absolute** — выходит из потока, позиционируется относительно ближайшего позиционированного предка.",
+            "**fixed** — выходит из потока, позиционируется относительно viewport, не двигается при прокрутке.",
+            "**sticky** — остаётся в потоке, «прилипает» к viewport при прокрутке."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "top, right, bottom, left и inset"
+        },
+        {
+          "type": "p",
+          "text": "Свойства `top`, `right`, `bottom`, `left` задают **смещение** от краёв родительского элемента (или viewport для `fixed`)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".element {\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n}\n/* Элемент растянут на весь родительский контейнер */"
+        },
+        {
+          "type": "p",
+          "text": "`inset` — сокращённое свойство, которое задаёт `top`, `right`, `bottom`, `left` одной строкой:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".element {\n  position: absolute;\n  inset: 0; /* top: 0; right: 0; bottom: 0; left: 0 */\n}\n\n.element {\n  position: absolute;\n  inset: 10px 20px; /* top/bottom: 10px, left/right: 20px */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Базовый z-index"
+        },
+        {
+          "type": "p",
+          "text": "`z-index` управляет **порядком наложения** (stacking order) позиционированных элементов. Элемент с бóльшим `z-index` перекрывает элемент с меньшим."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".overlay {\n  position: absolute;\n  z-index: 10;\n}\n\n.tooltip {\n  position: absolute;\n  z-index: 20; /* tooltip будет поверх overlay */\n}"
+        },
+        {
+          "type": "p",
+          "text": "`z-index` работает **только** с позиционированными элементами (position: relative, absolute, fixed, sticky). Для обычных элементов (static) он не действует."
+        },
+        {
+          "type": "heading",
+          "text": "Реальные UI-примеры"
+        },
+        {
+          "type": "heading",
+          "text": "1. Бейдж на карточке"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".card {\n  position: relative;\n}\n\n.badge {\n  position: absolute;\n  top: -8px;\n  right: -8px;\n  background: red;\n  color: white;\n  padding: 2px 8px;\n  border-radius: 12px;\n  font-size: 12px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "2. Кнопка «наверх»"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".back-to-top {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  width: 40px;\n  height: 40px;\n  border-radius: 50%;\n  background: skyblue;\n  color: white;\n  cursor: pointer;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "3. Sticky header"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".nav {\n  position: sticky;\n  top: 0;\n  background: white;\n  z-index: 50;\n  padding: 10px 20px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `position: relative` у родителя.** Без него `absolute`-дочерний элемент позиционируется относительно `<body>`.",
+            "**Путают relative и absolute.** `relative` — сдвиг, но место остаётся. `absolute` — вырывание из потока, место освобождается.",
+            "**Используют absolute без необходимости.** Часто проще решить задачу с `margin`, `padding` или Flexbox.",
+            "**Забывают про z-index.** Перекрывающиеся элементы без z-index ведут себя непредсказуемо."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`static` — по умолчанию, обычный поток.",
+            "`relative` — сдвиг, но место сохраняется. Контекст для `absolute`-детей.",
+            "`absolute` — из потока, позиционируется относительно ближайшего позиционированного предка.",
+            "`fixed` — из потока, фиксируется к viewport.",
+            "`sticky` — «прилипает» к viewport при прокрутке.",
+            "`z-index` управляет порядком наложения (только для позиционированных элементов).",
+            "`inset` — сокращённая запись для `top/right/bottom/left`."
+          ]
+        }
+      ]
+    }
+  ]
+}

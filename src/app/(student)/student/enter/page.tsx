@@ -26,7 +26,7 @@ export default function StudentEnter() {
     try {
       const formattedCode = code.trim().toUpperCase()
       const room = await validateRoomCode(formattedCode)
-      
+
       if (!room) {
         throw new Error(t.invalidRoom)
       }
@@ -50,8 +50,8 @@ export default function StudentEnter() {
 
       await createStudent(finalName, room.id)
       router.push(`/student/rooms/${room.id}`)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
     } finally {
       setLoading(false)
     }

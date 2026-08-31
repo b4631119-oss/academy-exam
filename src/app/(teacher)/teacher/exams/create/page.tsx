@@ -58,15 +58,15 @@ function CreateExamForm() {
     try {
       // Create exam
       const exam = await createExam(roomId, title)
-      
+
       // Create questions
       for (const qText of validQuestions) {
         await createQuestion(exam.id, qText)
       }
 
       router.push(`/teacher/rooms/${roomId}`)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err as Error).message)
       setLoading(false)
     }
   }
@@ -77,7 +77,7 @@ function CreateExamForm() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 slide-up">
-      <Link 
+      <Link
         href={`/teacher/rooms/${roomId}`}
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
@@ -142,9 +142,9 @@ function CreateExamForm() {
             </Card>
           ))}
 
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={addQuestion}
             className="w-full border-dashed border-2 py-6 text-slate-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"
           >

@@ -1,0 +1,179 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "prodvinutyy-flexbox",
+      "track": "css",
+      "order": 49,
+      "title": "Продвинутый Flexbox",
+      "summary": "flex-grow/shrink/basis, min-width в flex, auto margins, sizing, типичные проблемы.",
+      "sourceTitle": "Продвинутый Flexbox",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Как работает распределение пространства?"
+        },
+        {
+          "type": "p",
+          "text": "В Level 1 вы изучили основные Flexbox-свойства. Теперь разберём, **как именно** flex-контейнер распределяет пространство между элементами."
+        },
+        {
+          "type": "heading",
+          "text": "flex-grow: растяжение"
+        },
+        {
+          "type": "p",
+          "text": "`flex-grow` определяет, **сколько свободного пространства** получает каждый элемент. По умолчанию: `0` (не растягивается)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Все элементы делят пространство поровну */\n.item { flex: 1; } /* = flex: 1 1 0% */\n\n/* Первый элемент получает вдвое больше */\n.item-1 { flex: 2; }\n.item-2 { flex: 1; }\n.item-3 { flex: 1; }"
+        },
+        {
+          "type": "p",
+          "text": "Свободное пространство = ширина контейнера минус сумма `flex-basis` всех элементов."
+        },
+        {
+          "type": "heading",
+          "text": "flex-shrink: сжатие"
+        },
+        {
+          "type": "p",
+          "text": "`flex-shrink` определяет, **как элемент сжимается**, когда места не хватает. По умолчанию: `1`."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Элемент НЕ сжимается */\n.item-no-shrink {\n  flex-shrink: 0;\n  width: 300px;\n}\n\n/* Элемент сжимается вдвое быстрее */\n.item-fast-shrink {\n  flex-shrink: 2;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "flex-basis: начальный размер"
+        },
+        {
+          "type": "p",
+          "text": "`flex-basis` задаёт размер элемента **до** распределения свободного пространства. Это «отправная точка»."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* flex-basis: 0% — все элементы от нуля, потом делят пространство */\n.item { flex: 1; } /* = 1 1 0% */\n\n/* flex-basis: auto — размер определяется содержимым */\n.item { flex: 1; } /* = 1 1 auto — разный результат! */\n\n/* flex-basis: фиксированный размер */\n.sidebar { flex: 0 0 250px; }\n.main { flex: 1; }"
+        },
+        {
+          "type": "heading",
+          "text": "flex: сокращённая запись"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* flex: grow shrink basis */\n.item-a { flex: 1; }       /* 1 1 0% — делят поровну */\n.item-b { flex: 1 1 auto; } /* от содержимого, потом делят */\n.item-c { flex: 0 0 200px; } /* фиксированный 200px */\n.item-d { flex: 1 1 250px; } /* минимум 250px, растягивается */"
+        },
+        {
+          "type": "heading",
+          "text": "Почему элемент не хочет сжиматься?"
+        },
+        {
+          "type": "p",
+          "text": "Частая проблема: элемент **вылезает** за контейнер. Причина: по умолчанию элемент не может стать уже своего `min-content` размера."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Решение 1: разрешить сжатие */\n.item {\n  min-width: 0;\n  overflow: hidden;\n}\n\n/* Решение 2: не задавать ширину */\n.item {\n  flex: 1 1 0%; /* от нуля, не от содержимого */\n}\n\n/* Решение 3: ограничить */\n.item {\n  flex: 1 1 auto;\n  max-width: 100%;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "min-width / max-width внутри flex"
+        },
+        {
+          "type": "p",
+          "text": "`min-width` и `max-width` **перезаписывают** `flex-basis` и `flex-shrink`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Элемент минимум 200px, даже если flex-shrink: 1 */\n.item {\n  flex: 1;\n  min-width: 200px;\n}\n\n/* Элемент максимум 500px, даже если flex-grow: 3 */\n.item {\n  flex: 3;\n  max-width: 500px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Auto margins в flex"
+        },
+        {
+          "type": "p",
+          "text": "`margin: auto` во flex-контейнере работает **иначе** чем в обычном блоке. Auto margin «поглощает» свободное пространство:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Центрирование по обеим осям */\n.container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n/* Тот же результат через auto margin */\n.item {\n  margin: auto;\n}\n\n/* Разнести элементы: один влево, другой вправо */\n.item-left { margin-right: auto; }\n.item-right { margin-left: auto; }"
+        },
+        {
+          "type": "heading",
+          "text": "align-self и align-content"
+        },
+        {
+          "type": "p",
+          "text": "`align-self` — индивидуальное выравнивание **одного** элемента. `align-content` — выравнивание **строк** при `flex-wrap`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Один элемент внизу, остальные наверху */\n.container {\n  display: flex;\n  align-items: flex-start;\n  height: 300px;\n}\n\n.container .bottom-item {\n  align-self: flex-end;\n}\n\n/* Выравнивание строк при переносе */\n.container {\n  flex-wrap: wrap;\n  align-content: center; /* строки по центру */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "order: визуальный порядок"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Меняем визуальный порядок */\n.item-1 { order: 3; } /* будет последним */\n.item-2 { order: 1; } /* будет первым */\n.item-3 { order: 2; } /* будет вторым */"
+        },
+        {
+          "type": "heading",
+          "text": "Типичные проблемы Flexbox"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Элемент не сжимается.** Решение: `min-width: 0` или `flex: 1 1 0%`.",
+            "**Высота контейнера = 0.** Решение: задайте `height` или `min-height`.",
+            "**Пробелы между inline-элементами.** Решение: `font-size: 0` на контейнере или `display: flex`.",
+            "**Прокрутка не работает.** Решение: `overflow: auto` + фиксированная высота.",
+            "**Элемент вылезает за контейнер.** Решение: `min-width: 0` + `overflow: hidden`."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Используют `flex: 1` вместо `flex: 1 1 0%`.** Разный результат: `flex: 1` = `1 1 auto`, `flex: 1 1 0%` = от нуля.",
+            "**Забывают `min-width: 0`.** Элементы не сжимаются ниже `min-content`.",
+            "**Путают `align-items` и `justify-content`.** `align` = поперечная, `justify` = основная ось.",
+            "**Не учитывают `order`.** Визуальный порядок ≠ порядок в HTML."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`flex-grow` — растяжение (занять свободное место).",
+            "`flex-shrink` — сжатие (уменьшиться при нехватке).",
+            "`flex-basis` — начальный размер до распределения.",
+            "`flex: 1` = `1 1 auto`, `flex: 1 1 0%` = от нуля.",
+            "`min-width: 0` — разрешает сжатие ниже `min-content`.",
+            "`margin: auto` во flex поглощает свободное пространство.",
+            "`order` — визуальный порядок (не меняет HTML)."
+          ]
+        }
+      ]
+    }
+  ]
+}

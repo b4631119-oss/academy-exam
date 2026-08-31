@@ -1,0 +1,181 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "prodvinutye-izobrazheniya",
+      "track": "html",
+      "order": 20,
+      "title": "Продвинутые изображения",
+      "summary": "Srcset, sizes, picture, source, responsive images, art direction и оптимизация.",
+      "sourceTitle": "Продвинутые изображения",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем нужны продвинутые изображения?"
+        },
+        {
+          "type": "p",
+          "text": "В Level 1 мы изучили `<img>` с `src` и `alt`. Но на разных устройствах нужны разные версии картинок: на телефоне — маленькая, на десктопе — большая, на Retina — двойное разрешение."
+        },
+        {
+          "type": "p",
+          "text": "HTML5 предоставляет инструменты для этого: `srcset`, `sizes` и `<picture>`."
+        },
+        {
+          "type": "heading",
+          "text": "srcset: разные разрешения"
+        },
+        {
+          "type": "p",
+          "text": "Атрибут `srcset` указывает несколько версий изображения. Браузер выбирает подходящую."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<img\n  src=\"photo-800.jpg\"\n  srcset=\"photo-400.jpg 400w,\n          photo-800.jpg 800w,\n          photo-1200.jpg 1200w\"\n  alt=\"Пейзаж с горами\"\n>"
+        },
+        {
+          "type": "p",
+          "text": "Значения `400w`, `800w`, `1200w` — ширина изображения в пикселях. Браузер выбирает оптимальную версию в зависимости от экрана."
+        },
+        {
+          "type": "heading",
+          "text": "sizes: размер на экране"
+        },
+        {
+          "type": "p",
+          "text": "Атрибут `sizes` говорит браузеру, какой ширины будет картинка на экране. Это помогает выбирать правильную версию."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<img\n  src=\"photo-800.jpg\"\n  srcset=\"photo-400.jpg 400w,\n          photo-800.jpg 800w,\n          photo-1200.jpg 1200w\"\n  sizes=\"(max-width: 600px) 100vw, 800px\"\n  alt=\"Пейзаж с горами\"\n>"
+        },
+        {
+          "type": "p",
+          "text": "`(max-width: 600px) 100vw` — на экранах до 600px картинка занимает всю ширину. `800px` — на больших экранах фиксированная ширина."
+        },
+        {
+          "type": "heading",
+          "text": "picture: разные изображения для разных условий"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<picture>` позволяет подставить совершенно разные картинки в зависимости от условий — не просто разные разрешения, а разные кадры (art direction)."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<picture>\n  <source srcset=\"hero-wide.jpg\" media=\"(min-width: 800px)\">\n  <source srcset=\"hero-narrow.jpg\" media=\"(max-width: 799px)\">\n  <img src=\"hero-fallback.jpg\" alt=\"Главный баннер\">\n</picture>"
+        },
+        {
+          "type": "p",
+          "text": "Браузер проверяет `<source>` сверху вниз и выбирает первый подходящий. Если ни один не подошёл — берёт `<img>`."
+        },
+        {
+          "type": "heading",
+          "text": "picture для разных форматов"
+        },
+        {
+          "type": "p",
+          "text": "`<picture>` можно использовать для поддержки современных форматов (WebP, AVIF) с fallback на JPEG."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<picture>\n  <source srcset=\"photo.avif\" type=\"image/avif\">\n  <source srcset=\"photo.webp\" type=\"image/webp\">\n  <img src=\"photo.jpg\" alt=\"Фото\">\n</picture>"
+        },
+        {
+          "type": "p",
+          "text": "Браузер выберет AVIF → WebP → JPEG в порядке приоритета."
+        },
+        {
+          "type": "heading",
+          "text": "Art direction: разный кадр для разных экранов"
+        },
+        {
+          "type": "p",
+          "text": "На широком экране — панорама. На узком — только главный объект. Это art direction."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<picture>\n  <source srcset=\"landscape.jpg\" media=\"(min-width: 800px)\">\n  <img src=\"portrait.jpg\" alt=\"Человек на фоне гор\">\n</picture>"
+        },
+        {
+          "type": "p",
+          "text": "Обычный `<img>` с `srcset` просто масштабирует одну картинку. `<picture>` подставляет **другую** картинку."
+        },
+        {
+          "type": "heading",
+          "text": "Когда <picture>, а когда <img> с srcset?"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`<img srcset>`** — разные разрешения одной картинки (Retina).",
+            "**`<picture>`** — разные картинки для разных условий (art direction, форматы)."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "width/height и стабильность макета"
+        },
+        {
+          "type": "p",
+          "text": "Атрибуты `width` и `height` у `<img>` предотвращают «прыжки» контента при загрузке. Браузер заранее знает размер и выделяет место."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<img src=\"photo.jpg\" alt=\"Пейзаж\" width=\"800\" height=\"600\">"
+        },
+        {
+          "type": "note",
+          "text": "Указывайте **реальные** пропорции изображения. CSS может изменить визуальный размер, но `width`/`height` сохраняют пропорции."
+        },
+        {
+          "type": "heading",
+          "text": "Производительность"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Используйте `srcset` — не грузите 4K-картинку на телефон.",
+            "Поддерживайте WebP — на 25–35% меньше JPEG при том же качестве.",
+            "Указывайте `width`/`height` — стабильный макет.",
+            "Не используйте `<picture>` без необходимости — `<img srcset>` проще."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Типичные ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**srcset без sizes.** Браузер не знает, какой размер картинки нужен.",
+            "**picture вместо srcset.** Если нужна только разная плотность пикселей — `<img srcset>`.",
+            "**Нет fallback `<img>`.** `<picture>` без `<img>` не работает.",
+            "**Дублируют src в srcset и src.** `src` — fallback, `srcset` — основной источник."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`srcset` — несколько версий одного изображения (разные разрешения).",
+            "`sizes` — какой ширины картинка на экране.",
+            "`<picture>` — разные картинки для разных условий.",
+            "`<source>` внутри `<picture>` — варианты с условиями.",
+            "`<img>` внутри `<picture>` — обязательный fallback.",
+            "`width`/`height` — стабильный макет при загрузке."
+          ]
+        }
+      ]
+    }
+  ]
+}

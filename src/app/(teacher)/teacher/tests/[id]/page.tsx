@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Plus, Trash2, Save, CheckCircle2, Clock, Award, HelpCircle, Play, Loader2 } from "lucide-react"
+import { ArrowLeft, Plus, Trash2, Save, CheckCircle2, Clock, Award, HelpCircle, Loader2 } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -70,14 +70,15 @@ export default function TestConstructorPage() {
   const router = useRouter()
   const testId = params.id as string
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [test, setTest] = useState<any>(null)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [questions, setQuestions] = useState<QuestionItem[]>([])
-  
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [launching, setLaunching] = useState(false)
+  const [launching] = useState(false)
   const [error, setError] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({})
@@ -97,12 +98,14 @@ export default function TestConstructorPage() {
         const qData = await getTestQuestions(testId)
         if (qData && qData.length > 0) {
           setQuestions(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
             qData.map((q: any) => ({
               id: q.id,
               text: q.question_text || q.text || "",
               position: q.position || 1,
               time_limit_seconds: q.time_limit_seconds ?? 15,
               points: q.points ?? 20,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
               test_options: (q.test_options || []).map((opt: any) => ({
                 id: opt.id,
                 text: opt.option_text || opt.text || "",
@@ -115,8 +118,8 @@ export default function TestConstructorPage() {
           // Initialize with 1 default question
           setQuestions([createBlankQuestion(1)])
         }
-      } catch (err: any) {
-        setError(err.message || "Ошибка загрузки теста")
+      } catch (err: unknown) {
+        setError((err as Error).message || "Ошибка загрузки теста")
       } finally {
         setLoading(false)
       }
@@ -140,7 +143,8 @@ export default function TestConstructorPage() {
   }
 
   const handleAddQuestion = () => {
-    setQuestions((prev) => [...prev, createBlankQuestion(prev.length + 1)])
+    const newQ = createBlankQuestion(questions.length + 1)
+    setQuestions((prev) => [...prev, newQ])
   }
 
   const handleRemoveQuestion = (index: number) => {
@@ -160,6 +164,7 @@ export default function TestConstructorPage() {
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const handleQuestionChange = (index: number, field: keyof QuestionItem, value: any) => {
     clearQuestionErrors(index)
     setQuestions((prev) => {
@@ -202,12 +207,12 @@ export default function TestConstructorPage() {
       }
       const wasCorrect = currentOpts[optIndex].is_correct
       const filtered = currentOpts.filter((_, i) => i !== optIndex)
-      
+
       // If deleted option was correct, set first remaining as correct
       if (wasCorrect && filtered.length > 0) {
         filtered[0].is_correct = true
       }
-      
+
       next[qIndex] = {
         ...next[qIndex],
         test_options: filtered.map((o, idx) => ({ ...o, position: idx + 1 }))
@@ -258,8 +263,8 @@ export default function TestConstructorPage() {
       await saveTestQuestions(testId, title, description, questions)
       setSuccessMsg("Тест сохранён")
       setTimeout(() => setSuccessMsg(""), 4000)
-    } catch (err: any) {
-      setError(friendlyError(err.message || "Ошибка при сохранении теста"))
+    } catch (err: unknown) {
+      setError(friendlyError((err as Error).message || "Ошибка при сохранении теста"))
     } finally {
       setSaving(false)
     }

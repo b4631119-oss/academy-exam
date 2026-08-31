@@ -1,0 +1,163 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "css-custom-properties",
+      "track": "css",
+      "order": 47,
+      "title": "CSS Custom Properties",
+      "summary": "CSS-переменные: объявление, использование, наследование, темизация.",
+      "sourceTitle": "CSS Custom Properties",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Что такое CSS Custom Properties?"
+        },
+        {
+          "type": "p",
+          "text": "`CSS Custom Properties` (также известные как **CSS-переменные**) позволяют сохранить значение в именованную переменную и использовать его в разных местах стиля. Изменив значение **одной** переменной, вы меняете её везде, где она используется."
+        },
+        {
+          "type": "p",
+          "text": "В Level 1 вы уже встречали `var()` в уроке «CSS-функции». Теперь разберём это подробнее."
+        },
+        {
+          "type": "heading",
+          "text": "Синтаксис объявления"
+        },
+        {
+          "type": "p",
+          "text": "Переменные объявляются через `--` и читаются через `var()`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Объявление */\n:root {\n  --primary: #0066cc;\n  --spacing: 16px;\n}\n\n/* Использование */\n.btn {\n  background: var(--primary);\n  padding: var(--spacing);\n}"
+        },
+        {
+          "type": "p",
+          "text": "`--` — префикс для объявления. `var(--имя)` — для чтения. Имена чувствительны к регистру: `--Color` и `--color` — разные переменные."
+        },
+        {
+          "type": "heading",
+          "text": "Fallback (значение по умолчанию)"
+        },
+        {
+          "type": "p",
+          "text": "Второй аргумент `var()` — значение на случай, если переменная не определена:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Если --text-color не объявлена, будет #333 */\n.element {\n  color: var(--text-color, #333);\n}\n\n/* Fallback может быть другим var() */\n.element {\n  color: var(--text-color, var(--primary, #000));\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Область действия и наследование"
+        },
+        {
+          "type": "p",
+          "text": "CSS-переменные **наследуются**, как и обычные CSS-свойства. Объявите в `:root` — доступны везде. Переопределите в конкретном элементе — изменится только для него и его потомков:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ":root {\n  --primary: blue;\n}\n\n.card {\n  --primary: green; /* переопределение для .card и его детей */\n  color: var(--primary); /* green */\n}\n\n.card .title {\n  color: var(--primary); /* green — наследует от .card */\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Организация переменных"
+        },
+        {
+          "type": "p",
+          "text": "Рекомендуется группировать переменные по категориям в `:root`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ":root {\n  /* Цвета */\n  --color-primary: #0066cc;\n  --color-secondary: #6c757d;\n  --color-success: #28a745;\n  --color-danger: #dc3545;\n\n  /* Отступы */\n  --space-xs: 4px;\n  --space-sm: 8px;\n  --space-md: 16px;\n  --space-lg: 24px;\n  --space-xl: 32px;\n\n  /* Шрифты */\n  --font-size-sm: 0.875rem;\n  --font-size-base: 1rem;\n  --font-size-lg: 1.25rem;\n\n  /* Радиусы */\n  --radius-sm: 4px;\n  --radius-md: 8px;\n  --radius-lg: 12px;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Темизация через переменные"
+        },
+        {
+          "type": "p",
+          "text": "Переменные — основа **темизации**. Объявите базовые значения, потом переопределите для тёмной темы:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Светлая тема (по умолчанию) */\n:root {\n  --bg: #ffffff;\n  --text: #1a1a1a;\n  --border: #e0e0e0;\n  --card-bg: #f8f9fa;\n}\n\n/* Тёмная тема */\n@media (prefers-color-scheme: dark) {\n  :root {\n    --bg: #1a1a2e;\n    --text: #e0e0e0;\n    --border: #333333;\n    --card-bg: #16213e;\n  }\n}\n\n/* Использование */\nbody {\n  background: var(--bg);\n  color: var(--text);\n}\n\n.card {\n  background: var(--card-bg);\n  border: 1px solid var(--border);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Переменные для spacing"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".container {\n  padding: var(--space-md);\n}\n\n.btn {\n  padding: var(--space-sm) var(--space-lg);\n}\n\n.card {\n  margin-bottom: var(--space-lg);\n  padding: var(--space-xl);\n}"
+        },
+        {
+          "type": "p",
+          "text": "Изменив `--space-md` с `16px` на `20px`, вы измените отступ **везде**, где она используется."
+        },
+        {
+          "type": "heading",
+          "text": "Переменные и calc()"
+        },
+        {
+          "type": "p",
+          "text": "Переменные отлично работают с `calc()`:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ":root {\n  --header-height: 60px;\n  --sidebar-width: 250px;\n}\n\n.main {\n  margin-left: var(--sidebar-width);\n  min-height: calc(100vh - var(--header-height));\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Инкрементальные значения"
+        },
+        {
+          "type": "p",
+          "text": "Переменные можно изменять **локально** для компонента:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* Базовая кнопка */\n.btn {\n  --btn-bg: var(--color-primary);\n  --btn-padding: var(--space-sm) var(--space-md);\n  background: var(--btn-bg);\n  padding: var(--btn-padding);\n}\n\n/* Крупная кнопка */\n.btn-lg {\n  --btn-padding: var(--space-md) var(--space-xl);\n  font-size: var(--font-size-lg);\n}\n\n/* Опасная кнопка */\n.btn-danger {\n  --btn-bg: var(--color-danger);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забывают `--` при объявлении.** `primary: blue` не работает. Нужно `--primary: blue`.",
+            "**Не используют `:root` для глобальных переменных.** Без `:root` переменные не наследуются.",
+            "**Путают `var()` с обычным значением.** `var(--color)` — это не цвет, а ссылка на переменную.",
+            "**Создают слишком много переменных.** Начните с основных (цвета, spacing), добавляйте по мере необходимости."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Переменные объявляются через `--имя: значение;` и читаются через `var(--имя)`.",
+            "`var(--имя, fallback)` — fallback используется, если переменная не определена.",
+            "Переменные **наследуются**: объявите в `:root`, переопределите в компоненте.",
+            "Переменные — основа **темизации** и **дизайн-систем**.",
+            "Группируйте переменные по категориям: цвета, spacing, шрифты.",
+            "Переменные работают с `calc()` и другими CSS-функциями."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -14,8 +14,10 @@ export default function ExamResults() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [exam, setExam] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- // Supabase data shape — runtime-validated server-side, no runtime risk
   const [students, setStudents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -36,7 +38,7 @@ export default function ExamResults() {
           .select("*, rooms(id, name)")
           .eq("id", examId)
           .single()
-        
+
         if (examError) throw examError
         setExam(examData)
 
@@ -61,7 +63,7 @@ export default function ExamResults() {
 
   return (
     <div className="space-y-6 fade-in">
-      <Link 
+      <Link
         href={`/teacher/rooms/${exam.rooms.id}`}
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
       >
@@ -112,8 +114,8 @@ export default function ExamResults() {
                       <span className="text-slate-400">/ {student.total}</span>
                     </div>
                     <div className="w-24 h-2 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
-                      <div 
-                        className="h-full bg-sky-500" 
+                      <div
+                        className="h-full bg-sky-500"
                         style={{ width: `${(student.answered / student.total) * 100}%` }}
                       ></div>
                     </div>

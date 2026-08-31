@@ -1,0 +1,286 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "tekst-i-shrifty",
+      "track": "css",
+      "order": 24,
+      "title": "Текст и шрифты",
+      "summary": "Свойства шрифтов, оформление текста и типографика в CSS.",
+      "sourceTitle": "Урок 6. Текст и шрифты",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Зачем стилизовать текст?"
+        },
+        {
+          "type": "p",
+          "text": "Текст — основной носитель информации на веб-странице. Правильная типографика делает чтение удобным, а дизайн — профессиональным."
+        },
+        {
+          "type": "p",
+          "text": "CSS позволяет управлять: шрифтом, его размером, толщиной, межстрочным интервалом, выравниванием, decorations и другими параметрами."
+        },
+        {
+          "type": "heading",
+          "text": "Шрифты: font-family"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `font-family` задаёт, каким шрифтом будет отображён текст. В CSS можно указать несколько шрифтов через запятую — браузер будет использовать первый доступный."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "body {\n  font-family: \"Arial\", \"Helvetica\", sans-serif;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Как это работает:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Браузер проверяет, установлен ли `Arial`. Если да — использует его.",
+            "Если нет — проверяет `Helvetica`.",
+            "Если нет — использует любой шрифт из семейства `sans-serif`."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Названия шрифтов с пробелами нужно заключать в кавычки: `\"Times New Roman\"`, `\"Courier New\"`."
+        },
+        {
+          "type": "heading",
+          "text": "Generic families"
+        },
+        {
+          "type": "p",
+          "text": "В конце списка шрифтов принято указывать generic family — общее семейство, которое guaranteeирует хотя бы какой-то шрифт:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`serif` — шрифт с засечками (Times New Roman, Georgia).",
+            "`sans-serif` — без засечек (Arial, Helvetica, Verdana).",
+            "`monospace` — моноширинный (Courier New, Consolas).",
+            "`cursive` — рукописный.",
+            "`fantasy` — декоративный."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Размер шрифта: font-size"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `font-size` задаёт размер текста."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "h1 {\n  font-size: 32px;\n}\n\np {\n  font-size: 16px;\n}\n\n.small {\n  font-size: 0.875rem;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Размер можно задавать в разных единицах: `px`, `em`, `rem`, `%`. Подробнее об единицах — в следующем уроке."
+        },
+        {
+          "type": "p",
+          "text": "По умолчанию размер шрифта в браузере равен `16px`."
+        },
+        {
+          "type": "heading",
+          "text": "Толщина шрифта: font-weight"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `font-weight` управляет насыщенностью (толщиной) шрифта."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".light    { font-weight: 300; }\n.normal   { font-weight: 400; }\n.bold     { font-weight: 700; }\n.thin     { font-weight: 100; }"
+        },
+        {
+          "type": "p",
+          "text": "Значения задаются числами от `100` до `900` (ступенями по 100) или словами: `normal` (400), `bold` (700)."
+        },
+        {
+          "type": "heading",
+          "text": "Курсив: font-style"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `font-style` управляет наклоном шрифта."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".italic {\n  font-style: italic;\n}\n\n.oblique {\n  font-style: oblique;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Значения: `normal` (обычный), `italic` (курсив), `oblique` (наклонный). На практике `italic` и `oblique` почти неотличимы."
+        },
+        {
+          "type": "heading",
+          "text": "Высота строки: line-height"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `line-height` задаёт расстояние между строками текста. Это одно из самых важных свойств для читаемости."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "p {\n  line-height: 1.6;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Значение `1.6` означает межстрочный интервал, равный 160% от размера шрифта. Для основного текста рекомендуется `1.4–1.8`."
+        },
+        {
+          "type": "p",
+          "text": "Можно задавать и в пикселях: `line-height: 24px;`, но безразмерные значения удобнее — они масштабируются вместе с шрифтом."
+        },
+        {
+          "type": "heading",
+          "text": "Выравнивание текста: text-align"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `text-align` выравнивает текст по горизонтали внутри родительского элемента."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".left    { text-align: left; }\n.center  { text-align: center; }\n.right   { text-align: right; }\n.justify { text-align: justify; }"
+        },
+        {
+          "type": "p",
+          "text": "`justify` выравнивает текст по обеим сторонам — как в газетах. На веб-страницах используется редко, потому что может создавать некрасивые пробелы."
+        },
+        {
+          "type": "heading",
+          "text": "Декорации текста: text-decoration"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `text-decoration` добавляет линии к тексту."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".underline   { text-decoration: underline; }\n.line-through { text-decoration: line-through; }\n.overline     { text-decoration: overline; }\n.none         { text-decoration: none; }"
+        },
+        {
+          "type": "p",
+          "text": "Чаще всего используется для ссылок — чтобы убрать подчёркивание: `a { text-decoration: none; }`."
+        },
+        {
+          "type": "heading",
+          "text": "Трансформация текста: text-transform"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `text-transform` меняет регистр текста без изменения HTML."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".uppercase { text-transform: uppercase; }\n.lowercase { text-transform: lowercase; }\n.capitalize { text-transform: capitalize; }"
+        },
+        {
+          "type": "p",
+          "text": "`capitalize` делает заглавной первую букву каждого слова — удобно для заголовков."
+        },
+        {
+          "type": "heading",
+          "text": "Расстояние между символами и словами"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "h1 {\n  letter-spacing: 2px;\n}\n\np {\n  word-spacing: 4px;\n}"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`letter-spacing` — расстояние между символами.",
+            "`word-spacing` — расстояние между словами."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "На практике `letter-spacing` используется чаще — например, для заголовков в верхнем регистре."
+        },
+        {
+          "type": "heading",
+          "text": "Сокращённое свойство: font"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `font` позволяет задать несколько параметров шрифта одной строкой."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "body {\n  font: normal 400 16px/1.6 \"Arial\", sans-serif;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Порядок значений: `font: [style] [weight] size/line-height family;`. Обязательны только `size` и `family`."
+        },
+        {
+          "type": "p",
+          "text": "Если не указать `font-size` или `font-family`, браузер проигнорирует всё свойство."
+        },
+        {
+          "type": "heading",
+          "text": "Хороший типографический пример"
+        },
+        {
+          "type": "p",
+          "text": "Соберём несколько свойств вместе для удобочитаемого текста."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "body {\n  font-family: \"Segoe UI\", Arial, sans-serif;\n  font-size: 16px;\n  line-height: 1.6;\n  color: #333;\n}\n\nh1 {\n  font-size: 32px;\n  font-weight: 700;\n  line-height: 1.2;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n}\n\na {\n  text-decoration: none;\n  color: #0066cc;\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забыли указать generic family.** Без `sans-serif` в конце списка браузер не сможет подобрать запасной шрифт.",
+            "**Не ставят кавычки у шрифтов с пробелами.** `font-family: Times New Roman` не работает — нужно `\"Times New Roman\"`.",
+            "**Слишком маленький line-height.** Текст «слипается» — строки накладываются друг на друга. Для основного текста не менее `1.4`.",
+            "**Злоупотребляют text-decoration.** Много подчёркиваний и перечёркиваний делает текст трудным для чтения."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`font-family` задаёт шрифт, всегда указывайте generic family в конце.",
+            "`font-size` — размер текста, по умолчанию `16px`.",
+            "`line-height` — межстрочный интервал, для читаемости `1.4–1.8`.",
+            "`font-weight` — толщина: `400` (normal), `700` (bold).",
+            "`font` — сокращённое свойство: `font: [style] [weight] size/line-height family;`."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "В следующем уроке разберём Google Fonts и другие способы подключения нестандартных шрифтов."
+        }
+      ]
+    }
+  ]
+}

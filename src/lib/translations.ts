@@ -5,7 +5,7 @@ export const t = {
   signIn: 'Войти',
   signingIn: 'Вход...',
   error: 'Ошибка',
-  
+
   // Login
   teacherLogin: 'Вход для преподавателей',
   loginWelcome: 'Добро пожаловать! Введите ваши данные.',
@@ -29,7 +29,7 @@ export const t = {
   joinBtn: 'Войти в аудиторию',
   invalidRoom: 'Неверный код аудитории. Пожалуйста, проверьте и попробуйте снова.',
   nameTaken: 'Имя "{name}" уже занято в этой аудитории. Продолжить как "{finalName}"?',
-  
+
   // Exam taking
   loadingExam: 'Загрузка экзамена...',
   noQuestions: 'В этом экзамене нет вопросов.',
@@ -61,7 +61,7 @@ export const t = {
   roomNamePlaceholder: 'например, Математика 8 класс, Биология 101',
   cancel: 'Отмена',
   creating: 'Создание...',
-  
+
   // Teacher Room Details
   editRoom: 'Редактировать',
   deleteRoom: 'Удалить аудиторию',
@@ -108,7 +108,7 @@ export const t = {
   loadingQuestions: 'Загрузка вопросов...',
   examNotFound: 'Экзамен не найден.',
   backToRoomWith: 'Вернуться к',
-  
+
   // Teacher Exam Results
   resultsTitle: 'Результаты:',
   reviewSubmissions: 'Просмотр ответов студентов',
@@ -120,7 +120,7 @@ export const t = {
   actionLabel: 'Действие',
   toCheck: 'на проверку',
   reviewBtn: 'Проверить',
-  
+
   // Teacher Review Student
   reviewStudentTitle: 'Проверка ответов:',
   backToResults: 'Вернуться к результатам',

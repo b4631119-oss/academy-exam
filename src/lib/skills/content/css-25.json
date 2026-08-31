@@ -1,0 +1,246 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "box-model",
+      "track": "css",
+      "order": 25,
+      "title": "Box Model",
+      "summary": "Модель коробки: content, padding, border, margin и box-sizing.",
+      "sourceTitle": "Урок 7. Box Model",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Каждый элемент — прямоугольник"
+        },
+        {
+          "type": "p",
+          "text": "Любой элемент на веб-странице — это прямоугольник. Даже круглая кнопка или текст — браузер рисует их внутри прямоугольной области."
+        },
+        {
+          "type": "p",
+          "text": "Чтобы точно понимать, сколько места займёт элемент и как он поведёт себя рядом с другими, нужно знать **блочную модель** (box model)."
+        },
+        {
+          "type": "heading",
+          "text": "Из чего состоит блочная модель"
+        },
+        {
+          "type": "p",
+          "text": "Каждый прямоугольник состоит из четырёх слоёв:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Content** — содержимое: текст, картинка, иконка.",
+            "**Padding** — внутренний отступ: пространство между содержимым и рамкой.",
+            "**Border** — рамка: линия, обрамляющая элемент.",
+            "**Margin** — внешний отступ: пространство между элементом и его соседями."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Схема блочной модели:"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "code": "┌──────────── margin ────────────┐\n│ ┌────────── border ──────────┐ │\n│ │ ┌──────── padding ───────┐ │ │\n│ │ │       content          │ │ │\n│ │ └────────────────────────┘ │ │\n│ └─────────────────────────────┘ │\n└─────────────────────────────────┘"
+        },
+        {
+          "type": "heading",
+          "text": "Content: содержимое"
+        },
+        {
+          "type": "p",
+          "text": "Content — это область, где находится сам контент. Ширина и высота, заданные через `width` и `height`, определяют размер именно этой области (по умолчанию)."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  width: 200px;\n  height: 100px;\n  background-color: #e0e0e0;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Прямоугольник будет размером 200×100 пикселей — ровно столько займёт контент."
+        },
+        {
+          "type": "heading",
+          "text": "Padding: внутренний отступ"
+        },
+        {
+          "type": "p",
+          "text": "Padding — это «воздух» между содержимым и рамкой. Он увеличивает пространство вокруг контента, не меняя сам контент."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  width: 200px;\n  height: 100px;\n  padding: 20px;\n  background-color: #e0e0e0;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Теперь реальные размеры блока: `200 + 20 + 20 = 240px` в ширину и `100 + 20 + 20 = 140px` в высоту. Padding **прибавляется** к заданным размерам."
+        },
+        {
+          "type": "p",
+          "text": "Можно задавать отступы для каждой стороны отдельно:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "/* padding: верх право низ лево */\npadding: 10px 20px 10px 20px;\n\n/* padding: верх/низ право/лево */\npadding: 10px 20px;\n\n/* padding: все стороны одинаковые */\npadding: 15px;"
+        },
+        {
+          "type": "heading",
+          "text": "Border: рамка"
+        },
+        {
+          "type": "p",
+          "text": "Border — это линия по краю элемента. Она тоже прибавляется к итоговым размерам."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  width: 200px;\n  height: 100px;\n  padding: 20px;\n  border: 3px solid #333;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Итоговая ширина: `200 + 20 + 20 + 3 + 3 = 246px`. Рамка толщиной 3px с каждой стороны."
+        },
+        {
+          "type": "p",
+          "text": "Свойство `border` — сокращённое. Можно задавать отдельно:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "border-width: 3px;\nborder-style: solid;\nborder-color: #333;"
+        },
+        {
+          "type": "heading",
+          "text": "Margin: внешний отступ"
+        },
+        {
+          "type": "p",
+          "text": "Margin — пространство **снаружи** элемента. Он не входит в размеры элемента, но влияет на то, сколько места он займёт на странице."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  width: 200px;\n  height: 100px;\n  padding: 20px;\n  border: 3px solid #333;\n  margin: 30px;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Margin «отталкивает» соседние элементы. Если у двух рядом стоящих блоков margin по 30px, между ними будет 60px (в большинстве случаев — подробнее о margin collapsing в продвинутых темах)."
+        },
+        {
+          "type": "heading",
+          "text": "Проблема content-box"
+        },
+        {
+          "type": "p",
+          "text": "По умолчанию `width` и `height` задают размер **только контента**. Padding и border прибавляются сверху. Это может быть неожиданным."
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  width: 300px;\n  padding: 20px;\n  border: 5px solid #333;\n}\n/* Итоговая ширина: 300 + 20 + 20 + 5 + 5 = 350px! */"
+        },
+        {
+          "type": "p",
+          "text": "Вы указали `width: 300px`, а блок получился 350px. Это частая причина «сломанных» макетов."
+        },
+        {
+          "type": "heading",
+          "text": "Решение: box-sizing: border-box"
+        },
+        {
+          "type": "p",
+          "text": "Свойство `box-sizing` меняет способ расчёта размеров."
+        },
+        {
+          "type": "list",
+          "items": [
+            "`content-box` (по умолчанию) — `width`/`height` = только контент. Padding и border добавляются сверху.",
+            "`border-box` — `width`/`height` = контент + padding + border. Всё включено."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".box {\n  box-sizing: border-box;\n  width: 300px;\n  padding: 20px;\n  border: 5px solid #333;\n}\n/* Итоговая ширина: ровно 300px! */"
+        },
+        {
+          "type": "p",
+          "text": "С `border-box` указанный `width: 300px` — это **итоговая** ширина блока. Padding и border «забирают» часть этих 300px, а не добавляются к ним."
+        },
+        {
+          "type": "heading",
+          "text": "Глобальный сброс box-sizing"
+        },
+        {
+          "type": "p",
+          "text": "Почти все современные проекты устанавливают `border-box` глобально для удобства:"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": "*,\n*::before,\n*::after {\n  box-sizing: border-box;\n}"
+        },
+        {
+          "type": "p",
+          "text": "Это правило ставят в самом начале CSS-файла. Теперь `width` и `height` всегда ведут себя предсказуемо."
+        },
+        {
+          "type": "heading",
+          "text": "Полный пример"
+        },
+        {
+          "type": "code",
+          "lang": "css",
+          "code": ".card {\n  box-sizing: border-box;\n  width: 300px;\n  padding: 24px;\n  border: 2px solid #ddd;\n  margin: 16px;\n  background-color: #fff;\n}"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<div class=\"card\">\n  <h2>Заголовок</h2>\n  <p>Текст внутри карточки.</p>\n</div>"
+        },
+        {
+          "type": "p",
+          "text": "Карточка будет ровно 300px шириной. Внутри неё 24px отступа со всех сторон, 2px рамка и 16px внешнего пространства."
+        },
+        {
+          "type": "heading",
+          "text": "Частые ошибки новичков"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Забыли про box-sizing.** Без `border-box` размер элемента «прыгает» из-за padding и border. Добавьте глобальный сброс в начало CSS.",
+            "**Путают padding и margin.** Padding — **внутри** элемента, margin — **снаружи**. Если нужен отступ от края до контента — это padding.",
+            "**Не учитывают border при расчёте размеров.** Даже `border: 1px` добавляет 2px к итоговой ширине (по 1px с каждой стороны).",
+            "**Задают width элементу и ожидают, что он будет ровно такого размера.** В `content-box` padding и border увеличивают итоговый размер."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Блочная модель: content → padding → border → margin.",
+            "Padding — внутренний отступ, margin — внешний.",
+            "`box-sizing: border-box` делает `width`/`height` предсказуемыми — итоговый размер включает padding и border.",
+            "Практически всегда ставьте `box-sizing: border-box` глобально.",
+            "Margin не входит в размер элемента, но влияет на расположение соседей."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "В следующем уроке разберём цвета в CSS: как задавать и комбинировать цвета."
+        }
+      ]
+    }
+  ]
+}

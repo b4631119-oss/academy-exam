@@ -33,14 +33,14 @@ export default function TeacherLoginPage() {
     setError("")
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
 
       router.push("/teacher/dashboard")
       router.refresh()
-    } catch (err: any) {
+    } catch (err: unknown) {
       setAttempts(prev => prev + 1)
-      setError(err.message)
+      setError((err as Error).message)
     } finally {
       setLoading(false)
     }

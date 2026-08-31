@@ -36,3 +36,13 @@ next-env.d.ts
 
 # Supabase
 supabase/.branches
+
+# Debug logs
+dev.log
+
+# Playwright generated artifacts
+test-results/
+playwright-report/
+e2e/student-auth.json
+e2e/teacher-auth.json
+e2e/test-data.json

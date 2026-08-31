@@ -1,4 +1,4 @@
-import content from "./content.json"
+import { lessons as allLessons, source as COURSE_SOURCE } from "./content"
 
 export type TrackId = "html" | "css"
 
@@ -35,9 +35,9 @@ export const TRACKS: Record<
   },
 }
 
-export const COURSE_SOURCE = content.source
+export { COURSE_SOURCE }
 
-const lessons = content.lessons as Lesson[]
+const lessons = allLessons as Lesson[]
 
 export function isTrackId(value: string): value is TrackId {
   return value === "html" || value === "css"

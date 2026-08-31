@@ -1,0 +1,217 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "interaktivnyj-html",
+      "track": "html",
+      "order": 21,
+      "title": "Интерактивный HTML",
+      "summary": "Details, summary, dialog, popover, iframe — встроенная интерактивность и встраивание.",
+      "sourceTitle": "Интерактивный HTML",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Интерактивность без JavaScript"
+        },
+        {
+          "type": "p",
+          "text": "HTML5 предоставляет элементы, которые работают интерактивно «из коробки» — без написания JavaScript. Рассмотрим основные."
+        },
+        {
+          "type": "heading",
+          "text": "details и summary: раскрывающийся блок"
+        },
+        {
+          "type": "p",
+          "text": "`<details>` создаёт блок, который можно открыть/закрыть кликом. `<summary>` — видимая часть (заголовок)."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<details>\n  <summary>Что такое HTML?</summary>\n  <p>HTML — это язык разметки для создания структуры веб-страниц.</p>\n</details>"
+        },
+        {
+          "type": "p",
+          "text": "Браузер показывает треугольник и текст `<summary>`. При клике — раскрывает содержимое."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<!-- Открыт по умолчанию -->\n<details open>\n  <summary>Инструкция</summary>\n  <ol>\n    <li>Откройте редактор кода</li>\n    <li>Создайте файл index.html</li>\n    <li>Напишите свой первый тег</li>\n  </ol>\n</details>"
+        },
+        {
+          "type": "p",
+          "text": "Атрибут `open` — блок раскрыт по умолчанию. Без него — свёрнут."
+        },
+        {
+          "type": "heading",
+          "text": "Аккордеон: несколько details с name"
+        },
+        {
+          "type": "p",
+          "text": "С помощью атрибута `name` можно сделать аккордеон — когда открыт только один блок из группы."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<details name=\"faq\">\n  <summary>Что нужно для начала?</summary>\n  <p>Только браузер и текстовый редактор.</p>\n</details>\n\n<details name=\"faq\">\n  <summary>Сколько времени займёт курс?</summary>\n  <p>От 2 до 4 недель при ежедневных занятиях.</p>\n</details>\n\n<details name=\"faq\">\n  <summary>Выдаётся ли сертификат?</summary>\n  <p>Да, по окончании курса.</p>\n</details>"
+        },
+        {
+          "type": "note",
+          "text": "Атрибут `name` связывает `<details>` в группу. Открытие одного закрывает другие с тем же `name`."
+        },
+        {
+          "type": "heading",
+          "text": "dialog: модальные и немодальные окна"
+        },
+        {
+          "type": "p",
+          "text": "`<dialog>` создаёт встроенное модальное или немодальное окно."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<dialog id=\"my-dialog\">\n  <h2>Подтверждение</h2>\n  <p>Вы уверены, что хотите удалить файл?</p>\n  <form method=\"dialog\">\n    <button value=\"cancel\">Отмена</button>\n    <button value=\"confirm\">Удалить</button>\n  </form>\n</dialog>\n\n<button onclick=\"document.getElementById('my-dialog').showModal()\">\n  Удалить файл\n</button>"
+        },
+        {
+          "type": "p",
+          "text": "`showModal()` — модальное окно (блокирует страницу). `show()` — немодальное (можно кликать на страницу). `close()` — закрывает."
+        },
+        {
+          "type": "heading",
+          "text": "Модальное vs немодальное"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Модальное** (`showModal()`) — блокирует взаимодействие с остальной страницей. Обязательно закрыть.",
+            "**Немодальное** (`show()`) — не блокирует. Пользователь может продолжать работу."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Popover: всплывающие элементы"
+        },
+        {
+          "type": "p",
+          "text": "HTML-атрибут `popover` создаёт элемент, который можно показать/скрыть через кнопку — без JavaScript."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<button popovertarget=\"my-popover\">Показать подсказку</button>\n\n<div id=\"my-popover\" popover>\n  <p>Это всплывающая подсказка!</p>\n</div>"
+        },
+        {
+          "type": "p",
+          "text": "Клик по кнопке показывает/скрывает popover. Клик вне popover закрывает его."
+        },
+        {
+          "type": "note",
+          "text": "Popover API поддерживается во всех современных браузерах с 2023 года. Для старых браузеров нужен JavaScript-fallback."
+        },
+        {
+          "type": "heading",
+          "text": "iframe: встраивание чужих страниц"
+        },
+        {
+          "type": "p",
+          "text": "`<iframe>` (inline frame) встраивает другую веб-страницу внутрь текущей. Это способ показать контент с другого сайта — видео, карту, виджет — прямо на своей странице."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<iframe\n  src=\"https://www.youtube.com/embed/dQw4w9WgXcQ\"\n  title=\"Видео-урок по HTML\"\n  width=\"560\"\n  height=\"315\"\n  allowfullscreen\n></iframe>"
+        },
+        {
+          "type": "p",
+          "text": "Браузер загружает страницу из `src` и отображает её внутри прямоугольника на вашей странице. Пользователь может взаимодействовать с встроенным контентом, не покидая вашу страницу."
+        },
+        {
+          "type": "heading",
+          "text": "Основные атрибуты"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`src`** — адрес страницы для встраивания.",
+            "**`title`** — описание содержимого для скринридеров (обязательно для доступности).",
+            "**`width`** / **`height`** — размер в пикселях.",
+            "**`allowfullscreen`** — разрешает полноэкранный режим."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Популярные примеры"
+        },
+        {
+          "type": "p",
+          "text": "`<iframe>` используется повсеместно:"
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<!-- YouTube видео -->\n<iframe\n  src=\"https://www.youtube.com/embed/VIDEO_ID\"\n  title=\"Название видео\"\n  width=\"560\"\n  height=\"315\"\n  allowfullscreen\n></iframe>\n\n<!-- Google Maps -->\n<iframe\n  src=\"https://www.google.com/maps/embed?...\"\n  title=\"Карта\"\n  width=\"600\"\n  height=\"450\"\n  style=\"border:0\"\n  allowfullscreen\n></iframe>\n\n<!-- Codesandbox / CodePen -->\n<iframe\n  src=\"https://codepen.io/user/embed/ID\"\n  title=\"Пример кода\"\n  width=\"100%\"\n  height=\"400\"\n></iframe>"
+        },
+        {
+          "type": "heading",
+          "text": "Ограничения и безопасность"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Каждый `<iframe>` — отдельная страница.** Это значит дополнительную нагрузку на память и процессор.",
+            "**Чужой контент = чужой код.** Вы не контролируете, что загружается внутри `<iframe>`. Не встраивайте непроверенные сайты.",
+            "**Блокировщики рекламы** могут блокировать `<iframe>` с рекламой.",
+            "**Некоторые сайты запрещают встраивание** через заголовок `X-Frame-Options`. Это защита от мошенничества."
+          ]
+        },
+        {
+          "type": "note",
+          "text": "Для простых задач (видео, карты) `<iframe>` — стандартное решение. Не пытайтесь заменить его на `<object>` или `<embed>` — они устарели."
+        },
+        {
+          "type": "heading",
+          "text": "Семантика и доступность"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`<details>`/`<summary>` — семантически верно для FAQ, инструкций, раскрывающихся блоков.",
+            "`<dialog>` — семантически верно для модальных окон, подтверждений.",
+            "Скринридеры понимают эти теги и сообщают пользователю об их состоянии.",
+            "Не используйте `<div>` с классом `modal` вместо `<dialog>` — потеряете семантику."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Типичные ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Нет `<summary>` внутри `<details>`.** Без summary браузер покажет дефолтный текст.",
+            "**Используют `<div class=\"modal\">` вместо `<dialog>`.** `<dialog>` — семантичный и доступный.",
+            "**Забывают `method=\"dialog\"` в форме внутри dialog.** Без него форма отправит страницу.",
+            "**Не используют `name` для аккордеона.** Без name все `<details>` открываются независимо."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`<details>` + `<summary>` — раскрывающийся блок без JavaScript.",
+            "`<details open>` — раскрыт по умолчанию.",
+            "`<details name=\"...\">` — группировка в аккордеон.",
+            "`<dialog>` — модальное/немодальное окно.",
+            "`showModal()` / `show()` / `close()` — управление dialog.",
+            "`popover` + `popovertarget` — всплывающие элементы без JS.",
+            "`<iframe>` — встраивание чужих страниц (видео, карты, виджеты)."
+          ]
+        }
+      ]
+    }
+  ]
+}

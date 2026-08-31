@@ -1,0 +1,180 @@
+{
+  "source": "https://github.com/ipzxc191/html-css-course-start",
+  "lessons": [
+    {
+      "slug": "prodvinutye-formy",
+      "track": "html",
+      "order": 17,
+      "title": "Продвинутые формы",
+      "summary": "Select, option, optgroup, fieldset, legend, datalist, валидация, autocomplete и GET vs POST.",
+      "sourceTitle": "Продвинутые формы",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Выпадающий список: select и option"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<select>` создаёт выпадающий список (dropdown). Каждый вариант — тег `<option>` внутри `<select>`."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<label for=\"city\">Выберите город:</label>\n<select name=\"city\" id=\"city\" required>\n  <option value=\"\">-- Выберите --</option>\n  <option value=\"moscow\">Москва</option>\n  <option value=\"spb\">Санкт-Петербург</option>\n  <option value=\"kazan\">Казань</option>\n</select>"
+        },
+        {
+          "type": "p",
+          "text": "Атрибут `value` у `<option>` — это то, что отправится на сервер. Если `value` нет, отправится текст внутри тега."
+        },
+        {
+          "type": "heading",
+          "text": "Группировка: optgroup"
+        },
+        {
+          "type": "p",
+          "text": "Тег `<optgroup>` группирует связанные `<option>` с общим заголовком."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<select name=\"car\">\n  <optgroup label=\"Японские\">\n    <option value=\"toyota\">Toyota</option>\n    <option value=\"honda\">Honda</option>\n  </optgroup>\n  <optgroup label=\"Немецкие\">\n    <option value=\"bmw\">BMW</option>\n    <option value=\"audi\">Audi</option>\n  </optgroup>\n</select>"
+        },
+        {
+          "type": "heading",
+          "text": "Группировка полей: fieldset и legend"
+        },
+        {
+          "type": "p",
+          "text": "`<fieldset>` группирует связанные поля формы. `<legend>` задаёт заголовок этой группы."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<fieldset>\n  <legend>Личные данные</legend>\n  <label for=\"name\">Имя:</label>\n  <input type=\"text\" id=\"name\" name=\"name\" required>\n\n  <label for=\"email\">Email:</label>\n  <input type=\"email\" id=\"email\" name=\"email\" required>\n</fieldset>"
+        },
+        {
+          "type": "p",
+          "text": "Для скринридера `<legend>` — это подпись группы. Без неё пользователь не поймёт, какие поля связаны."
+        },
+        {
+          "type": "heading",
+          "text": "Подсказки: datalist"
+        },
+        {
+          "type": "p",
+          "text": "`<datalist>` добавляет подсказки к текстовому полю. Пользователь может выбрать подсказку или ввести своё значение."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<label for=\"browser\">Браузер:</label>\n<input list=\"browsers\" id=\"browser\" name=\"browser\">\n<datalist id=\"browsers\">\n  <option value=\"Chrome\">\n  <option value=\"Firefox\">\n  <option value=\"Safari\">\n  <option value=\"Edge\">\n</datalist>"
+        },
+        {
+          "type": "p",
+          "text": "В отличие от `<select>`, `<datalist>` позволяет вводить произвольные значения."
+        },
+        {
+          "type": "heading",
+          "text": "Встроенная валидация"
+        },
+        {
+          "type": "p",
+          "text": "HTML предоставляет атрибуты для проверки данных прямо в браузере — без JavaScript."
+        },
+        {
+          "type": "list",
+          "items": [
+            "`required` — поле обязательно.",
+            "`minlength` / `maxlength` — минимальная/максимальная длина текста.",
+            "`min` / `max` — минимальное/максимальное значение (для чисел и дат).",
+            "`pattern` — регулярное выражение для проверки формата.",
+            "`multiple` — позволяет выбрать несколько значений (для `<select>`, `<input type=\"email\">`)."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<!-- Телефон: формат +XX XXX XXX-XX-XX -->\n<input type=\"tel\" pattern=\"[\\+]?[0-9]{2}[ ][0-9]{3}[ ][0-9]{3}-[0-9]{2}-[0-9]{2}\"\n       title=\"Формат: +XX XXX XXX-XX-XX\" required>\n\n<!-- Число от 1 до 100 -->\n<input type=\"number\" min=\"1\" max=\"100\" step=\"1\">\n\n<!-- Длина от 3 до 50 символов -->\n<input type=\"text\" minlength=\"3\" maxlength=\"50\">"
+        },
+        {
+          "type": "note",
+          "text": "Встроенная валидация — первый уровень защиты. Серверная валидация обязательна всегда."
+        },
+        {
+          "type": "heading",
+          "text": "Autocomplete"
+        },
+        {
+          "type": "p",
+          "text": "Атрибут `autocomplete` подсказывает браузеру, какие данные предлагать для автозаполнения."
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<input type=\"text\" name=\"given-name\" autocomplete=\"given-name\">\n<input type=\"email\" name=\"email\" autocomplete=\"email\">\n<input type=\"tel\" name=\"tel\" autocomplete=\"tel\">\n<input type=\"street-address\" name=\"address\" autocomplete=\"street-address\">"
+        },
+        {
+          "type": "p",
+          "text": "Правильные значения `autocomplete` ускоряют заполнение форм и улучшают UX."
+        },
+        {
+          "type": "heading",
+          "text": "GET vs POST"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**GET** — данные в URL (?name=Аня&city=москва). Для поиска, фильтров. Данные видны в адресной строке.",
+            "**POST** — данные в теле запроса. Для регистрации, отправки файлов, паролей. Данные не видны в URL."
+          ]
+        },
+        {
+          "type": "code",
+          "lang": "html",
+          "code": "<!-- Поиск: GET -->\n<form action=\"/search\" method=\"GET\">\n  <input type=\"text\" name=\"q\">\n  <button>Найти</button>\n</form>\n\n<!-- Регистрация: POST -->\n<form action=\"/register\" method=\"POST\">\n  <input type=\"email\" name=\"email\" required>\n  <input type=\"password\" name=\"password\" required>\n  <button>Зарегистрироваться</button>\n</form>"
+        },
+        {
+          "type": "heading",
+          "text": "Типы кнопок"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`type=\"submit\"` — отправляет форму (по умолчанию).",
+            "`type=\"reset\"` — очищает все поля.",
+            "`type=\"button\"` — обычная кнопка без действия (для JavaScript)."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Типичные ошибки"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Нет `<label>` у `<select>`.** Скринридер не поймёт, что выбрать.",
+            "**Нет `value` у `<option>`.** Отправится текст, что может быть некорректно.",
+            "**Нет пустого option-заглушки.** Без `value=\"\"` пользователь не сможет «не выбрать».",
+            "**Полагаются только на встроенную валидацию.** Серверная валидация обязательна.",
+            "**GET для паролей.** Пароли и чувствительные данные — только POST."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Важно запомнить"
+        },
+        {
+          "type": "list",
+          "items": [
+            "`<select>` + `<option>` — выпадающий список.",
+            "`<optgroup>` — группировка вариантов с заголовком.",
+            "`<fieldset>` + `<legend>` — группировка полей формы.",
+            "`<datalist>` — подсказки для текстового поля.",
+            "Встроенная валидация: `required`, `pattern`, `minlength`, `maxlength`, `min`, `max`.",
+            "GET — для поиска, POST — для отправки данных."
+          ]
+        }
+      ]
+    }
+  ]
+}
