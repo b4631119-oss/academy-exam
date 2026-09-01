@@ -50,16 +50,18 @@ export function ThemeToggle({ className }: { className?: string }) {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "p-2 rounded-lg transition-colors text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800",
+          "p-2.5 rounded-lg transition-colors text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900",
           className
         )}
         aria-label="Тема"
+        aria-expanded={open}
+        aria-haspopup="listbox"
       >
         <CurrentIcon className="w-5 h-5" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-1.5 z-50 fade-in">
+        <div className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-1.5 z-50 fade-in" role="listbox" aria-label="Выбор темы">
           {options.map((opt) => {
             const Icon = opt.icon
             const active = theme === opt.value
@@ -70,14 +72,16 @@ export function ThemeToggle({ className }: { className?: string }) {
                   setTheme(opt.value)
                   setOpen(false)
                 }}
+                role="option"
+                aria-selected={active}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors",
+                  "w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-inset",
                   active
                     ? "text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 font-medium"
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                 )}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className="w-5 h-5 shrink-0" />
                 <span>{opt.label}</span>
               </button>
             )
