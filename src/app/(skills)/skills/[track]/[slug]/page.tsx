@@ -72,16 +72,22 @@ export default async function LessonPage({ params }: PageProps) {
 
       {/* Source */}
       <p className="text-xs leading-5 text-slate-400 dark:text-slate-500">
-        Материал адаптирован из курса{" "}
-        <a
-          href={COURSE_SOURCE}
-          className="underline decoration-slate-300 dark:decoration-slate-600 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
-          target="_blank"
-          rel="noreferrer"
-        >
-          html-css-course-start
-        </a>
-        .
+        {track === "js" ? (
+          <>Материалы курса JavaScript — PROlab Academy.</>
+        ) : (
+          <>
+            Материал адаптирован из курса{" "}
+            <a
+              href={COURSE_SOURCE}
+              className="underline decoration-slate-300 dark:decoration-slate-600 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+              target="_blank"
+              rel="noreferrer"
+            >
+              html-css-course-start
+            </a>
+            .
+          </>
+        )}
       </p>
 
       {/* Prev / Next */}

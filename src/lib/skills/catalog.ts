@@ -1,6 +1,7 @@
 import { lessons as allLessons, source as COURSE_SOURCE } from "./content"
+import { jsLessons } from "./content/js-lessons-data"
 
-export type TrackId = "html" | "css"
+export type TrackId = "html" | "css" | "js"
 
 export type ContentBlock =
   | { type: "heading"; text: string }
@@ -33,14 +34,19 @@ export const TRACKS: Record<
     title: "CSS",
     description: "Стилизация и оформление веб-страниц",
   },
+  js: {
+    id: "js",
+    title: "JavaScript",
+    description: "Основы языка программирования для веба",
+  },
 }
 
 export { COURSE_SOURCE }
 
-const lessons = allLessons as Lesson[]
+const lessons = [...(allLessons as Lesson[]), ...jsLessons] as Lesson[]
 
 export function isTrackId(value: string): value is TrackId {
-  return value === "html" || value === "css"
+  return value === "html" || value === "css" || value === "js"
 }
 
 export function getLessonsByTrack(track: TrackId): Lesson[] {

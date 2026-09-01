@@ -1,0 +1,145 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "async-await",
+      "track": "js",
+      "order": 4,
+      "title": "async/await",
+      "summary": "Научиться писать асинхронный код, который выглядит синхронным, с помощью async/await — современного способа работы с промисами.",
+      "sourceTitle": "Урок 5.4. async/await",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: async/await как последовательные шаги"
+        },
+        {
+          "type": "p",
+          "text": "С промисами это как говорить: «Когда блюдо будет готово, принесите мне» (.then()). С async/await — «Подождите, пока блюдо готово, а потом возьмите его» (await). Код читается как последовательные шаги."
+        },
+        {
+          "type": "heading",
+          "text": "async и await"
+        },
+        {
+          "type": "p",
+          "text": "async — функция ВСЕГДА возвращает промис. await — ждёт выполнения промиса (только внутри async-функции)."
+        },
+        {
+          "type": "heading",
+          "text": "Обработка ошибок с try/catch"
+        },
+        {
+          "type": "p",
+          "text": "try { ... await ... } catch (error) { ... } — обработка ошибок в async-функциях."
+        },
+        {
+          "type": "heading",
+          "text": "Параллельные операции"
+        },
+        {
+          "type": "p",
+          "text": "await Promise.all([fetch(\"/a\"), fetch(\"/b\")]) — выполнение нескольких операций одновременно."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — async/await, генераторы. Спецификация.\n\nDoka.guide: Аналогия — «await как стояние в очереди». Простота.\n\nlearn.javascript.ru: Практический — замена callback Hell. Применимость.\n\nWes Bos: Современный — «async/await — новый стандарт». Прагматизм.\n\nYou Don't Know JS: Глубокий — генераторы и async/await. Механика."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Простой async/await"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "async function getTodo(id) {\n    let response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`);\n    let todo = await response.json();\n    return todo;\n}\n\ngetTodo(1)\n    .then(todo => console.log(todo))\n    .catch(error => console.error(error));"
+        },
+        {
+          "type": "heading",
+          "text": "Обработка ошибок"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "async function fetchUserData(userId) {\n    try {\n        let response = await fetch(`/api/users/${userId}`);\n        \n        if (!response.ok) {\n            throw new Error(`Пользователь не найден: ${response.status}`);\n        }\n        \n        let user = await response.json();\n        console.log(\"Пользователь:\", user.name);\n        return user;\n    } catch (error) {\n        console.error(\"Ошибка загрузки:\", error.message);\n        return null;\n    }\n}"
+        },
+        {
+          "type": "heading",
+          "text": "Параллельные запросы"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "async function loadDashboard() {\n    try {\n        let [user, posts, notifications] = await Promise.all([\n            fetch(\"/api/user\").then(r => r.json()),\n            fetch(\"/api/posts\").then(r => r.json()),\n            fetch(\"/api/notifications\").then(r => r.json())\n        ]);\n        \n        return { user, posts, notifications };\n    } catch (error) {\n        console.error(\"Ошибка загрузки дашборда:\", error);\n    }\n}"
+        },
+        {
+          "type": "heading",
+          "text": "async IIFE"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "(async () => {\n    let data = await fetch(\"/api/data\").then(r => r.json());\n    console.log(data);\n})();"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ await можно использовать только внутри async-функции (или top-level в ES modules).",
+            "⚠️ Последовательные vs параллельные: let a = await fetch(\"/a\"); let b = await fetch(\"/b\"); — медленно! Используйте Promise.all.",
+            "⚠️ Забытый try/catch: Unhandled promise rejection. Всегда обрабатывайте ошибки.",
+            "⚠️ await ждёт промис: если передать не промис — вернёт значение как есть (бессмысленно).",
+            "⚠️ Top-level await доступен только в модулях (type=\"module\")."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Напишите async-функцию getUserName(id).\n2. Используя await, получите данные из jsonplaceholder.typicode.com/users/1.\n3. Обработайте ошибку с помощью try/catch."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Напишите функцию loadUserData(userId) для параллельной загрузки пользователя и постов.\n2. Реализуйте retry(asyncFn, attempts) для повторения при ошибке.\n3. Напишите processArray(items, asyncFn) для параллельной обработки."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте async/await с помощью function* и yield.\n2. Напишите asyncPool(concurrency, items, asyncFn) для ограничения параллелизма.\n3. Реализуйте asyncDebounce(fn, delay)."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "async/await — современный способ работы с промисами. await ждёт выполнения промиса (только внутри async-функции). try/catch обрабатывает ошибки. Используйте Promise.all для параллельных операций. Top-level await доступен в ES modules. async/await — синтаксический сахар над промисами."
+        }
+      ]
+    }
+  ]
+}

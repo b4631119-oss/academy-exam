@@ -1,0 +1,135 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "obekty",
+      "track": "js",
+      "order": 5,
+      "title": "Объекты — коллекции с ключами",
+      "summary": "Понять, что объекты — это структуры данных для хранения пар «ключ-значение», и научиться создавать, изменять и обходить объекты.",
+      "sourceTitle": "Урок 3.5. Объекты — коллекции с ключами",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: объект как словарь"
+        },
+        {
+          "type": "p",
+          "text": "Представьте словарь. У каждого слова (ключ) есть значение (определение). Вы можете добавлять новые слова, удалять их и искать определения."
+        },
+        {
+          "type": "heading",
+          "text": "Методы объекта"
+        },
+        {
+          "type": "p",
+          "text": "Объекты могут содержать функции (методы). Методы — это функции, которые являются свойствами объекта. Ключевое слово this ссылается на сам объект."
+        },
+        {
+          "type": "heading",
+          "text": "Копирование и слияние объектов"
+        },
+        {
+          "type": "p",
+          "text": "Spread syntax { ...original } создаёт ПОВЕРХНОСТНУЮ копию. При слиянии { ...defaults, ...userPrefs } свойства второго перезаписывают первый."
+        },
+        {
+          "type": "heading",
+          "text": "Деструктуризация объектов"
+        },
+        {
+          "type": "p",
+          "text": "let { name, age } = user; — извлекает свойства. Поддерживает переименование и значения по умолчанию."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — объекты как основа JS. Спецификация.\n\nDoka.guide: Аналогия — «объект как анкета». Простота.\n\nlearn.javascript.ru: Практический — объекты для данных API. Применимость.\n\nEloquent JavaScript: Концептуальный — объекты vs примитивы. Теория.\n\nYou Don't Know JS: Глубокий — prototype chain. Внутренняя механика."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Создание и модификация объекта"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let book = {\n    title: \"JavaScript: The Good Parts\",\n    author: \"Douglas Crockford\",\n    year: 2008\n};\n\nbook.isAvailable = true; // Добавление\nbook.year = 2010;        // Изменение\ndelete book.pages;       // Удаление"
+        },
+        {
+          "type": "heading",
+          "text": "Объект как словарь"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let wordCounts = {};\nlet words = \"hello world hello javascript world hello\".split(\" \");\n\nfor (let word of words) {\n    wordCounts[word] = (wordCounts[word] || 0) + 1;\n}\n\nconsole.log(wordCounts); // { hello: 3, world: 2, javascript: 1 }"
+        },
+        {
+          "type": "heading",
+          "text": "Object.keys, Object.values, Object.entries"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let scores = { math: 90, physics: 85, chemistry: 95 };\n\nconsole.log(Object.keys(scores));   // [\"math\", \"physics\", \"chemistry\"]\nconsole.log(Object.values(scores)); // [90, 85, 95]\nconsole.log(Object.entries(scores)); // [[\"math\", 90], [\"physics\", 85], [\"chemistry\", 95]]\n\nfor (let [subject, score] of Object.entries(scores)) {\n    console.log(`${subject}: ${score}`);\n}"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ Ключи объектов — всегда строки (или Symbol): numeric keys автоматически приводятся к строкам.",
+            "⚠️ Доступ к несуществующему ключу: obj.age → undefined (не ошибка!), но obj.address.city → TypeError.",
+            "⚠️ Сравнение объектов: let a = {x:1}; let b = {x:1}; a === b → false (создаются два разных объекта!).",
+            "⚠️ Spread создаёт ПОВЕРХНОСТНУЮ копию: вложенные объекты всё ещё связаны. Используйте structuredClone()."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Создайте объект car с свойствами: brand, model, year, isRunning.\n2. Добавьте методы start() и stop() к объекту car.\n3. Выведите все ключи и все значения объекта car."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Напишите функцию mergeObjects(obj1, obj2), которая объединяет два объекта.\n2. Создайте объект-словарь для перевода 5 слов. Напишите функцию translate(word).\n3. Используя деструктуризацию, извлеките вложенные свойства из объекта user."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте Object.assign() без использования встроенного метода.\n2. Напишите функцию deepClone(obj), которая создаёт глубокую копию объекта любой вложенности.\n3. Реализуйте простой JSON.stringify() для объектов (без циклических ссылок)."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "Объекты — коллекции пар «ключ-значение». Ключи — строки (или Symbol), значения — любые типы. Spread {...obj} создаёт поверхностную копию. Деструктуризация удобно извлекает свойства. Object.keys(), Object.values(), Object.entries() — для обхода объектов."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "tipy-dannykh",
+      "track": "js",
+      "order": 3,
+      "title": "Типы данных — числа, строки, булевы, null, undefined, NaN",
+      "summary": "Научиться различать семь примитивных типов данных в JavaScript и понимать, как JavaScript определяет тип значения в runtime.",
+      "sourceTitle": "Урок 1.3. Типы данных — числа, строки, булевы, null, undefined, NaN",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: типы данных как «жанры» книг"
+        },
+        {
+          "type": "p",
+          "text": "Представьте библиотеку. Книги бывают разных жанров: научные, художественные, детективные. Чтобы найти нужную книгу, вы смотрите на жанр. Точно так же значения в JavaScript имеют типы — это определяет, что с ними можно делать."
+        },
+        {
+          "type": "p",
+          "text": "Нельзя читать научную книгу как роман, и нельзя складывать строку с числом (в большинстве языков). JavaScript — особенный: он позволяет складывать строку с числом (приведение типов), что часто приводит к неожиданностям."
+        },
+        {
+          "type": "heading",
+          "text": "Семь примитивных типов"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Number (число) — целые и дробные: 42, 3.14, -10, 1e6",
+            "String (строка) — текст: \"Привет\", 'Анна', `Hello, ${name}`",
+            "Boolean (булев) — true/false",
+            "null — «ничего» (намеренно пустое значение)",
+            "undefined — «не определено» (значение не задано)",
+            "BigInt — очень большие целые числа: 9007199254740991n",
+            "Symbol — уникальный идентификатор"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Оператор typeof"
+        },
+        {
+          "type": "p",
+          "text": "Чтобы определить тип значения, используйте typeof:\ntypeof 42 → \"number\", typeof \"hello\" → \"string\", typeof true → \"boolean\"\ntypeof null → \"object\" (историческая ошибка!), typeof undefined → \"undefined\""
+        },
+        {
+          "type": "heading",
+          "text": "Специальные числовые значения"
+        },
+        {
+          "type": "p",
+          "text": "Infinity (бесконечность), -Infinity (минус бесконечность), NaN («Not a Number» — результат невозможной математической операции). NaN === NaN возвращает false — единственное значение в JS, не равное самому себе."
+        },
+        {
+          "type": "heading",
+          "text": "Неявное приведение типов (type coercion)"
+        },
+        {
+          "type": "p",
+          "text": "JavaScript автоматически приводит типы: \"5\" + 3 → \"53\" (строка + число = строка), \"5\" - 3 → 2 (число - строка = число)."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — детальное описание каждого типа. Акцент на спецификации.\n\nDoka.guide: Аналогия — «типы как контейнеры разной формы». Визуальное мышление.\n\nlearn.javascript.ru: Практический — сразу примеры приведения. Быстрое понимание через код.\n\nEloquent JavaScript: Концептуальный — типы как категории значений. Теоретическая основа.\n\nYou Don't Know JS: Глубокий — как V8 представляет типы «под капотом». Внутренняя механика.\n\nStack Overflow: Ошибки — [] + {}, typeof null. Реальные подводные камни."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Различия между типами"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let num = 42;\nlet str = \"42\";\nlet bool = true;\nlet empty = null;\nlet notDefined; // undefined\n\nconsole.log(typeof num);   // \"number\"\nconsole.log(typeof str);   // \"string\"\nconsole.log(typeof bool);  // \"boolean\"\nconsole.log(typeof empty); // \"object\" (баг!)\nconsole.log(typeof notDefined); // \"undefined\""
+        },
+        {
+          "type": "heading",
+          "text": "Несравнимые типы"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "console.log(null == undefined);  // true (нестрогое сравнение)\nconsole.log(null === undefined); // false (строгое — разные типы)\nconsole.log(NaN === NaN);        // false (NaN не равен самому себе)"
+        },
+        {
+          "type": "heading",
+          "text": "Пустые значения vs нулевые значения"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let a = null;      // Явно ничего\nlet b = undefined; // Неопределено\nlet c = 0;         // Числовое значение (не «пусто»)\nlet d = \"\";        // Пустая строка (не «пусто»)\nlet e = false;     // Булево значение (не «пусто»)\n\n// Все они \"falsy\" (приводятся к false в булевом контексте):\nif (!a) console.log(\"null — falsy\");\nif (!b) console.log(\"undefined — falsy\");\nif (!c) console.log(\"0 — falsy\");\nif (!d) console.log(\"'' — falsy\");\nif (!e) console.log(\"false — falsy\");"
+        },
+        {
+          "type": "heading",
+          "text": "0.1 + 0.2 !== 0.3"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "console.log(0.1 + 0.2); // 0.30000000000000004 (не 0.3!)\n// Это не баг JavaScript — так работает представление дробных чисел в компьютере.\n// Исправляйте через toFixed():\nconsole.log(parseFloat((0.1 + 0.2).toFixed(1))); // 0.3"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ typeof null === \"object\" — это баг, а не фича. Существует с 1995 года. Несмотря на попытки исправить, изменения сломали бы слишком много существующего кода.",
+            "⚠️ NaN !== NaN — единственное значение в JavaScript, которое не равно самому себе. Проверяйте через Number.isNaN(value).",
+            "⚠️ null vs undefined: null — «намеренно пусто», undefined — «ещё не задано». Они различаются при строгом сравнении.",
+            "⚠️ Falsy-значения: false, 0, -0, 0n, \"\", null, undefined, NaN. Всё остальное truthy (включая \"0\", [], {}, function(){}).",
+            "⚠️ 0.1 + 0.2 !== 0.3 — дробные числа в двоичной системе имеют ограничения точности."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Определите тип каждого значения с помощью typeof: 42, \"hello\", true, null, undefined, NaN, 10n.\n2. Напишите код, который проверяет, является ли переменная строкой: typeof x === \"string\".\n3. Создайте переменную temperature и присвойте ей значение null. Проверьте её тип."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Объясните результат каждого выражения: \"5\" + 3, \"5\" - 3, true + 1, false + \"\".\n2. Напишите функцию isNumber(value), которая возвращает true, если значение — число (не NaN).\n3. Напишите код, который безопасно сравнивает два значения с учётом null и undefined."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Объясните, почему [] + [] === \"\", а [] + {} === \"[object Object]\".\n2. Исследуйте: что такое undefined и чем оно отличается от undeclared? Напишите примеры.\n3. Напишите функцию, которая определяет, является ли значение «пустым» (null, undefined, \"\", 0, false, NaN) — но не считает «пустым» строку \" \"."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "JavaScript имеет 7 примитивных типов: number, string, boolean, null, undefined, bigint, symbol. typeof null === \"object\" — историческая ошибка. NaN !== NaN — проверяйте через Number.isNaN(). Неявное приведение типов — источник многих багов. null — «намеренно пусто», undefined — «ещё не задано»."
+        }
+      ]
+    }
+  ]
+}

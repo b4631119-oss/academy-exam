@@ -1,0 +1,140 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "sobytiya",
+      "track": "js",
+      "order": 3,
+      "title": "События (addEventListener, объект события)",
+      "summary": "Научиться реагировать на действия пользователя (клики, ввод текста, наведение мыши) с помощью событий и addEventListener.",
+      "sourceTitle": "Урок 4.3. События (addEventListener, объект события)",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: события как дверной звонок"
+        },
+        {
+          "type": "p",
+          "text": "Представьте, что вы ждёте гостя. На двери есть звонок. Когда кто-то звонит, вы реагируете: идёте открывать дверь. Событие — это «звонок», а addEventListener — это способ «подключить звонок» к определённой реакции."
+        },
+        {
+          "type": "heading",
+          "text": "Типы событий"
+        },
+        {
+          "type": "list",
+          "items": [
+            "События мыши: click, dblclick, mouseenter, mouseleave",
+            "События клавиатуры: keydown, keyup",
+            "События формы: submit, input, change",
+            "События документа: load, resize"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Объект события"
+        },
+        {
+          "type": "p",
+          "text": "event.target — элемент, на котором произошло событие. event.currentTarget — элемент, на котором висит обработчик. event.preventDefault() — отмена действия по умолчанию. event.stopPropagation() — остановка всплытия."
+        },
+        {
+          "type": "heading",
+          "text": "Всплытие и перехват (bubbling & capturing)"
+        },
+        {
+          "type": "p",
+          "text": "По умолчанию события «всплывают» от потомка к родителю. Перехват (capturing) — обратный порядок."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — полный список событий. Справочник.\n\nDoka.guide: Аналогия — «событие как сигнал тревоги». Простота.\n\nlearn.javascript.ru: Практический — примеры интерактивности. Применимость.\n\nEloquent JavaScript: Концептуальный — событийная модель. Теория."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Простой обработчик клика"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let button = document.querySelector(\"#myButton\");\n\nbutton.addEventListener(\"click\", function() {\n    console.log(\"Кнопка нажата!\");\n});"
+        },
+        {
+          "type": "heading",
+          "text": "Валидация формы"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let form = document.querySelector(\"#myForm\");\nlet emailInput = document.querySelector(\"#email\");\n\nform.addEventListener(\"submit\", function(event) {\n    event.preventDefault(); // Предотвращаем перезагрузку\n    \n    let email = emailInput.value;\n    \n    if (!email.includes(\"@\")) {\n        alert(\"Некорректный email!\");\n        return;\n    }\n    \n    console.log(\"Форма отправлена:\", email);\n});"
+        },
+        {
+          "type": "heading",
+          "text": "Делегирование событий"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let list = document.querySelector(\"#myList\");\n\n// Один обработчик на родителе вместо каждого элемента:\nlist.addEventListener(\"click\", function(event) {\n    if (event.target.tagName === \"LI\") {\n        console.log(\"Клик по элементу:\", event.target.textContent);\n    }\n});"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ addEventListener vs onclick: onclick перезаписывает предыдущий обработчик, addEventListener добавляет.",
+            "⚠️ Утечка памяти: забытый removeEventListener при удалении элемента из DOM.",
+            "⚠️ event.target vs event.currentTarget: target — куда кликнули, currentTarget — где висит обработчик.",
+            "⚠️ Всплытие может вызвать неожиданное поведение: обработчик родителя сработает при клике на ребёнка."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Навесьте обработчик клика на кнопку. Выводите \"Привет!\" в консоль.\n2. Навесьте обработчик input на поле ввода. Выводите длину текста.\n3. Используйте event.preventDefault() для отмены отправки формы."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Создайте счётчик кликов: кнопка + span с числом.\n2. Реализуйте делегирование для списка: выводите текст при клике на элемент.\n3. Навесьте обработчик keydown: при Escape очищайте все инпуты."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте простой drag-and-drop: элемент перетаскивается мышью.\n2. Напишите функцию throttle(fn, delay) для ограничения частоты вызова.\n3. Реализуйте виртуальный скролл: отображайте только видимые элементы."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "addEventListener — основной способ назначения обработчиков. Объект события содержит информацию о событии. event.preventDefault() отменяет действие по умолчанию. event.stopPropagation() останавливает всплытие. Делегирование событий — паттерн для множества элементов."
+        }
+      ]
+    }
+  ]
+}

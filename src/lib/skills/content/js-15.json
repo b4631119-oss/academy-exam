@@ -1,0 +1,125 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "dom-struktura-stranitsy",
+      "track": "js",
+      "order": 1,
+      "title": "DOM — структура страницы",
+      "summary": "Понять, что DOM (Document Object Model) — это программное представление HTML-страницы в виде дерева объектов, с которым JavaScript может взаимодействовать.",
+      "sourceTitle": "Урок 4.1. DOM — структура страницы",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: DOM как дерево семей"
+        },
+        {
+          "type": "p",
+          "text": "Представьте семейное дерево. Вверху — прадедушка (document), у него дети (html), у детей — внуки (head, body), у внуков — правнуки (div, p, span). Каждый элемент — это объект со свойствами и методами."
+        },
+        {
+          "type": "heading",
+          "text": "Что такое DOM?"
+        },
+        {
+          "type": "p",
+          "text": "DOM — это API, который браузер создаёт при загрузке HTML-страницы. Он превращает текстовый HTML в дерево объектов."
+        },
+        {
+          "type": "heading",
+          "text": "Узлы и элементы"
+        },
+        {
+          "type": "p",
+          "text": "Все узлы в DOM: Element (элемент), Text (текст), Comment (комментарий), Document (корневой узел)."
+        },
+        {
+          "type": "heading",
+          "text": "Родители и дети"
+        },
+        {
+          "type": "p",
+          "text": "document.body.children, firstElementChild, parentElement, childNodes — основные свойства для навигации по дереву."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — DOM API, узлы, элементы. Спецификация.\n\nDoka.guide: Аналогия — «DOM как дерево». Простота.\n\nlearn.javascript.ru: Практический — работа с DOM на практике. Применимость.\n\nEloquent JavaScript: Концептуальный — DOM как модель документа. Теория."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Получение информации о странице"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "console.log(document.title);        // Заголовок страницы\nconsole.log(document.body);         // Тело страницы\nconsole.log(document.head);         // Заголовок документа\nconsole.log(document.documentElement); // Корневой элемент <html>"
+        },
+        {
+          "type": "heading",
+          "text": "Свойства элементов"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let heading = document.querySelector(\"h1\");\n\nconsole.log(heading.textContent);  // Текст внутри элемента\nconsole.log(heading.innerHTML);    // HTML-содержимое\nconsole.log(heading.outerHTML);    // Элемент целиком\nconsole.log(heading.tagName);      // \"H1\""
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ DOM обновляется динамически: нужно запрашивать элементы заново после изменений.",
+            "⚠️ HTMLCollection (live) обновляется автоматически, NodeList (static) — нет.",
+            "⚠️ innerHTML рендерит HTML (опасно с пользовательским вводом — XSS!). textContent безопасен."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Выведите в консоль заголовок страницы и все элементы <p>.\n2. Выведите количество дочерних элементов <body>.\n3. Получите родителя первого <h1> на странице."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Выведите дерево элементов: для каждого покажите тег и количество детей.\n2. Найдите все ссылки на странице и выведите их href.\n3. Напишите функцию, определяющую глубину вложенности элемента."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте простой аналог document.querySelector().\n2. Напишите функцию getComputedStyles(element).\n3. Реализуйте простой Virtual DOM: diff(oldTree, newTree)."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "DOM — это объектное представление HTML-страницы. document — корневой объект. Элементы связаны иерархией: родители, дети, siblings. textContent, innerHTML, tagName — основные свойства для чтения."
+        }
+      ]
+    }
+  ]
+}

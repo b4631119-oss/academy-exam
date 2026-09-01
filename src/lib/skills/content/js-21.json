@@ -1,0 +1,148 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "promisy",
+      "track": "js",
+      "order": 3,
+      "title": "Промисы (Promise)",
+      "summary": "Понять, что Promise — это объект, представляющий «обещание» получить результат в будущем, и научиться создавать и использовать промисы для управления асинхронными операциями.",
+      "sourceTitle": "Урок 5.3. Промисы (Promise)",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: чек в ресторане"
+        },
+        {
+          "type": "p",
+          "text": "Представьте, что вы заказали еду. Вам дают чек (Promise). Чек может находиться в одном из трёх состояний:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Pending (ожидание) — блюдо готовится.",
+            "Fulfilled (выполнено) — блюдо подано, вот ваш заказ.",
+            "Rejected (отклонено) — кухня сообщила, что ингредиенты закончились."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Цепочки промисов"
+        },
+        {
+          "type": "p",
+          "text": ".then(result => ...).then(result => ...).catch(error => ...) — один .catch ловит ошибки из ЛЮБОГО .then выше."
+        },
+        {
+          "type": "heading",
+          "text": "Промисификация callback-функции"
+        },
+        {
+          "type": "p",
+          "text": "Оборачиваем callback в new Promise((resolve, reject) => { ... })."
+        },
+        {
+          "type": "heading",
+          "text": "Статические методы"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Promise.all — все промисы должны выполниться",
+            "Promise.allSettled — ждёт завершения ВСЕХ (включая отклонённые)",
+            "Promise.race — первый завершится",
+            "Promise.resolve / Promise.reject — создание已完成/отклонённого промиса"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — полный API Promise. Спецификация.\n\nDoka.guide: Аналогия — «Promise как чек». Простота.\n\nlearn.javascript.ru: Практический — промисификация callback. Применимость.\n\nEloquent JavaScript: Концептуальный — промисы как модель асинхронности. Теория.\n\nYou Don't Know JS: Глубокий — микрозадачи, thenable. Механика."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Простой промис"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "function getUser(id) {\n    return new Promise((resolve, reject) => {\n        setTimeout(() => {\n            if (id > 0) {\n                resolve({ id, name: `Пользователь ${id}` });\n            } else {\n                reject(new Error(\"Неверный ID\"));\n            }\n        }, 1000);\n    });\n}\n\ngetUser(1)\n    .then(user => console.log(user))\n    .catch(error => console.error(error));"
+        },
+        {
+          "type": "heading",
+          "text": "Цепочка промисов"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "fetchUser(1)\n    .then(user => {\n        console.log(\"Пользователь:\", user.name);\n        return fetchPosts(user.id); // Возвращаем промис\n    })\n    .then(posts => {\n        console.log(\"Посты:\", posts.length);\n    })\n    .catch(error => {\n        console.error(\"Ошибка:\", error);\n    });"
+        },
+        {
+          "type": "heading",
+          "text": "Promise.all — параллельные запросы"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "Promise.all([\n    fetch(\"/api/users\").then(r => r.json()),\n    fetch(\"/api/posts\").then(r => r.json()),\n    fetch(\"/api/comments\").then(r => r.json())\n])\n.then(([users, posts, comments]) => {\n    console.log(\"Все данные получены!\");\n})\n.catch(error => {\n    console.error(\"Одна из операций не удалась:\", error);\n});"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ Ошибки в .catch ловят ошибки из ВСЕХ .then выше в цепочке.",
+            "⚠️ Забытый .catch: Unhandled Promise Rejection — ошибка не обработана.",
+            "⚠️ .then возвращает новый промис: каждый .then создаёт новую цепочку.",
+            "⚠️ Promise.all отклоняется при первой ошибке: остальные игнорируются. Используйте allSettled."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Создайте промис, который разрешается через 2 секунды со значением \"Готово\".\n2. Используйте .then() и .catch() для обработки результата.\n3. Создайте промис, который всегда отклоняется с ошибкой."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Напишите функцию fetchWithTimeout(url, timeout).\n2. Реализуйте последовательное выполнение трёх зависимых промисов.\n3. Используя Promise.all, загрузите данные из трёх URL одновременно."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте Promise.all без встроенного метода.\n2. Напишите Promise.any (возвращает первый успешный промис).\n3. Реализуйте Promise.retry(fn, times, delay)."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "Promise — объект с тремя состояниями: pending, fulfilled, rejected. .then() — обработка успешного результата. .catch() — обработка ошибки. Цепочки промисов позволяют последовательно выполнять асинхронные операции. Promise.all, allSettled, race — для параллельных операций."
+        }
+      ]
+    }
+  ]
+}

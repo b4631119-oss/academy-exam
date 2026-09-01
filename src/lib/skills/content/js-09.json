@@ -1,0 +1,133 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "funktsii-vyrazheniya-i-strelochnye",
+      "track": "js",
+      "order": 5,
+      "title": "Функции-выражения и стрелочные функции",
+      "summary": "Научиться писать стрелочные функции (=>), понять разницу между Function Declaration, Function Expression и Arrow Function, и осознать, когда каждый тип уместен.",
+      "sourceTitle": "Урок 2.5. Функции-выражения и стрелочные функции",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: три стиля написания функций"
+        },
+        {
+          "type": "p",
+          "text": "Представьте, что вы пишете письмо. У вас есть три способа: формальный (Function Declaration), неформальный (Function Expression), краткий (Arrow Function). Все передают одну и ту же информацию, но в разных форматах."
+        },
+        {
+          "type": "heading",
+          "text": "Стрелочные функции — синтаксис"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Полный: const add = (a, b) => { return a + b; }",
+            "Краткий: const add = (a, b) => a + b;",
+            "Один параметр: const square = x => x * x;",
+            "Ноль параметров: const sayHello = () => \"Привет!\";",
+            "Возврат объекта: const obj = (name) => ({ name });"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Разница в this"
+        },
+        {
+          "type": "p",
+          "text": "Это КЛЮЧЕВОЕ различие: стрелочные функции НЕ имеют своего this — они берут его из внешней области. Это делает их идеальными для колбэков, но непригодными для методов объектов и конструкторов."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — разница в this, arguments, constructor. Спецификация.\n\nDoka.guide: Визуальный — «стрелка = короткая запись». Простота.\n\nlearn.javascript.ru: Практический — когда использовать стрелочные. Рекомендации.\n\nWes Bos: Современный — «всегда используйте arrow functions». Прагматизм.\n\nDouglas Crockford: Строгий — «осторожно с this». Дисциплина."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Все три стиля рядом"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "function declarationStyle(a, b) { return a + b; }\nconst expressionStyle = function(a, b) { return a + b; };\nconst arrowStyle = (a, b) => a + b;\n\n// Все три работают одинаково при вызове:\nconsole.log(declarationStyle(2, 3)); // 5\nconsole.log(expressionStyle(2, 3));  // 5\nconsole.log(arrowStyle(2, 3));      // 5"
+        },
+        {
+          "type": "heading",
+          "text": "Стрелочные функции — идеальны для колбэков"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "const numbers = [1, 2, 3, 4, 5];\n\nconst doubled = numbers.map(n => n * 2);        // [2, 4, 6, 8, 10]\nconst evens = numbers.filter(n => n % 2 === 0);  // [2, 4]\nconst sum = numbers.reduce((a, b) => a + b, 0);  // 15"
+        },
+        {
+          "type": "heading",
+          "text": "Возврат объекта"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "const createUser = (name, age) => ({\n    name,\n    age,\n    greet() {\n        return `Привет, я ${name}, мне ${age}`;\n    }\n});\n\nconst user = createUser(\"Анна\", 25);\nconsole.log(user.greet()); // \"Привет, я Анна, мне 25\""
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ Стрелочные функции не имеют this: const obj = { greet: () => console.log(this.name) } — this = window, не obj!",
+            "⚠️ Стрелочные функции нельзя использовать как конструкторы: new (() => {})() — TypeError.",
+            "⚠️ Стрелочные функции не имеют arguments: используйте rest parameters (...args).",
+            "⚠️ IIFE со стрелочной функцией требует скобок: (() => console.log(\"hello\"))();"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Перепишите функцию multiply(a, b) в стиле arrow function.\n2. Напишите arrow function, которая принимает массив и возвращает его длину.\n3. Объясните разницу: const f = function() {}; vs const f = () => {};"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Используя map, filter и reduce, найдите чётные числа из [1..10], возведите в квадрат и просуммируйте.\n2. Напишите функцию debounce(fn, ms) с использованием стрелочных функций.\n3. Создайте объект с методами, используя стрелочные функции. Объясните, почему один из методов не работает."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Объясните, почему setTimeout(() => console.log(this), 100) в объекте выводит window.\n2. Реализуйте функцию pipe(...fns), которая применяет функции последовательно: pipe(add1, double)(3) → 8.\n3. Напишите полифил для Function.prototype.bind с использованием замыкания."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "Arrow functions — краткий синтаксис для функций. Стрелочные функции не имеют своего this, arguments и не могут быть конструкторами. Используйте arrow functions для колбэков и function declarations для методов объектов. Для возврата объекта оборачивайте в скобки: => ({...})."
+        }
+      ]
+    }
+  ]
+}

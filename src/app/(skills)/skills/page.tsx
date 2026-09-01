@@ -1,16 +1,17 @@
 import Link from "next/link"
-import { Code2, Palette, ArrowRight } from "lucide-react"
+import { Code2, Palette, Braces, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { getLessonsByTrack, TRACKS } from "@/lib/skills/catalog"
 
 export const metadata = {
   title: "Обучение — PROlab Academy",
-  description: "Изучай основы веб-разработки: HTML и CSS в PROlab Academy. Бесплатные уроки.",
+  description: "Изучай основы веб-разработки: HTML, CSS и JavaScript в PROlab Academy. Бесплатные уроки.",
 }
 
 const trackMeta = [
   { ...TRACKS.html, icon: Code2, href: "/skills/html" },
   { ...TRACKS.css, icon: Palette, href: "/skills/css" },
+  { ...TRACKS.js, icon: Braces, href: "/skills/js" },
 ]
 
 export default function SkillsPage() {
@@ -25,7 +26,7 @@ export default function SkillsPage() {
         </p>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-3">
         {trackMeta.map((track) => {
           const Icon = track.icon
           const count = getLessonsByTrack(track.id).length

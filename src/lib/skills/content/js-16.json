@@ -1,0 +1,133 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "poisk-elementov",
+      "track": "js",
+      "order": 2,
+      "title": "Поиск элементов (querySelector, getElementById)",
+      "summary": "Освоить основные методы поиска элементов в DOM: getElementById, querySelector, querySelectorAll и понять разницу между HTMLCollection и NodeList.",
+      "sourceTitle": "Урок 4.2. Поиск элементов (querySelector, getElementById)",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: поиск как адрес в городе"
+        },
+        {
+          "type": "p",
+          "text": "Представьте, что вы ищете конкретный дом. У вас есть: поиск по номеру дома (getElementById — самый быстрый), поиск по описанию (querySelector — «дом на улице Пушкина, красный»), поиск всех подходящих (querySelectorAll)."
+        },
+        {
+          "type": "heading",
+          "text": "Способы поиска элементов"
+        },
+        {
+          "type": "list",
+          "items": [
+            "getElementById — быстрый поиск по ID (возвращает ОДИН элемент)",
+            "getElementsByTagName — по имени тега (возвращает HTMLCollection)",
+            "getElementsByClassName — по классу (возвращает HTMLCollection)",
+            "querySelector — по CSS-селектору (возвращает ПЕРВЫЙ)",
+            "querySelectorAll — по CSS-селектору (возвращает ВСЕ)"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "HTMLCollection vs NodeList"
+        },
+        {
+          "type": "p",
+          "text": "HTMLCollection (live) — обновляется автоматически при изменении DOM. NodeList (static) — не обновляется."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — сигнатуры методов, возвращаемые типы. Спецификация.\n\nDoka.guide: Практический — «используйте querySelector». Рекомендация.\n\nlearn.javascript.ru: Подробный — все способы поиска. Полный обзор.\n\nWes Bos: Современный — «querySelector — лучший выбор». Прагматизм."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "getElementById — быстрый и точный"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let header = document.getElementById(\"header\");\nif (header) {\n    header.textContent = \"Новый заголовок\";\n}"
+        },
+        {
+          "type": "heading",
+          "text": "querySelectorAll — все подходящие элементы"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let allLinks = document.querySelectorAll(\"a\");\nconsole.log(`Найдено ссылок: ${allLinks.length}`);\n\nallLinks.forEach(link => {\n    console.log(link.href);\n});"
+        },
+        {
+          "type": "heading",
+          "text": "Поиск внутри элемента"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let sidebar = document.querySelector(\"#sidebar\");\nlet sidebarLinks = sidebar.querySelectorAll(\"a\"); // Только ссылки внутри sidebar\nconsole.log(`Ссылок в сайдбаре: ${sidebarLinks.length}`);"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ getElementById — только для ID: не работает с классами.",
+            "⚠️ querySelector медленнее getElementById для поиска по ID.",
+            "⚠️ Live HTMLCollection может неожиданно измениться при модификации DOM.",
+            "⚠️ querySelectorAll возвращает статический список: не обновляется автоматически."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Найдите элемент по ID и выведите его текст.\n2. Найдите все элементы <li> и выведите количество.\n3. Найдите первый элемент с классом active."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Найдите все ссылки, начинающиеся с https://.\n2. Найдите все инпуты с типом text и выведите placeholder-ы.\n3. Напишите функцию findElements(parent, selector)."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте простой querySelector для селекторов по тегу, классу и ID.\n2. Напишите функцию closest(element, selector).\n3. Реализуйте getElementsByClassName, возвращающий статический список."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "getElementById — самый быстрый способ найти элемент по ID. querySelector — гибкий поиск по CSS-селектору (возвращает первый). querySelectorAll — поиск всех подходящих. HTMLCollection — live, NodeList — static. Для большинства задач используйте querySelector / querySelectorAll."
+        }
+      ]
+    }
+  ]
+}

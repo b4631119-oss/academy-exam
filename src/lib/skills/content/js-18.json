@@ -1,0 +1,141 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "khranenie-dannykh-na-kliente",
+      "track": "js",
+      "order": 4,
+      "title": "Хранение данных на клиенте (localStorage, sessionStorage)",
+      "summary": "Научиться сохранять данные на стороне клиента (в браузере) с помощью localStorage и sessionStorage, понимая разницу между ними и ограничения каждого способа.",
+      "sourceTitle": "Урок 4.4. Хранение данных на клиенте (localStorage, sessionStorage)",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: localStorage как записная книжка"
+        },
+        {
+          "type": "p",
+          "text": "Представьте localStorage как записную книжку, которая всегда с вами. Вы пишете туда информацию, и она остаётся даже после закрытия дневника (браузера). sessionStorage — как одноразовый стикер: данные исчезают при закрытии окна."
+        },
+        {
+          "type": "heading",
+          "text": "Базовые методы"
+        },
+        {
+          "type": "list",
+          "items": [
+            "setItem(key, value) — сохранение",
+            "getItem(key) — получение",
+            "removeItem(key) — удаление",
+            "clear() — очистка всего хранилища"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Хранение объектов и массивов"
+        },
+        {
+          "type": "p",
+          "text": "localStorage хранит только строки! Для объектов используйте JSON.stringify() / JSON.parse()."
+        },
+        {
+          "type": "heading",
+          "text": "Пространства имён"
+        },
+        {
+          "type": "p",
+          "text": "localStorage разделяется по origin (протокол + домен + порт). Используйте префиксы для избежания конфликтов."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — интерфейс, ограничения. Спецификация.\n\nDoka.guide: Аналогия — «localStorage как шкаф для вещей». Простота.\n\nlearn.javascript.ru: Практический — примеры использования. Применимость.\n\nWes Bos: Современный — localStorage для состояния приложения. Прагматизм."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Сохранение темы"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let themeToggle = document.querySelector(\"#themeToggle\");\nlet body = document.body;\n\n// Загрузка темы при старте\nlet savedTheme = localStorage.getItem(\"theme\");\nif (savedTheme) {\n    body.classList.add(savedTheme);\n}\n\n// Переключение темы\nthemeToggle.addEventListener(\"click\", function() {\n    body.classList.toggle(\"dark\");\n    let isDark = body.classList.contains(\"dark\");\n    localStorage.setItem(\"theme\", isDark ? \"dark\" : \"light\");\n});"
+        },
+        {
+          "type": "heading",
+          "text": "Хранение объектов"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let user = { name: \"Анна\", age: 25, hobbies: [\"чтение\", \"программирование\"] };\n\n// Сохранение:\nlocalStorage.setItem(\"user\", JSON.stringify(user));\n\n// Получение:\nlet savedUser = JSON.parse(localStorage.getItem(\"user\"));\nconsole.log(savedUser.name); // \"Анна\"\nconsole.log(savedUser.hobbies); // [\"чтение\", \"программирование\"]"
+        },
+        {
+          "type": "heading",
+          "text": "Утилита для работы с localStorage"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "const Storage = {\n    prefix: \"myapp_\",\n    \n    set(key, value) {\n        localStorage.setItem(this.prefix + key, JSON.stringify(value));\n    },\n    \n    get(key) {\n        const data = localStorage.getItem(this.prefix + key);\n        return data ? JSON.parse(data) : null;\n    },\n    \n    remove(key) {\n        localStorage.removeItem(this.prefix + key);\n    }\n};\n\nStorage.set(\"user\", { name: \"Анна\" });\nStorage.get(\"user\"); // { name: \"Анна\" }"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ Всё хранится как строки: typeof localStorage.getItem(\"count\") → \"string\", даже если сохранено число.",
+            "⚠️ Лимит хранилища: обычно ~5-10 MB на origin. При превышении — QuotaExceededError.",
+            "⚠️ localStorage НЕ безопасен для секретов: любой JS-код может прочитать localStorage.",
+            "⚠️ Ошибки JSON: невалидный JSON вызовет ошибку при JSON.parse(). Оборачивайте в try/catch.",
+            "⚠️ Событие storage: НЕ срабатывает при изменении из ТОЙ ЖЕ вкладки, только из другой."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Сохраните своё имя в localStorage и считайте обратно.\n2. Сохраните объект {theme: \"dark\", language: \"ru\"} и считайте обратно.\n3. Очистите всё хранилище и проверьте, что оно пустое."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Создайте тему-переключатель: кнопка меняет тему, тема сохраняется.\n2. Реализуйте автосохранение формы в localStorage.\n3. Создайте список задач с сохранением между сессиями."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте кэш на localStorage с TTL: cache.set(\"key\", value, 60000).\n2. Напишите localStorage polyfill для Node.js.\n3. Реализуйте синхронизацию данных между вкладками через storage event."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "localStorage — данные сохраняются навсегда (пока не удалены). sessionStorage — до закрытия вкладки. Всё хранится как строки: объекты через JSON.stringify/parse. localStorage НЕ безопасен для секретов. Используйте префиксы для имён ключей."
+        }
+      ]
+    }
+  ]
+}

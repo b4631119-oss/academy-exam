@@ -76,6 +76,8 @@ const allModules = [
 
 export const source = allModules[0]?.source ?? ""
 
-export const lessons: Lesson[] = allModules.flatMap(
+const moduleLessons: Lesson[] = allModules.flatMap(
   (m) => (m.lessons as Lesson[]) ?? [],
 )
+
+export const lessons: Lesson[] = moduleLessons

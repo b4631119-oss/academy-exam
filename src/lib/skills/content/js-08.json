@@ -1,0 +1,130 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "oblast-vidimosti-i-zamykaniya",
+      "track": "js",
+      "order": 4,
+      "title": "Область видимости и замыкания (начало)",
+      "summary": "Понять, что такое область видимости (scope) переменных и как замыкания позволяют функциям «запоминать» окружение, в котором они были созданы.",
+      "sourceTitle": "Урок 2.4. Область видимости и замыкания (начало)",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: область видимости как круги"
+        },
+        {
+          "type": "p",
+          "text": "Представьте, что вы стоите в центре множества концентрических кругов. Каждый круг — это область видимости. Вы видите всё, что внутри вашего круга, и можете «заглядывать» во внешние круги. Но внешние круги не видят, что происходит внутри ваших."
+        },
+        {
+          "type": "heading",
+          "text": "Три типа области видимости"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Глобальная область видимости — var globalVar = \"глобальная\" (видна везде)",
+            "Функциональная область видимости — var funcVar = \"локальная\" (видна только внутри функции)",
+            "Блочная область видимости (let и const) — let blockVar = \"блочная\" (видна только внутри блока {})"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Замыкания — функция «запоминает» своё окружение"
+        },
+        {
+          "type": "p",
+          "text": "Замыкание возникает, когда функция обращается к переменным из внешней области видимости, даже после того, как внешняя функция завершилась. Внутренняя функция «захватывает» ссылку на lexical environment внешней."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — Scope Chain, Lexical Environment. Механика движка.\n\nDoka.guide: Аналогия — «область видимости как комната с дверями». Простота.\n\nlearn.javascript.ru: Практический — замыкания в реальных задачах. Применимость.\n\nYou Don't Know JS: Глубокий — подробный анализ scope chain. Внутренняя механика.\n\nEloquent JavaScript: Концептуальный — замыкания как основа функционального стиля. Теория."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Вложенная область видимости"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let globalVar = \"Я глобальная\";\n\nfunction outer() {\n    let outerVar = \"Я во внешней функции\";\n    \n    function inner() {\n        let innerVar = \"Я во внутренней функции\";\n        \n        // Видим всё: innerVar, outerVar, globalVar\n        console.log(innerVar);  // ✅\n        console.log(outerVar);  // ✅ (из внешней области)\n        console.log(globalVar); // ✅ (глобальная)\n    }\n    \n    inner();\n    // console.log(innerVar); // ❌ ReferenceError!\n}\n\nouter();"
+        },
+        {
+          "type": "heading",
+          "text": "Замыкание — счётчик"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "function createCounter() {\n    let count = 0; // Эта переменная «запомнится»\n    \n    return function() {\n        count++; // Функция обращается к count из внешней области\n        return count;\n    };\n}\n\nconst counter = createCounter();\nconsole.log(counter()); // 1\nconsole.log(counter()); // 2\nconsole.log(counter()); // 3"
+        },
+        {
+          "type": "heading",
+          "text": "Замыкание для приватных данных"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "function createBankAccount(initialBalance) {\n    let balance = initialBalance; // Приватная переменная\n    \n    return {\n        deposit(amount) {\n            balance += amount;\n            return `Баланс: ${balance}`;\n        },\n        withdraw(amount) {\n            if (amount > balance) return \"Недостаточно средств\";\n            balance -= amount;\n            return `Баланс: ${balance}`;\n        },\n        getBalance() {\n            return balance;\n        }\n    };\n}\n\nconst account = createBankAccount(1000);\nconsole.log(account.deposit(500));    // \"Баланс: 1500\"\nconsole.log(account.withdraw(200));   // \"Баланс: 1300\""
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ Замыкание удерживает ссылку, а не копию: все функции в массиве ссылаются на одну и ту же переменную.",
+            "⚠️ var в цикле — классическая ловушка: все setTimeout увидят финальное значение i.",
+            "⚠️ Глобальные переменные — злейший враг: загрязняют пространство имён. Используйте IIFE или модули."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Объясните, почему let лучше var для циклов.\n2. Напишите пример замыкания: функция, которая возвращает функцию, умножающую на заданное число.\n3. Объясните разницу между глобальной и локальной переменной."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Создайте функцию createTimer() с методами start(), stop() и getTime(). Время должно быть приватным.\n2. Напишите функцию once(fn), которая вызывает fn только один раз.\n3. Создайте функцию memoize(fn), которая кэширует результаты вызовов."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Объясните, что выведет: for (var i = 0; i < 3; i++) { setTimeout(() => console.log(i), 100); }\n2. Реализуйте замыкание для подсчёта вызовов функции: createCallCounter(fn) с методом getCount().\n3. Напишите функцию createEventEmitter() с методами on(), emit(), off()."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "Область видимости определяет, где доступна переменная. let и const — блочная область видимости, var — функциональная. Замыкание — функция «запоминает» переменные из внешней области. Замыкания используются для приватных данных, частичного применения и callback-функций."
+        }
+      ]
+    }
+  ]
+}

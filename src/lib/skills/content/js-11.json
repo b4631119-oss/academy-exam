@@ -1,0 +1,127 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "bazovye-metody-massivov",
+      "track": "js",
+      "order": 2,
+      "title": "Базовые методы массивов (push, pop, shift, unshift, splice)",
+      "summary": "Освоить основные методы модификации массивов и понять разницу между мутирующими и немутирующими методами.",
+      "sourceTitle": "Урок 3.2. Базовые методы массивов (push, pop, shift, unshift, splice)",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: стек и очередь"
+        },
+        {
+          "type": "p",
+          "text": "Стек (stack) — как стопка тарелок: кладёте сверху (push) и снимаете сверху (pop). Очередь (queue) — как очередь в магазине: встаёте в конец (push) и выходите из начала (shift)."
+        },
+        {
+          "type": "heading",
+          "text": "Мутирующие методы (изменяют оригинал)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "push(item) — добавить в конец",
+            "pop() — удалить из конца",
+            "unshift(item) — добавить в начало",
+            "shift() — удалить из начала",
+            "splice(index, deleteCount, ...items) — удалить/вставить/заменить"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Немутирующие методы (создают новый массив)"
+        },
+        {
+          "type": "list",
+          "items": [
+            "concat() — объединить массивы",
+            "slice() — вырезать часть",
+            "spread [...arr] — современный способ копирования"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — каждая сигнатура метода. Справочник.\n\nDoka.guide: Визуальный — анимации изменений массива. Наглядность.\n\nlearn.javascript.ru: Практический — примеры из реальных задач. Применимость.\n\nEloquent JavaScript: Концептуальный — мутирующие vs немутирующие. Архитектура."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Стек — история браузера"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let history = [];\n\nhistory.push(\"google.com\");\nhistory.push(\"github.com\");\nhistory.push(\"stackoverflow.com\");\n\nconsole.log(history.pop()); // \"stackoverflow.com\" (назад)\nconsole.log(history.pop()); // \"github.com\" (назад ещё раз)\nconsole.log(history);       // [\"google.com\"]"
+        },
+        {
+          "type": "heading",
+          "text": "splice — удаление и вставка"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "let arr = [\"a\", \"b\", \"c\", \"d\", \"e\"];\n\n// Удалить \"c\" (индекс 2):\nlet removed = arr.splice(2, 1); // removed = [\"c\"], arr = [\"a\", \"b\", \"d\", \"e\"]\n\n// Вставить \"x\" на позицию 1:\narr.splice(1, 0, \"x\"); // arr = [\"a\", \"x\", \"b\", \"d\", \"e\"]\n\n// Заменить \"b\" на \"y\" и \"z\":\narr.splice(2, 1, \"y\", \"z\"); // arr = [\"a\", \"x\", \"y\", \"z\", \"d\", \"e\"]"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ splice vs slice: splice мутирует оригинал, slice создаёт копию. Не путайте!",
+            "⚠️ push возвращает новую длину, а не массив: let result = arr.push(4); console.log(result); // 4, не [1,2,3,4]!",
+            "⚠️ Пустые элементы при splice: splice может создать «дыры» в массиве."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Создайте стек из 5 чисел и извлеките их все (LIFO).\n2. Используя splice, удалите третий элемент из массива.\n3. Создайте очередь из 5 имён и выведите всех (FIFO)."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Напишите функцию removeElement(arr, index), которая удаляет элемент по индексу и возвращает новый массив.\n2. Используя splice, замените все отрицательные числа в массиве на 0.\n3. Напишите функцию insertAt(arr, index, ...values), которая вставляет значения на указанную позицию."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте Array.prototype.shift() без использования встроенных методов.\n2. Напишите функцию compact(arr), которая удаляет все undefined, null и пустые строки.\n3. Реализуйте функцию chunk(arr, size), которая разбивает массив на подмассивы заданного размера."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "Мутирующие методы (push, pop, shift, unshift, splice) изменяют оригинал. Немутирующие методы (slice, concat, spread) создают новый массив. splice(index, deleteCount, ...items) — универсальный метод. Всегда помните: массивы — ссылочный тип."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "source": "https://prolab-academy.site",
+  "lessons": [
+    {
+      "slug": "callback-funktsii-i-settimeout",
+      "track": "js",
+      "order": 2,
+      "title": "Callback-функции и setTimeout",
+      "summary": "Понять, что callback — это функция, переданная другой функции для вызова позже, и освоить практическое использование setTimeout, setInterval и callback в асинхронных операциях.",
+      "sourceTitle": "Урок 5.2. Callback-функции и setTimeout",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Ментальная модель: записка для повара"
+        },
+        {
+          "type": "p",
+          "text": "Представьте, что вы заказали еду. Повар не может отдать блюдо мгновенно — оно готовится. Вы оставляете записку (callback) с просьбой «когда блюдо будет готово, принесите его мне». Повар выполняет вашу просьбу, когда еда готова."
+        },
+        {
+          "type": "heading",
+          "text": "setTimeout и setInterval"
+        },
+        {
+          "type": "p",
+          "text": "setTimeout — выполнить функцию ОДИН раз через задержку. setInterval — повторять каждые N миллисекунд. Оба возвращают ID таймера для отмены через clearTimeout/clearInterval."
+        },
+        {
+          "type": "heading",
+          "text": "Callback Hell — «ад金字塔»"
+        },
+        {
+          "type": "p",
+          "text": "Последовательные асинхронные операции с колбэками приводят к глубокой вложенности (3-4 уровня). Решение: Promise и async/await."
+        },
+        {
+          "type": "heading",
+          "text": "Паттерн «error-first callback»"
+        },
+        {
+          "type": "p",
+          "text": "В Node.js первый аргумент callback — всегда ошибка (или null): callback(error, data)."
+        },
+        {
+          "type": "heading",
+          "text": "📊 Сравнение источников"
+        },
+        {
+          "type": "p",
+          "text": "MDN: Технический — setTimeout, setInterval, callback. Спецификация.\n\nDoka.guide: Аналогия — «callback как записка». Простота.\n\nlearn.javascript.ru: Практический — таймеры и колбэки. Применимость.\n\nEloquent JavaScript: Концептуальный — асинхронность как основа. Теория."
+        },
+        {
+          "type": "heading",
+          "text": "💻 Примеры кода"
+        },
+        {
+          "type": "heading",
+          "text": "Простой callback"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "function greet(name, callback) {\n    let message = `Привет, ${name}!`;\n    callback(message);\n}\n\ngreet(\"Анна\", function(message) {\n    console.log(message); // \"Привет, Анна!\"\n});"
+        },
+        {
+          "type": "heading",
+          "text": "Таймер обратного отсчёта"
+        },
+        {
+          "type": "code",
+          "lang": "javascript",
+          "code": "function countdown(seconds, callback) {\n    let remaining = seconds;\n    \n    let timer = setInterval(() => {\n        console.log(`Осталось: ${remaining}`);\n        remaining--;\n        \n        if (remaining < 0) {\n            clearInterval(timer);\n            callback();\n        }\n    }, 1000);\n}\n\ncountdown(5, () => {\n    console.log(\"Время вышло! 🚀\");\n});"
+        },
+        {
+          "type": "heading",
+          "text": "⚠️ Подводные камни"
+        },
+        {
+          "type": "list",
+          "items": [
+            "⚠️ Callback Hell: вложенные колбэки — сложная логика ошибок и читаемость. Используйте Promise / async-await.",
+            "⚠️ Забытый clearInterval: интервал работает бесконечно без очистки.",
+            "⚠️ this в callback: стрелочные функции сохраняют this из внешней области, обычные — нет.",
+            "⚠️ Порядок выполнения: setTimeout(fn, 0) выполняется после синхронного кода и микрозадач."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "🎯 Практические задания"
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Базовый уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Используя setTimeout, выведите \"Привет!\" через 3 секунды.\n2. Напишите функцию delay(ms, callback).\n3. Используя setInterval, выведите текущее время каждую секунду."
+        },
+        {
+          "type": "heading",
+          "text": "📝 Задания — Средний уровень"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте таймер обратного отсчёта от 10 до 0.\n2. Напишите функцию retry(fn, times, delay).\n3. Реализуйте простой аналог Promise с методами resolve и reject."
+        },
+        {
+          "type": "heading",
+          "text": "🔥 Задания — Хардкор"
+        },
+        {
+          "type": "p",
+          "text": "1. Реализуйте Promise.all() без встроенного метода.\n2. Напишите функцию waterfall(tasks) для последовательного выполнения.\n3. Реализуйте async/await с помощью генераторов (function* и yield)."
+        },
+        {
+          "type": "heading",
+          "text": "📌 Итог"
+        },
+        {
+          "type": "p",
+          "text": "Callback — функция, переданная для вызова позже. setTimeout — выполнить ОДИН раз через задержку. setInterval — повторять каждые N миллисекунд. Callback Hell — проблема глубокой вложенности, решение: Promise / async-await. this в callback может неожиданно измениться."
+        }
+      ]
+    }
+  ]
+}

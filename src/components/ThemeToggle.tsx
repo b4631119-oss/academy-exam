@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useSyncExternalStore } from "react"
 import { Sun, Moon, Monitor } from "lucide-react"
 import { useTheme } from "@/lib/theme-provider"
 import { cn } from "@/lib/utils"
@@ -11,9 +11,18 @@ const options = [
   { value: "system" as const, icon: Monitor, label: "Системная" },
 ]
 
+const emptySubscribe = () => () => {}
+const useIsMounted = () =>
+  useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  )
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
+  const mounted = useIsMounted()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -32,7 +41,9 @@ export function ThemeToggle({ className }: { className?: string }) {
     }
   }, [open])
 
-  const CurrentIcon = options.find((o) => o.value === theme)?.icon || Sun
+  const CurrentIcon = mounted
+    ? (options.find((o) => o.value === theme)?.icon || Sun)
+    : Monitor
 
   return (
     <div className="relative" ref={ref}>
