@@ -1,13 +1,13 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next"
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://prolab-academy.site'
-
   return {
     rules: {
-      userAgent: '*',
-      allow: '/',
+      userAgent: "*",
+      allow: "/",
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   }
 }
