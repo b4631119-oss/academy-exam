@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { jwtVerify } from 'jose'
 import { verifyStudentToken } from './lib/jwt'
 import { updateSession } from './lib/supabase/middleware'
 import { isIPBlocked, blockIP } from './lib/block-ip'
@@ -65,11 +66,27 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse
   }
 
-  // 5. Protect admin routes (/admin/*)
-  if (pathname.startsWith('/admin')) {
-    const isAuth = request.cookies.get('sb-access-token') || request.cookies.get('supabase-auth-token')
-    if (!isAuth) {
-      return NextResponse.redirect(new URL('/login', request.url))
+  // 5. Protect /teacher/admin/* routes (admin JWT check)
+  // Note: updateSession above already handles Supabase auth redirect
+  const ADMIN_SESSION_COOKIE = 'admin_session'
+
+  if (pathname.startsWith('/teacher/admin') && pathname !== '/teacher/admin/login') {
+    // If updateSession didn't redirect, user is Supabase-authenticated.
+    // Now check admin JWT cookie.
+    const adminToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value
+    if (!adminToken) {
+      return NextResponse.redirect(new URL('/teacher/admin/login', request.url))
+    }
+
+    // Verify admin JWT is valid
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || '')
+      const { payload } = await jwtVerify(adminToken, secret)
+      if ((payload as Record<string, unknown>).isAdmin !== true) {
+        throw new Error('Not admin')
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/teacher/admin/login', request.url))
     }
   }
 
