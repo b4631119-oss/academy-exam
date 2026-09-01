@@ -29,7 +29,7 @@ export function AssignmentCard({
 
   return (
     <Card
-      className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-md transition-all ${
+      className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-md transition-all ${
         isStarting
           ? "border-sky-400 dark:border-sky-600 bg-sky-50/50 dark:bg-sky-950/30"
           : ""
@@ -39,15 +39,15 @@ export function AssignmentCard({
         <div className="p-3 bg-sky-50 dark:bg-sky-950 rounded-xl">
           <FileText className="w-6 h-6 text-sky-500 dark:text-sky-400" />
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">
             {item.title}
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {isExam ? "Экзамен" : "Тест"}
           </p>
           {item.description && (
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 truncate">
               {item.description}
             </p>
           )}
@@ -57,11 +57,11 @@ export function AssignmentCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 w-full sm:w-auto">
         {isExam ? (
           <Button
             onClick={() => onOpenExam(item.id)}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             {t.takeExam}
             <ChevronRight className="w-4 h-4" />
@@ -70,7 +70,7 @@ export function AssignmentCard({
           <Button
             onClick={() => onOpenTest(item.id)}
             disabled={isStarting}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             {isStarting ? (
               "Открытие..."
