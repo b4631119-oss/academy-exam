@@ -26,7 +26,7 @@ export function PublicHeader() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-1">
+        <nav className="hidden sm:flex items-center gap-1" aria-label="Основная навигация">
           {navLinks.map((link) => {
             const isActive = pathname === link.href ||
               (link.href !== "/" && pathname.startsWith(link.href))
@@ -35,7 +35,7 @@ export function PublicHeader() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors",
+                  "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900",
                   isActive
                     ? "text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -52,18 +52,20 @@ export function PublicHeader() {
         <div className="flex items-center gap-1 sm:hidden">
           <ThemeToggle />
           <button
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400"
+            className="p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Меню"
+            aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="sm:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 space-y-1">
+        <nav id="mobile-nav" className="sm:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 space-y-1" aria-label="Мобильная навигация">
           {navLinks.map((link) => {
             const isActive = pathname === link.href ||
               (link.href !== "/" && pathname.startsWith(link.href))
