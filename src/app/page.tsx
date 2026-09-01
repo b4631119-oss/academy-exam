@@ -2,37 +2,75 @@ import Link from "next/link"
 import { BookOpen, LogIn } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { PublicHeader } from "@/components/PublicHeader"
+import { JsonLd } from "@/components/JsonLd"
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
+
+export const metadata = {
+  title: "PROlab Academy — IT-образование в Оше | Курсы программирования",
+  description: "PROlab Academy — обучение программированию в Оше, Кыргызстан. Курсы JavaScript, HTML, CSS для начинающих. Современная платформа для экзаменов и тестирования.",
+  openGraph: {
+    title: "PROlab Academy — IT-образование в Оше",
+    description: "PROlab Academy — обучение программированию в Оше, Кыргызстан. Курсы JavaScript, HTML, CSS для начинающих.",
+    type: "website",
+    url: SITE_URL,
+    siteName: "PROlab Academy",
+    images: [
+      {
+        url: "/hero-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PROlab Academy — IT-образование в Оше",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PROlab Academy — IT-образование в Оше",
+    description: "PROlab Academy — обучение программированию в Оше, Кыргызстан. Курсы JavaScript, HTML, CSS для начинающих.",
+    images: ["/hero-image.png"],
+  },
+  alternates: {
+    canonical: "/",
+  },
+  robots: "index, follow",
+}
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "PROlab Academy",
+  url: SITE_URL,
+  logo: `${SITE_URL}/hero-image.png`,
+  sameAs: [
+    "https://github.com/b4631119-oss/academy-exam",
+  ],
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Ош",
+    addressCountry: "KG",
+  },
+  description: "PROlab Academy — современная образовательная платформа для изучения программирования и проведения экзаменов в Оше, Кыргызстан.",
+}
 
 export default function Home() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "PROlab Academy",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site",
-    description: "Образовательная платформа для изучения основ веб-разработки и проведения экзаменов.",
-  }
-
   return (
     <>
       <PublicHeader />
+      <JsonLd data={organizationJsonLd} />
 
       <main className="flex-1">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
-
-          <div className="max-w-2xl mx-auto text-center space-y-6 fade-in">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <div className="max-w-2xl mx-auto text-center space-y-5 fade-in">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               PROlab Academy
             </h1>
-            <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 leading-relaxed">
               Изучай IT и развивай практические навыки
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 max-w-xl mx-auto slide-up">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 max-w-xl mx-auto slide-up">
             <Link href="/skills" className="group">
               <Card className="h-full flex flex-col items-center gap-3 p-7 text-center transition-all hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-lg hover:shadow-sky-50 dark:hover:shadow-sky-950/50">
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-950">
