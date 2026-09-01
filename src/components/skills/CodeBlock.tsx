@@ -78,15 +78,17 @@ export function CodeBlock({ code, lang }: { code: string; lang: string }) {
       <figcaption className="flex items-center justify-between border-b border-slate-800 px-4 py-2">
         <span className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</span>
       </figcaption>
-      <pre className="overflow-x-auto p-4 text-[13px] leading-6">
-        <code className="font-mono text-slate-100">
-          {tokens.map((token, index) => (
-            <span key={index} className={token.className}>
-              {token.text}
-            </span>
-          ))}
-        </code>
-      </pre>
+      <div className="overflow-x-auto -mx-4 px-4">
+        <pre className="p-4 text-[13px] leading-6 min-w-max">
+          <code className="font-mono text-slate-100 whitespace-pre">
+            {tokens.map((token, index) => (
+              <span key={index} className={token.className}>
+                {token.text}
+              </span>
+            ))}
+          </code>
+        </pre>
+      </div>
     </figure>
   )
 }
