@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button"
 import { getStudent, getQuestions, getExam, saveAnswer, getStudentAnswersForExam, completeExam, saveAllAnswers } from "@/lib/actions"
 import { initAntiCheat } from "@/lib/anti-cheat"
 import { t } from "@/lib/translations"
+import { toast } from "sonner"
 
 export default function TakeExam() {
   const params = useParams()
@@ -31,14 +32,12 @@ export default function TakeExam() {
   useEffect(() => {
     const cleanupAntiCheat = initAntiCheat(async (reason) => {
       console.warn("Anti-cheat violation:", reason);
-      alert(`⚠️ Нарушение правил: ${reason}. Экзамен будет завершен.`);
+      toast.error(`⚠️ Нарушение правил: ${reason}. Экзамен будет завершён.`);
 
       // Auto-finish exam on violation
       try {
         const currentStudent = await getStudent();
         if (currentStudent?.id) {
-          // Pass answers from state but actually we should use a ref if we want latest answers,
-          // However, for MVP, we'll try to just finish the exam.
           await completeExam(currentStudent.id);
           router.push(`/student/result/${examId}`);
         }
@@ -110,8 +109,8 @@ export default function TakeExam() {
       }
 
       if (emptyCount > 0) {
-        const confirm = window.confirm(t.unansweredWarning.replace('{count}', String(emptyCount)))
-        if (!confirm) {
+        const confirmed = window.confirm(t.unansweredWarning.replace('{count}', String(emptyCount)))
+        if (!confirmed) {
           return
         }
       }
