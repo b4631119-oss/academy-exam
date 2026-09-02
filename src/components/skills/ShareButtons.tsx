@@ -9,6 +9,7 @@ import {
   MessageCircle,
   X,
 } from "lucide-react"
+import { toast } from "sonner"
 
 const FacebookIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -83,9 +84,11 @@ export function ShareButtons({ title, url }: ShareButtonProps) {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
+      toast.success("Ссылка скопирована")
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Clipboard API may not be available
+      toast.error("Не удалось скопировать ссылку")
     }
   }
 
