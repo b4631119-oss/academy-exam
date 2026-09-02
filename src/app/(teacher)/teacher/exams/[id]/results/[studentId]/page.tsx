@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client"
 import { getStudentAnswersForExam, approveAnswer } from "@/lib/actions"
 import { cn } from "@/lib/utils"
 import { t } from "@/lib/translations"
+import { toast } from "sonner"
 
 export default function ReviewStudent() {
   const params = useParams()
@@ -59,9 +60,10 @@ export default function ReviewStudent() {
       const newData = [...data]
       newData[index].answer.is_correct = isCorrect
       setData(newData)
+      toast.success(isCorrect ? t.markedCorrect : t.markedIncorrect)
     } catch (err) {
       console.error(err)
-      alert(t.error)
+      toast.error(t.error)
     }
   }
 
