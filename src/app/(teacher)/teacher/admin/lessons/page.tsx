@@ -10,6 +10,7 @@ import {
   deleteLesson,
   type LessonRecord,
 } from "@/lib/admin/actions";
+import { toast } from "sonner";
 
 const TRACKS = [
   { id: "all", label: "Все", color: "slate" },
@@ -111,11 +112,12 @@ export default function AdminLessonsPage() {
       if (result.success) {
         setLessons((prev) => prev.filter((l) => l.id !== id));
         setDeleteConfirm(null);
+        toast.success("Урок удалён");
       } else {
-        alert(result.error || "Ошибка удаления");
+        toast.error(result.error || "Ошибка удаления");
       }
     } catch {
-      alert("Ошибка удаления урока");
+      toast.error("Ошибка удаления урока");
     } finally {
       setDeleting(null);
     }
