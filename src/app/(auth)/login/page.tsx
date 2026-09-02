@@ -8,7 +8,7 @@ export default function LoginPage() {
       <div className="w-full max-w-lg space-y-8 fade-in">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           На главную
@@ -18,7 +18,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Вход в PROlab Academy
           </h1>
-          <p className="text-base text-slate-500 dark:text-slate-400">
+          <p className="text-base text-slate-600 dark:text-slate-400">
             Выберите, как вы хотите войти
           </p>
         </div>
@@ -33,7 +33,7 @@ export default function LoginPage() {
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   Я ученик
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
                   Войти в комнату и пройти тесты и экзамены
                 </p>
               </div>
@@ -53,7 +53,7 @@ export default function LoginPage() {
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   Я преподаватель
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
                   Управлять комнатами, тестами и экзаменами
                 </p>
               </div>

@@ -27,18 +27,32 @@ export const trackKeywords: Record<string, string[]> = {
     "JavaScript курс",
     "JS обучение",
     "программирование на JS",
-    "109 уроков",
+    "90 уроков",
     "ООП JavaScript",
     "асинхронность JavaScript",
     "промисы JavaScript",
     "JavaScript course",
     "learn JavaScript",
     "JS programming",
-    "109 lessons",
+    "90 lessons",
     "OOP JavaScript",
     "async/await JavaScript",
     "promises JavaScript",
     "JavaScript tutorial",
+  ],
+  dom: [
+    "DOM курс",
+    "DOM обучение",
+    "браузерное окружение",
+    "DOM дерево",
+    "события JavaScript",
+    "19 уроков",
+    "DOM course",
+    "learn DOM",
+    "DOM manipulation",
+    "browser events",
+    "19 lessons",
+    "DOM tutorial",
   ],
   html: [
     "HTML курс",
@@ -97,6 +111,7 @@ export function getTrackTitle(track: string): { ru: string; en: string } {
     js: { ru: "JavaScript", en: "JavaScript" },
     html: { ru: "HTML и CSS", en: "HTML & CSS" },
     css: { ru: "CSS", en: "CSS" },
+    dom: { ru: "DOM и браузер", en: "DOM & Browser" },
   };
   return titles[track] || { ru: track, en: track };
 }
@@ -104,8 +119,8 @@ export function getTrackTitle(track: string): { ru: string; en: string } {
 export function getTrackDescription(track: string): { ru: string; en: string } {
   const descriptions: Record<string, { ru: string; en: string }> = {
     js: {
-      ru: "Полный курс JavaScript от основ до продвинутых тем: промисы, async/await, ООП, прототипы. 109 уроков с практическими заданиями.",
-      en: "Complete JavaScript course from basics to advanced topics: promises, async/await, OOP, prototypes. 109 lessons with practical exercises.",
+      ru: "Полный курс JavaScript от основ до продвинутых тем: промисы, async/await, ООП, прототипы. 90 уроков с практическими заданиями.",
+      en: "Complete JavaScript course from basics to advanced topics: promises, async/await, OOP, prototypes. 90 lessons with practical exercises.",
     },
     html: {
       ru: "Изучите HTML и CSS с нуля: семантическая вёрстка, flexbox, grid, адаптивный дизайн. 21 тема для начинающих веб-разработчиков.",
@@ -114,6 +129,10 @@ export function getTrackDescription(track: string): { ru: string; en: string } {
     css: {
       ru: "Полный курс CSS: flexbox, grid, анимации, адаптивный дизайн, CSS-переменные. 30 тем для профессиональной вёрстки.",
       en: "Complete CSS course: flexbox, grid, animations, responsive design, CSS variables. 30 topics for professional web development.",
+    },
+    dom: {
+      ru: "Курс по DOM и браузерному окружению: DOM-дерево, события, стили, формы, загрузка документов. 19 уроков с практическими заданиями.",
+      en: "DOM and browser environment course: DOM tree, events, styles, forms, document loading. 19 lessons with practical exercises.",
     },
   };
   return descriptions[track] || { ru: "", en: "" };

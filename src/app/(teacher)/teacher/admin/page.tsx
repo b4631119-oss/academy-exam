@@ -174,6 +174,9 @@ export default function AdminDashboard() {
           <Link href="/skills/js">
             <Button variant="outline">JavaScript →</Button>
           </Link>
+          <Link href="/skills/dom">
+            <Button variant="outline">DOM →</Button>
+          </Link>
         </div>
       </div>
     </div>

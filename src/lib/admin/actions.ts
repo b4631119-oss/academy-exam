@@ -372,6 +372,7 @@ export async function saveLesson(data: LessonInput): Promise<{ success: boolean;
   revalidatePath("/skills/html");
   revalidatePath("/skills/css");
   revalidatePath("/skills/js");
+  revalidatePath("/skills/dom");
   invalidateCache();
 
   return { success: true };
@@ -429,6 +430,7 @@ export async function deleteLesson(
   revalidatePath("/skills/html");
   revalidatePath("/skills/css");
   revalidatePath("/skills/js");
+  revalidatePath("/skills/dom");
   invalidateCache();
 
   return { success: true };

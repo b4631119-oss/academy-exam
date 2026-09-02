@@ -148,7 +148,7 @@ export default async function LessonPage({ params }: PageProps) {
       <JsonLd data={articleJsonLd} />
       <div className="mx-auto max-w-3xl space-y-8 fade-in">
         {/* Breadcrumb */}
-        <nav className="flex flex-wrap items-center gap-1.5 text-sm text-slate-400 dark:text-slate-500" aria-label="Хлебные крошки">
+        <nav className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-500" aria-label="Хлебные крошки">
           <Link href="/skills" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded">
             Обучение
           </Link>
@@ -166,7 +166,7 @@ export default async function LessonPage({ params }: PageProps) {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
             {lesson.title}
           </h1>
-          <p className="text-base leading-7 text-slate-500 dark:text-slate-400 sm:text-lg">{lesson.summary}</p>
+          <p className="text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">{lesson.summary}</p>
         </div>
 
         {/* Content */}
@@ -178,9 +178,9 @@ export default async function LessonPage({ params }: PageProps) {
         <ShareButtons title={lesson.title} url={url} />
 
         {/* Source */}
-        <p className="text-sm leading-6 text-slate-400 dark:text-slate-500">
-          {track === "js" ? (
-            <>Материалы курса JavaScript — PROlab Academy.</>
+        <p className="text-sm leading-6 text-slate-500 dark:text-slate-500">
+          {track === "js" || track === "dom" ? (
+            <>Материалы курса {meta.title} — PROlab Academy.</>
           ) : (
             <>
               Материал адаптирован из курса{" "}
@@ -208,7 +208,7 @@ export default async function LessonPage({ params }: PageProps) {
             >
               <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span className="min-w-0">
-                <span className="block text-xs font-normal text-slate-400 dark:text-slate-500">Предыдущая тема</span>
+                <span className="block text-xs font-normal text-slate-500 dark:text-slate-500">Предыдущая тема</span>
                 <span className="block truncate">{previous.title}</span>
               </span>
             </Link>

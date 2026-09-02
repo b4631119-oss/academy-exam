@@ -67,7 +67,7 @@ export default function Home() {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               PROlab Academy
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
               Изучай IT и развивай практические навыки
             </p>
           </div>
@@ -80,7 +80,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Обучение</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">HTML и CSS — основы веб-разработки</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">HTML и CSS — основы веб-разработки</p>
                 </div>
               </Card>
             </Link>
@@ -92,7 +92,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Войти</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Для преподавателей и студентов</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Для преподавателей и студентов</p>
                 </div>
               </Card>
             </Link>
@@ -101,7 +101,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 text-center text-sm text-slate-500 dark:text-slate-500">
           PROlab Academy
         </div>
       </footer>

@@ -1,7 +1,8 @@
 import { lessons as allLessons, source as COURSE_SOURCE } from "./content"
 import { jsLessons } from "./content/js-lessons-data"
+import { domLessons } from "./content/dom-lessons-data"
 
-export type TrackId = "html" | "css" | "js"
+export type TrackId = "html" | "css" | "js" | "dom"
 
 export type ContentBlock =
   | { type: "heading"; text: string }
@@ -39,14 +40,26 @@ export const TRACKS: Record<
     title: "JavaScript",
     description: "Основы языка программирования для веба",
   },
+  dom: {
+    id: "dom",
+    title: "DOM и браузер",
+    description:
+      "Изучите взаимодействие с веб-страницей: DOM-дерево, события, стили, формы, загрузка документов.",
+  },
 }
 
 export { COURSE_SOURCE }
 
-const lessons = [...(allLessons as Lesson[]), ...jsLessons] as Lesson[]
+const lessons = [
+  ...(allLessons as Lesson[]),
+  ...jsLessons,
+  ...domLessons,
+] as Lesson[]
 
 export function isTrackId(value: string): value is TrackId {
-  return value === "html" || value === "css" || value === "js"
+  return (
+    value === "html" || value === "css" || value === "js" || value === "dom"
+  )
 }
 
 export function getLessonsByTrack(track: TrackId): Lesson[] {
@@ -56,7 +69,9 @@ export function getLessonsByTrack(track: TrackId): Lesson[] {
 }
 
 export function getLesson(track: TrackId, slug: string): Lesson | undefined {
-  return lessons.find((lesson) => lesson.track === track && lesson.slug === slug)
+  return lessons.find(
+    (lesson) => lesson.track === track && lesson.slug === slug,
+  )
 }
 
 export function getAdjacentLessons(track: TrackId, slug: string) {
