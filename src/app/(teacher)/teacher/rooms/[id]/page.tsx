@@ -6,11 +6,13 @@ import Link from "next/link"
 import { ArrowLeft, FileText, Plus, Copy, Check, Pencil, Trash, Zap } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import { createClient } from "@/lib/supabase/client"
 import { getExams, deleteRoom, updateRoom, deleteExam, updateExam } from "@/lib/actions"
 import { getTeacherTests } from "@/lib/test-actions"
 import TestStatusBadge from "@/components/ui/TestStatusBadge"
 import { t } from "@/lib/translations"
+import { toast } from "sonner"
 
 export default function RoomDetails() {
   const params = useParams()
@@ -26,6 +28,12 @@ export default function RoomDetails() {
   const [activeTab, setActiveTab] = useState<"exams" | "tests">("exams")
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [editingRoomName, setEditingRoomName] = useState(false)
+  const [roomNameInput, setRoomNameInput] = useState("")
+  const [editingExamId, setEditingExamId] = useState<string | null>(null)
+  const [examTitleInput, setExamTitleInput] = useState("")
+  const [deletingRoom, setDeletingRoom] = useState(false)
+  const [deletingExamId, setDeletingExamId] = useState<string | null>(null)
 
   const roomId = params.id as string
 
@@ -70,49 +78,80 @@ export default function RoomDetails() {
     loadData()
   }, [roomId, router, supabase])
 
-  const handleEditRoom = async () => {
-    const newName = window.prompt("New room name:", room?.name)
-    if (newName && newName !== room.name) {
-      try {
-        const updated = await updateRoom(roomId, newName)
-        setRoom(updated)
-      } catch (err: unknown) {
-        alert((err as Error).message)
-      }
+  const handleEditRoom = () => {
+    setRoomNameInput(room?.name || "")
+    setEditingRoomName(true)
+  }
+
+  const handleSaveRoomName = async () => {
+    if (!roomNameInput.trim() || roomNameInput === room?.name) {
+      setEditingRoomName(false)
+      return
+    }
+    try {
+      const updated = await updateRoom(roomId, roomNameInput)
+      setRoom(updated)
+      toast.success("Название аудитории обновлено")
+    } catch (err: unknown) {
+      toast.error((err as Error).message)
+    } finally {
+      setEditingRoomName(false)
     }
   }
 
-  const handleDeleteRoom = async () => {
-    if (window.confirm(t.deleteRoomAlert)) {
-      try {
-        await deleteRoom(roomId)
-        router.push("/teacher/dashboard")
-      } catch (err: unknown) {
-        alert((err as Error).message)
-      }
+  const handleDeleteRoom = () => {
+    setDeletingRoom(true)
+  }
+
+  const handleConfirmDeleteRoom = async () => {
+    try {
+      await deleteRoom(roomId)
+      toast.success("Аудитория удалена")
+      router.push("/teacher/dashboard")
+    } catch (err: unknown) {
+      toast.error((err as Error).message)
+    } finally {
+      setDeletingRoom(false)
     }
   }
 
-  const handleEditExam = async (examId: string, currentTitle: string) => {
-    const newTitle = window.prompt("New exam title:", currentTitle)
-    if (newTitle && newTitle !== currentTitle) {
-      try {
-        const updated = await updateExam(examId, newTitle)
-        setExams(exams.map(e => e.id === examId ? updated : e))
-      } catch (err: unknown) {
-        alert((err as Error).message)
-      }
+  const handleEditExam = (examId: string, currentTitle: string) => {
+    setExamTitleInput(currentTitle)
+    setEditingExamId(examId)
+  }
+
+  const handleSaveExamTitle = async () => {
+    const examId = editingExamId
+    if (!examId || !examTitleInput.trim() || examTitleInput === exams.find(e => e.id === examId)?.title) {
+      setEditingExamId(null)
+      return
+    }
+    try {
+      const updated = await updateExam(examId, examTitleInput)
+      setExams(exams.map(e => e.id === examId ? updated : e))
+      toast.success("Название экзамена обновлено")
+    } catch (err: unknown) {
+      toast.error((err as Error).message)
+    } finally {
+      setEditingExamId(null)
     }
   }
 
-  const handleDeleteExam = async (examId: string) => {
-    if (window.confirm(t.deleteExamAlert)) {
-      try {
-        await deleteExam(examId)
-        setExams(exams.filter(e => e.id !== examId))
-      } catch (err: unknown) {
-        alert((err as Error).message)
-      }
+  const handleDeleteExam = (examId: string) => {
+    setDeletingExamId(examId)
+  }
+
+  const handleConfirmDeleteExam = async () => {
+    const examId = deletingExamId
+    if (!examId) return
+    try {
+      await deleteExam(examId)
+      setExams(exams.filter(e => e.id !== examId))
+      toast.success("Экзамен удалён")
+    } catch (err: unknown) {
+      toast.error((err as Error).message)
+    } finally {
+      setDeletingExamId(null)
     }
   }
 
@@ -120,6 +159,7 @@ export default function RoomDetails() {
     if (!room) return
     navigator.clipboard.writeText(room.code)
     setCopied(true)
+    toast.success("Код аудитории скопирован")
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -132,7 +172,78 @@ export default function RoomDetails() {
   }
 
   return (
-    <div className="space-y-6 fade-in">
+    <>
+      {editingRoomName && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Редактировать название аудитории</h2>
+            <Input
+              value={roomNameInput}
+              onChange={(e) => setRoomNameInput(e.target.value)}
+              placeholder="Название аудитории"
+              autoFocus
+              className="mb-4"
+              onKeyDown={(e) => { if (e.key === "Enter") handleSaveRoomName(); if (e.key === "Escape") setEditingRoomName(false); }}
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setEditingRoomName(false)}>Отмена</Button>
+              <Button onClick={handleSaveRoomName}>Сохранить</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deletingRoom && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Удалить аудиторию?</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">{t.deleteRoomAlert}</p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setDeletingRoom(false)}>Отмена</Button>
+              <Button variant="secondary" onClick={handleConfirmDeleteRoom} className="text-red-600 hover:bg-red-50">
+                Удалить
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingExamId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Редактировать название экзамена</h2>
+            <Input
+              value={examTitleInput}
+              onChange={(e) => setExamTitleInput(e.target.value)}
+              placeholder="Название экзамена"
+              autoFocus
+              className="mb-4"
+              onKeyDown={(e) => { if (e.key === "Enter") handleSaveExamTitle(); if (e.key === "Escape") setEditingExamId(null); }}
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setEditingExamId(null)}>Отмена</Button>
+              <Button onClick={handleSaveExamTitle}>Сохранить</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deletingExamId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Удалить экзамен?</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">{t.deleteExamAlert}</p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setDeletingExamId(null)}>Отмена</Button>
+              <Button variant="secondary" onClick={handleConfirmDeleteExam} className="text-red-600 hover:bg-red-50">
+                Удалить
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-6 fade-in">
       <Link
         href="/teacher/dashboard"
         className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
@@ -317,6 +428,6 @@ export default function RoomDetails() {
         )}
       </div>
     </div>
-  )
+  </>
+)
 }
-
