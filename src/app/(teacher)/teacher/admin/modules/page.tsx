@@ -11,6 +11,7 @@ import {
   reorderModules,
   type ModuleRecord,
 } from "@/lib/admin/actions";
+import { toast } from "sonner";
 
 export default function AdminModulesPage() {
   const [modules, setModules] = useState<ModuleRecord[]>([]);
@@ -34,22 +35,21 @@ export default function AdminModulesPage() {
   }, []);
 
   async function handleDelete(id: number) {
-    if (
-      !confirm(
-        `Удалить модуль ${id}? Уроки в этом модуле будут потеряны.`
-      )
+    const confirmed = window.confirm(
+      `Удалить модуль ${id}? Уроки в этом модуле будут потеряны.`
     )
-      return;
+    if (!confirmed) return;
     setDeleting(id);
     try {
       const result = await deleteModule(id);
       if (result.success) {
         setModules((prev) => prev.filter((m) => m.id !== id));
+        toast.success("Модуль удалён");
       } else {
-        alert(result.error || "Ошибка удаления");
+        toast.error(result.error || "Ошибка удаления");
       }
     } catch {
-      alert("Ошибка удаления модуля");
+      toast.error("Ошибка удаления модуля");
     } finally {
       setDeleting(null);
     }
