@@ -3,12 +3,14 @@ import { BookOpen, LogIn } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { PublicHeader } from "@/components/PublicHeader"
 import { JsonLd } from "@/components/JsonLd"
+import { commonKeywords } from "@/lib/seo/keywords"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
 export const metadata = {
   title: "PROlab Academy — IT-образование в Оше | Курсы программирования",
-  description: "PROlab Academy — обучение программированию в Оше, Кыргызстан. Курсы JavaScript, HTML, CSS для начинающих. Современная платформа для экзаменов и тестирования.",
+  description: "PROlab Academy — обучение программированию в Оше, Кыргызстан. Курсы JavaScript, HTML, CSS для начинающих. Современная платформа для экзаменов и тестирования. Start learning today.",
+  keywords: commonKeywords,
   openGraph: {
     title: "PROlab Academy — IT-образование в Оше",
     description: "PROlab Academy — обучение программированию в Оше, Кыргызстан. Курсы JavaScript, HTML, CSS для начинающих.",
