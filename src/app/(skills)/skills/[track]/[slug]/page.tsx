@@ -14,6 +14,7 @@ import {
   isTrackId,
   TRACKS,
 } from "@/lib/skills/catalog"
+import { getLessonKeywords, getTrackTitle } from "@/lib/seo/keywords"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
@@ -53,16 +54,19 @@ export async function generateMetadata({ params }: PageProps) {
   if (!lesson) return {}
 
   const meta = TRACKS[track]
+  const titles = getTrackTitle(track)
   const url = `${SITE_URL}/skills/${track}/${slug}`
 
   const fullContent = extractTextFromBlocks(lesson.blocks)
-  const description = lesson.summary || fullContent.slice(0, 160)
+  const baseDescription = lesson.summary || fullContent.slice(0, 140)
+  const description = `Урок «${lesson.title}» из курса ${titles.ru} / Lesson "${lesson.title}" from ${titles.en} course. ${baseDescription} Начните обучение сегодня / Start learning today.`
 
   return {
-    title: `${lesson.title} — PROlab Academy`,
+    title: `${lesson.title} — ${titles.ru} | PROlab Academy`,
     description,
+    keywords: getLessonKeywords(track, lesson.title),
     openGraph: {
-      title: `${lesson.title} — PROlab Academy`,
+      title: `${lesson.title} — ${titles.ru} | PROlab Academy`,
       description,
       type: "article",
       url,
@@ -82,7 +86,7 @@ export async function generateMetadata({ params }: PageProps) {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${lesson.title} — PROlab Academy`,
+      title: `${lesson.title} — ${titles.ru} | PROlab Academy`,
       description,
       images: ["/hero-image.png"],
     },
