@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/Label"
 import TestStatusBadge from "@/components/ui/TestStatusBadge"
 import { getTest, getTestQuestions, saveTestQuestions } from "@/lib/test-actions"
 import { friendlyError } from "@/lib/error-messages"
+import { toast } from "sonner"
 
 interface OptionItem {
   id?: string
@@ -149,7 +150,7 @@ export default function TestConstructorPage() {
 
   const handleRemoveQuestion = (index: number) => {
     if (questions.length <= 1) {
-      alert("Тест должен содержать хотя бы один вопрос")
+      toast.error("Тест должен содержать хотя бы один вопрос")
       return
     }
     setQuestions((prev) => prev.filter((_, i) => i !== index))
@@ -180,7 +181,7 @@ export default function TestConstructorPage() {
       const next = [...prev]
       const currentOpts = next[qIndex].test_options || []
       if (currentOpts.length >= 4) {
-        alert("Максимальное количество вариантов: 4")
+        toast.error("Максимальное количество вариантов: 4")
         return prev
       }
       const newOpt: OptionItem = {
@@ -202,7 +203,7 @@ export default function TestConstructorPage() {
       const next = [...prev]
       const currentOpts = next[qIndex].test_options || []
       if (currentOpts.length <= 2) {
-        alert("Минимальное количество вариантов: 2")
+        toast.error("Минимальное количество вариантов: 2")
         return prev
       }
       const wasCorrect = currentOpts[optIndex].is_correct
