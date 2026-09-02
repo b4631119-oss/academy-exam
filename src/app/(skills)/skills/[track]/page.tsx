@@ -8,25 +8,14 @@ import {
   type TrackId,
 } from "@/lib/skills/catalog"
 import { JsonLd } from "@/components/JsonLd"
+import { trackKeywords, getTrackTitle, getTrackDescription, commonKeywords } from "@/lib/seo/keywords"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
-const TRACK_SEO: Record<TrackId, { title: string; description: string; lessonCount: number }> = {
-  html: {
-    title: "Курс HTML и CSS — Основы веб-разработки | PROlab Academy",
-    description: "Изучите HTML и CSS с нуля: семантическая вёрстка, flexbox, grid, адаптивный дизайн. 21 тема для начинающих веб-разработчиков.",
-    lessonCount: 21,
-  },
-  css: {
-    title: "Курс CSS — Стилизация и адаптивный дизайн | PROlab Academy",
-    description: "Полный курс CSS: flexbox, grid, анимации, адаптивный дизайн, CSS-переменные. 30 тем для профессиональной вёрстки.",
-    lessonCount: 30,
-  },
-  js: {
-    title: "Курс JavaScript — 109 уроков | PROlab Academy",
-    description: "Полный курс JavaScript от основ до продвинутых тем: промисы, async/await, ООП, прототипы. 109 уроков с практическими заданиями.",
-    lessonCount: 109,
-  },
+const TRACK_LESSON_COUNT: Record<TrackId, number> = {
+  html: 21,
+  css: 30,
+  js: 109,
 }
 
 type PageProps = {
@@ -41,16 +30,17 @@ export async function generateMetadata({ params }: PageProps) {
   const { track } = await params
   if (!isTrackId(track)) return {}
 
-  const seo = TRACK_SEO[track]
-  const meta = TRACKS[track]
+  const titles = getTrackTitle(track)
+  const descriptions = getTrackDescription(track)
   const url = `${SITE_URL}/skills/${track}`
 
   return {
-    title: seo.title,
-    description: seo.description,
+    title: `${titles.ru} — ${track === "js" ? "109 уроков" : `${TRACK_LESSON_COUNT[track]} тем`} | PROlab Academy`,
+    description: `${descriptions.ru} ${descriptions.en} Start learning today.`,
+    keywords: [...trackKeywords[track], ...commonKeywords.slice(0, 4)],
     openGraph: {
-      title: seo.title,
-      description: seo.description,
+      title: `${titles.ru} — ${track === "js" ? "109 уроков" : `${TRACK_LESSON_COUNT[track]} тем`} | PROlab Academy`,
+      description: `${descriptions.ru} ${descriptions.en}`,
       type: "website",
       url,
       siteName: "PROlab Academy",
@@ -59,14 +49,14 @@ export async function generateMetadata({ params }: PageProps) {
           url: "/hero-image.png",
           width: 1200,
           height: 630,
-          alt: `${meta.title} — PROlab Academy`,
+          alt: `${titles.ru} — PROlab Academy`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: seo.title,
-      description: seo.description,
+      title: `${titles.ru} — ${track === "js" ? "109 уроков" : `${TRACK_LESSON_COUNT[track]} тем`} | PROlab Academy`,
+      description: `${descriptions.ru} ${descriptions.en}`,
       images: ["/hero-image.png"],
     },
     alternates: {
@@ -81,14 +71,14 @@ export default async function TrackPage({ params }: PageProps) {
   if (!isTrackId(track)) notFound()
 
   const meta = TRACKS[track]
-  const seo = TRACK_SEO[track]
+  const descriptions = getTrackDescription(track)
   const lessons = getLessonsByTrack(track)
 
   const courseJsonLd = {
     "@context": "https://schema.org",
     "@type": "Course",
     name: `${meta.title} — ${meta.description}`,
-    description: seo.description,
+    description: descriptions.ru,
     provider: {
       "@type": "EducationalOrganization",
       name: "PROlab Academy",
@@ -97,7 +87,7 @@ export default async function TrackPage({ params }: PageProps) {
     hasCourseInstance: {
       "@type": "CourseInstance",
       courseMode: "online",
-      courseWorkload: `PT${seo.lessonCount}H`,
+      courseWorkload: `PT${TRACK_LESSON_COUNT[track]}H`,
     },
     url: `${SITE_URL}/skills/${track}`,
     image: `${SITE_URL}/hero-image.png`,
