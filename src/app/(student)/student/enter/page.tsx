@@ -10,12 +10,14 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { validateRoomCode, createStudent, checkStudentExists } from "@/lib/actions"
 import { t } from "@/lib/translations"
+import { toast } from "sonner"
 
 export default function StudentEnter() {
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [pendingName, setPendingName] = useState<string | null>(null)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
@@ -41,20 +43,43 @@ export default function StudentEnter() {
       }
 
       if (finalName !== name.trim()) {
-        const confirm = window.confirm(t.nameTaken.replace('{name}', name.trim()).replace('{finalName}', finalName))
-        if (!confirm) {
-          setLoading(false)
-          return
-        }
+        setPendingName(finalName)
+        setLoading(false)
+        return
       }
 
       await createStudent(finalName, room.id)
+      toast.success(t.joinSuccess || "Вы успешно вошли в аудиторию")
       router.push(`/student/rooms/${room.id}`)
+    } catch (err: unknown) {
+      setError((err as Error).message)
+    } finally {
+      if (!pendingName) setLoading(false)
+    }
+  }
+
+  async function handleConfirmName() {
+    if (!pendingName) return
+    const finalName = pendingName
+    setPendingName(null)
+    setLoading(true)
+    try {
+      const formattedCode = code.trim().toUpperCase()
+      const room = await validateRoomCode(formattedCode)
+      if (room) {
+        await createStudent(finalName, room.id)
+        toast.success(t.joinSuccess || "Вы успешно вошли в аудиторию")
+        router.push(`/student/rooms/${room.id}`)
+      }
     } catch (err: unknown) {
       setError((err as Error).message)
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleCancelName() {
+    setPendingName(null)
   }
 
   return (
@@ -79,6 +104,22 @@ export default function StudentEnter() {
             {t.joinRoomDesc}
           </p>
         </div>
+
+        {pendingName && (
+          <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+            <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
+              {t.nameTaken.replace('{name}', name.trim()).replace('{finalName}', pendingName)}
+            </p>
+            <div className="flex gap-2 justify-center">
+              <Button variant="secondary" onClick={handleCancelName} className="w-full sm:w-auto">
+                {t.cancel || "Отмена"}
+              </Button>
+              <Button onClick={handleConfirmName} disabled={loading} className="w-full sm:w-auto">
+                {t.confirm || "Подтвердить"}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -107,7 +148,7 @@ export default function StudentEnter() {
 
           {error && <p className="text-red-500 dark:text-red-400 text-sm font-medium">{error}</p>}
 
-          <Button type="submit" className="w-full gap-2 text-lg h-14 mt-4" disabled={loading || !name || code.length < 3}>
+          <Button type="submit" className="w-full gap-2 text-lg h-14 mt-4" disabled={loading || !name || code.length < 3 || !!pendingName}>
             {loading ? t.joining : (
               <>
                 <span>{t.joinBtn}</span>
