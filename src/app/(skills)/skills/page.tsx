@@ -3,12 +3,14 @@ import { Code2, Palette, Braces, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { getLessonsByTrack, TRACKS } from "@/lib/skills/catalog"
 import { JsonLd } from "@/components/JsonLd"
+import { commonKeywords } from "@/lib/seo/keywords"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
 export const metadata = {
   title: "Курсы программирования — PROlab Academy",
-  description: "Изучайте программирование с нуля: HTML, CSS, JavaScript и другие технологии. Современная образовательная платформа PROlab Academy в Оше, Кыргызстан.",
+  description: "Изучайте программирование с нуля: HTML, CSS, JavaScript и другие технологии. Современная образовательная платформа PROlab Academy в Оше, Кыргызстан. Programming courses, IT education. Start learning today.",
+  keywords: [...commonKeywords, "курсы программирования", "IT обучение", "programming courses", "IT education"],
   openGraph: {
     title: "Курсы программирования — PROlab Academy",
     description: "Изучайте программирование с нуля: HTML, CSS, JavaScript и другие технологии. Современная образовательная платформа PROlab Academy в Оше, Кыргызстан.",
