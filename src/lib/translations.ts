@@ -29,6 +29,9 @@ export const t = {
   joinBtn: 'Войти в аудиторию',
   invalidRoom: 'Неверный код аудитории. Пожалуйста, проверьте и попробуйте снова.',
   nameTaken: 'Имя "{name}" уже занято в этой аудитории. Продолжить как "{finalName}"?',
+  joinSuccess: 'Вы успешно вошли в аудиторию',
+  confirm: 'Подтвердить',
+  cancel: 'Отмена',
 
   // Exam taking
   loadingExam: 'Загрузка экзамена...',
@@ -59,7 +62,6 @@ export const t = {
   roomGeneratedCodeMsg: 'Уникальный код доступа будет сгенерирован автоматически.',
   roomName: 'Название аудитории',
   roomNamePlaceholder: 'например, Математика 8 класс, Биология 101',
-  cancel: 'Отмена',
   creating: 'Создание...',
 
   // Teacher Room Details
@@ -108,6 +110,11 @@ export const t = {
   loadingQuestions: 'Загрузка вопросов...',
   examNotFound: 'Экзамен не найден.',
   backToRoomWith: 'Вернуться к',
+  questionUpdated: 'Вопрос обновлён',
+  questionDeleted: 'Вопрос удалён',
+  deleteQuestionConfirm: 'Нажмите ещё раз для подтверждения удаления',
+  questionAdded: 'Вопрос добавлен',
+  newQuestionPlaceholder: 'Текст нового вопроса',
 
   // Teacher Exam Results
   resultsTitle: 'Результаты:',
@@ -126,6 +133,8 @@ export const t = {
   backToResults: 'Вернуться к результатам',
   markCorrect: 'Верно',
   markIncorrect: 'Неверно',
+  markedCorrect: 'Отмечено как верное',
+  markedIncorrect: 'Отмечено как неверное',
   studentAnswer: 'Ответ студента:',
   correctStatus: 'Правильно',
   incorrectStatus: 'Неправильно',
