@@ -110,7 +110,7 @@ export function ShareButtons({ title, url }: ShareButtonProps) {
       ))}
       <button
         onClick={handleCopy}
-        className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+        className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
         aria-label={copied ? "Ссылка скопирована" : "Копировать ссылку"}
         aria-pressed={copied}
       >

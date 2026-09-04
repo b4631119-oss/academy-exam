@@ -13,7 +13,7 @@ export function SkillsHeader() {
           <Link href="/skills" className="text-sky-600">
             Обучение
           </Link>
-          <Link href="/" className="text-slate-500 hover:text-sky-600 transition-colors">
+          <Link href="/" className="text-slate-600 hover:text-sky-600 transition-colors">
             На главную
           </Link>
         </nav>
