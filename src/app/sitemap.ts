@@ -1,11 +1,11 @@
 import { MetadataRoute } from "next"
-import { getAllLessonParams } from "@/lib/skills/catalog"
+import { getAllLessonParams, TRACK_ORDER, isCanonicalTrack } from "@/lib/skills/catalog"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lessons = getAllLessonParams()
-  const tracks = ["html", "css", "js"] as const
+  const tracks = TRACK_ORDER.filter((t) => isCanonicalTrack(t))
 
   const trackUrls = tracks.map((track) => ({
     url: `${SITE_URL}/skills/${track}`,
