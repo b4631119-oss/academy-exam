@@ -1,11 +1,37 @@
 import Link from "next/link"
-import { Code2, Palette, Braces, Layout, ArrowRight } from "lucide-react"
+import {
+  Terminal,
+  Code2,
+  Palette,
+  Braces,
+  Frame,
+  Layers,
+  Zap,
+  Blocks,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react"
 import { Card } from "@/components/ui/Card"
-import { getLessonsByTrack, TRACKS } from "@/lib/skills/catalog"
+import {
+  getLessonsByTrack,
+  TRACK_ORDER,
+  TRACKS,
+  isOptionalTrack,
+  type TrackId,
+} from "@/lib/skills/catalog"
 import { JsonLd } from "@/components/JsonLd"
 import { commonKeywords } from "@/lib/seo/keywords"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
+
+// Russian level names used on the course cards. The English term is kept in
+// parentheses because it is the one used across technical literature.
+const LEVEL_LABELS: Record<string, string> = {
+  Foundation: "Фундамент",
+  Beginner: "Начальный",
+  Intermediate: "Средний",
+  Advanced: "Продвинутый",
+}
 
 export const metadata = {
   title: "Курсы программирования — PROlab Academy",
@@ -38,12 +64,41 @@ export const metadata = {
   robots: "index, follow",
 }
 
-const trackMeta = [
-  { ...TRACKS.html, icon: Code2, href: "/skills/html" },
-  { ...TRACKS.css, icon: Palette, href: "/skills/css" },
-  { ...TRACKS.js, icon: Braces, href: "/skills/js" },
-  { ...TRACKS.dom, icon: Layout, href: "/skills/dom" },
-]
+const TRACK_ICONS: Record<string, typeof Code2> = {
+  tools: Terminal,
+  html: Code2,
+  css: Palette,
+  "js-core": Braces,
+  "dom-basics": Frame,
+  "js-intermediate": Layers,
+  "js-async": Zap,
+  "dom-advanced": Blocks,
+  "js-advanced": Sparkles,
+}
+
+const CORE_STAGES = TRACK_ORDER.filter((id) => !isOptionalTrack(id))
+
+// Entry level of a track = level of its first lesson.
+function entryLevel(trackId: TrackId): string | undefined {
+  return getLessonsByTrack(trackId)[0]?.level
+}
+
+function levelLabel(level: string | undefined): string {
+  return level ? LEVEL_LABELS[level] || level : ""
+}
+
+const trackMeta = TRACK_ORDER.map((id) => {
+  const stageNumber = CORE_STAGES.indexOf(id) + 1
+  const optional = isOptionalTrack(id)
+  return {
+    ...TRACKS[id],
+    icon: TRACK_ICONS[id] || Code2,
+    href: `/skills/${id}`,
+    stageNumber,
+    optional,
+    levelLabel: levelLabel(entryLevel(id)),
+  }
+})
 
 const itemListJsonLd = {
   "@context": "https://schema.org",
@@ -73,15 +128,45 @@ export default function SkillsPage() {
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
             Обучение
           </h1>
-          <p className="max-w-xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
-            Изучай основы веб-разработки в удобном формате
+          <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
+            Изучай основы веб-разработки в удобном формате: от инструментов и
+            HTML/CSS до JavaScript и работы с браузером.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Onboarding signal: where to start and the mandatory path */}
+        <div className="rounded-2xl border border-sky-100 dark:border-sky-900 bg-sky-50/60 dark:bg-sky-950/40 p-5">
+          <p className="text-sm font-semibold text-sky-900 dark:text-sky-200">
+            С чего начать
+          </p>
+          <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-300">
+            Проходите курсы по порядку — с Этапа 1 до Этапа 8: каждый следующий
+            опирается на предыдущий. Начните с курса «Инструменты».
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+            {CORE_STAGES.map((id, i) => (
+              <Link
+                key={id}
+                href={`/skills/${id}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-800 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-sky-400 dark:hover:border-sky-600 transition-colors"
+              >
+                <span className="text-sky-600 dark:text-sky-400 tabular-nums">
+                  {i + 1}
+                </span>
+                {TRACKS[id].title}
+              </Link>
+            ))}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+              Дополнительно · {TRACKS["js-advanced"].title}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {trackMeta.map((track) => {
             const Icon = track.icon
             const count = getLessonsByTrack(track.id).length
+            const optional = isOptionalTrack(track.id)
             return (
               <Link key={track.id} href={track.href} className="group">
                 <Card className="h-full flex flex-col gap-4 transition-all hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-lg hover:shadow-sky-50 dark:hover:shadow-sky-950/50">
@@ -89,12 +174,24 @@ export default function SkillsPage() {
                     <div className="rounded-xl bg-slate-50 dark:bg-slate-800 p-3 transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-950">
                       <Icon className="h-6 w-6 text-slate-600 dark:text-slate-400 transition-colors group-hover:text-sky-500 dark:group-hover:text-sky-400" />
                     </div>
-                    <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400">
-                      {count} тем
+                    <span
+                      className={
+                        optional
+                          ? "rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-400"
+                          : "rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400"
+                      }
+                    >
+                      {optional ? "Дополнительно" : `Этап ${track.stageNumber} из ${CORE_STAGES.length}`} · {count} тем
                     </span>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{track.title}</h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{track.title}</h2>
+                    </div>
+                    <p className="mt-1 text-xs font-medium text-sky-600 dark:text-sky-400">
+                      {optional ? "Не входит в основной путь" : `Этап ${track.stageNumber} из ${CORE_STAGES.length}`}
+                      {track.levelLabel ? ` · ${track.levelLabel} уровень` : ""}
+                    </p>
                     <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{track.description}</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm font-medium text-sky-600 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 transition-colors">

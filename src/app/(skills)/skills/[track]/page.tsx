@@ -1,9 +1,13 @@
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { ChevronRight } from "lucide-react"
 import {
   getLessonsByTrack,
   isTrackId,
+  isCanonicalTrack,
+  isOptionalTrack,
+  LEGACY_TRACK_REDIRECT,
+  TRACK_ORDER,
   TRACKS,
   type TrackId,
 } from "@/lib/skills/catalog"
@@ -12,35 +16,41 @@ import { trackKeywords, getTrackTitle, getTrackDescription, commonKeywords } fro
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
 
-const TRACK_LESSON_COUNT: Record<TrackId, number> = {
-  html: 21,
-  css: 30,
-  js: 90,
-  dom: 19,
+const LEVEL_LABELS: Record<string, string> = {
+  Foundation: "Фундамент",
+  Beginner: "Начальный",
+  Intermediate: "Средний",
+  Advanced: "Продвинутый",
 }
+
+const CORE_STAGES = TRACK_ORDER.filter((id) => !isOptionalTrack(id))
 
 type PageProps = {
   params: Promise<{ track: string }>
 }
 
 export function generateStaticParams() {
-  return (Object.keys(TRACKS) as TrackId[]).map((track) => ({ track }))
+  // Only canonical Knowledge-Map stages are static pages.
+  return Object.keys(TRACKS)
+    .filter((id) => isCanonicalTrack(id as TrackId))
+    .map((track) => ({ track }))
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { track } = await params
-  if (!isTrackId(track)) return {}
+  if (!isTrackId(track) || !isCanonicalTrack(track)) return {}
 
+  const count = getLessonsByTrack(track).length
   const titles = getTrackTitle(track)
   const descriptions = getTrackDescription(track)
   const url = `${SITE_URL}/skills/${track}`
 
   return {
-    title: `${titles.ru} — ${TRACK_LESSON_COUNT[track]} тем | PROlab Academy`,
+    title: `${titles.ru} — ${count} тем | PROlab Academy`,
     description: `${descriptions.ru} ${descriptions.en} Start learning today.`,
     keywords: [...(trackKeywords[track] || []), ...commonKeywords.slice(0, 4)],
     openGraph: {
-      title: `${titles.ru} — ${TRACK_LESSON_COUNT[track]} тем | PROlab Academy`,
+      title: `${titles.ru} — ${count} тем | PROlab Academy`,
       description: `${descriptions.ru} ${descriptions.en}`,
       type: "website",
       url,
@@ -56,7 +66,7 @@ export async function generateMetadata({ params }: PageProps) {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${titles.ru} — ${TRACK_LESSON_COUNT[track]} тем | PROlab Academy`,
+      title: `${titles.ru} — ${count} тем | PROlab Academy`,
       description: `${descriptions.ru} ${descriptions.en}`,
       images: ["/hero-image.png"],
     },
@@ -69,11 +79,20 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function TrackPage({ params }: PageProps) {
   const { track } = await params
+
+  // Legacy merged-course urls (js / dom) redirect to the first stage.
   if (!isTrackId(track)) notFound()
+  if (!isCanonicalTrack(track)) {
+    redirect(`/skills/${LEGACY_TRACK_REDIRECT[track]}`)
+  }
 
   const meta = TRACKS[track]
   const descriptions = getTrackDescription(track)
   const lessons = getLessonsByTrack(track)
+  const optional = isOptionalTrack(track)
+  const stageNumber = optional ? 0 : CORE_STAGES.indexOf(track) + 1
+  const entryLevel = lessons[0]?.level
+  const levelLine = entryLevel ? ` · ${LEVEL_LABELS[entryLevel] || entryLevel} уровень` : ""
 
   const courseJsonLd = {
     "@context": "https://schema.org",
@@ -88,7 +107,7 @@ export default async function TrackPage({ params }: PageProps) {
     hasCourseInstance: {
       "@type": "CourseInstance",
       courseMode: "online",
-      courseWorkload: `PT${TRACK_LESSON_COUNT[track]}H`,
+      courseWorkload: `PT${lessons.length}H`,
     },
     url: `${SITE_URL}/skills/${track}`,
     image: `${SITE_URL}/hero-image.png`,
@@ -98,7 +117,7 @@ export default async function TrackPage({ params }: PageProps) {
     <>
       <JsonLd data={courseJsonLd} />
       <div className="space-y-8 fade-in">
-        <nav className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-500" aria-label="Хлебные крошки">
+        <nav className="flex flex-wrap items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400" aria-label="Хлебные крошки">
           <Link href="/skills" className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded">
             Обучение
           </Link>
@@ -107,9 +126,21 @@ export default async function TrackPage({ params }: PageProps) {
         </nav>
 
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">{meta.title}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">{meta.title}</h1>
+            {optional ? (
+              <span className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                Дополнительный курс
+              </span>
+            ) : null}
+          </div>
           <p className="text-base leading-7 text-slate-600 dark:text-slate-400">{meta.description}</p>
-          <p className="text-sm text-slate-500 dark:text-slate-500">{lessons.length} тем</p>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+            {optional
+              ? `Дополнительный курс — не входит в основной путь${levelLine}`
+              : `Этап ${stageNumber} из ${CORE_STAGES.length}${levelLine}`}
+          </p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{lessons.length} тем</p>
         </div>
 
         <ol className="space-y-2">
@@ -119,7 +150,7 @@ export default async function TrackPage({ params }: PageProps) {
                 href={`/skills/${track}/${lesson.slug}`}
                 className="group flex items-center gap-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 min-h-[52px] transition-all hover:border-sky-200 dark:hover:border-sky-700 hover:shadow-md hover:shadow-sky-50 dark:hover:shadow-sky-950/50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 text-sm font-bold text-slate-500 dark:text-slate-500 tabular-nums transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-950 group-hover:text-sky-500 dark:group-hover:text-sky-400">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 tabular-nums transition-colors group-hover:bg-sky-50 dark:group-hover:bg-sky-950 group-hover:text-sky-500 dark:group-hover:text-sky-400">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <div className="min-w-0 flex-1">
