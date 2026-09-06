@@ -170,4 +170,4 @@ academy-exam/
 
 ## 🙏 Благодарности
 
-- Сообществам **Next.js** и **Supabase** за отличные инструменты разработки.
+- Сообществам [Next.js](https://nextjs.org/) и [Supabase](https://supabase.com/) за отличные инструменты разработки.
