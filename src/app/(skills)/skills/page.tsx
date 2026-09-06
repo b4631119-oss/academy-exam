@@ -22,7 +22,8 @@ import {
 import { JsonLd } from "@/components/JsonLd"
 import { commonKeywords } from "@/lib/seo/keywords"
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
+// www is the canonical serving host (the apex host 308s to www).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolab-academy.site"
 
 // Russian level names used on the course cards. The English term is kept in
 // parentheses because it is the one used across technical literature.
@@ -148,9 +149,9 @@ export default function SkillsPage() {
               <Link
                 key={id}
                 href={`/skills/${id}`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-800 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-sky-400 dark:hover:border-sky-600 transition-colors"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 border border-sky-200 dark:border-sky-800 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:border-sky-400 dark:hover:border-sky-600 transition-colors"
               >
-                <span className="text-sky-600 dark:text-sky-400 tabular-nums">
+                <span className="text-sky-700 dark:text-sky-400 tabular-nums">
                   {i + 1}
                 </span>
                 {TRACKS[id].title}
@@ -188,7 +189,7 @@ export default function SkillsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{track.title}</h2>
                     </div>
-                    <p className="mt-1 text-xs font-medium text-sky-600 dark:text-sky-400">
+                    <p className="mt-1 text-xs font-medium text-sky-700 dark:text-sky-400">
                       {optional ? "Не входит в основной путь" : `Этап ${track.stageNumber} из ${CORE_STAGES.length}`}
                       {track.levelLabel ? ` · ${track.levelLabel} уровень` : ""}
                     </p>

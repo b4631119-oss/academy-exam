@@ -18,7 +18,8 @@ import {
 } from "@/lib/skills/catalog"
 import { getLessonKeywords, getTrackTitle } from "@/lib/seo/keywords"
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"
+// www is the canonical serving host (the apex host 308s to www).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolab-academy.site"
 
 // Russian level names for the badge; the English term is kept in
 // parentheses because it is the one used across technical literature.
@@ -226,7 +227,16 @@ export default async function LessonPage({ params }: PageProps) {
                 )
               })}
             </div>
-          ) : null}
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/50 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                Нужно знать:
+              </span>
+              <span className="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                Не требуется — этот урок начинает этап
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -247,6 +257,8 @@ export default async function LessonPage({ params }: PageProps) {
           {previous ? (
             <Link
               href={`/skills/${previous.track}/${previous.slug}`}
+              rel="prev"
+              aria-label={`Предыдущий урок: ${previous.title}`}
               className={cn(
                 "inline-flex min-h-[48px] min-w-0 items-center justify-start gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-slate-300 transition-all hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900",
               )}
@@ -263,6 +275,8 @@ export default async function LessonPage({ params }: PageProps) {
           {next ? (
             <Link
               href={`/skills/${next.track}/${next.slug}`}
+              rel="next"
+              aria-label={`Следующий урок: ${next.title}`}
               className="inline-flex min-h-[48px] min-w-0 items-center justify-end gap-3 rounded-xl bg-sky-500 px-4 py-3 text-right text-sm font-medium text-white shadow-sm shadow-sky-500/20 transition-all hover:bg-sky-600 sm:col-start-2 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
             >
               <span className="min-w-0">

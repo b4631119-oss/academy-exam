@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// www is the canonical serving host (the apex host 308s to www).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.prolab-academy.site"
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prolab-academy.site"),
+  metadataBase: new URL(SITE_URL),
   title: "PROlab Academy — Образовательная платформа",
   description: "PROlab Academy — современная образовательная платформа для проведения экзаменов, управления студентами и оценками. Обучение в Оше, Кыргызстан.",
   keywords: [
@@ -72,7 +75,7 @@ export const metadata: Metadata = {
     title: "PROlab Academy — Образовательная платформа",
     description: "PROlab Academy — современная образовательная платформа для проведения экзаменов и управления студентами.",
     type: "website",
-    url: "https://prolab-academy.site",
+    url: SITE_URL,
     siteName: "PROlab Academy",
     images: [
       {
