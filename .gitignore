@@ -46,3 +46,6 @@ playwright-report/
 e2e/student-auth.json
 e2e/teacher-auth.json
 e2e/test-data.json
+
+# Scratch / audit scripts (never commit)
+.audit-tmp/
