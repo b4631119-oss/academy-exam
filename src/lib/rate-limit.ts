@@ -16,6 +16,38 @@ export const RATE_LIMIT_PRESETS = {
   EXAM_SUBMIT: { limit: 10, windowMs: 60 * 1000 }     // 10 submissions per minute
 };
 
+export type RateLimitPreset = { limit: number; windowMs: number };
+
+/** Actual authentication routes. Sub-paths of these are covered as well. */
+const AUTH_LOGIN_ROUTES = ['/login', '/teacher/login', '/teacher/admin/login'];
+const AUTH_REGISTER_ROUTES = ['/register'];
+
+function matchesRoute(pathname: string, routes: string[]): boolean {
+  return routes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
+/**
+ * Resolves the rate-limit preset for a request.
+ *
+ * Auth limits (LOGIN/REGISTER) apply ONLY to actual submission requests (POST),
+ * e.g. server-action form submits. Ordinary GET page loads and RSC/link
+ * prefetch requests must never consume the login-attempt budget or trigger
+ * the automatic IP block — otherwise normal navigation can self-block a
+ * visitor for 24 hours. Safe GETs use the general API limit instead.
+ */
+export function resolveRateLimitPreset(
+  method: string | null | undefined,
+  pathname: string
+): RateLimitPreset {
+  if (method === 'POST') {
+    if (matchesRoute(pathname, AUTH_LOGIN_ROUTES)) return RATE_LIMIT_PRESETS.LOGIN;
+    if (matchesRoute(pathname, AUTH_REGISTER_ROUTES)) return RATE_LIMIT_PRESETS.REGISTER;
+  }
+  return RATE_LIMIT_PRESETS.API_GENERAL;
+}
+
 /**
  * Enforces rate limiting by key and rule.
  */

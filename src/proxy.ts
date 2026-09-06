@@ -4,7 +4,7 @@ import { jwtVerify } from 'jose'
 import { verifyStudentToken } from './lib/jwt'
 import { updateSession } from './lib/supabase/middleware'
 import { isIPBlocked, blockIP } from './lib/block-ip'
-import { rateLimit, RATE_LIMIT_PRESETS } from './lib/rate-limit'
+import { rateLimit, resolveRateLimitPreset } from './lib/rate-limit'
 
 function getClientIP(request: NextRequest): string {
   const xForwardedFor = request.headers.get('x-forwarded-for')
@@ -40,12 +40,10 @@ export async function proxy(request: NextRequest) {
   }
 
   // 3. Rate Limiting Check (Return 429 Too Many Requests)
-  let limitPreset = RATE_LIMIT_PRESETS.API_GENERAL
-  if (pathname.startsWith('/login')) {
-    limitPreset = RATE_LIMIT_PRESETS.LOGIN
-  } else if (pathname.startsWith('/register')) {
-    limitPreset = RATE_LIMIT_PRESETS.REGISTER
-  }
+  // Auth limits (LOGIN/REGISTER) apply ONLY to actual submissions (POST).
+  // GET page loads and RSC/link prefetch must not consume the auth-attempt
+  // budget or trigger the 24h auto-IP-block during normal navigation.
+  const limitPreset = resolveRateLimitPreset(request.method, pathname)
 
   const rlResult = rateLimit(`${ip}:${pathname}`, limitPreset.limit, limitPreset.windowMs)
   if (!rlResult.allowed) {
